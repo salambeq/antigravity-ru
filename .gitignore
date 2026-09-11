@@ -1,0 +1,18 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# Heavy binaries and backups
+*.orig
+*.bak
+*.tmp
+*.asar
+*.asar.ru
+*.ru
+language_server*
+!patch_binary.py
+
+# Extracted caches
+extracted_asar/
+frontend_bundle/
+node_modules/
