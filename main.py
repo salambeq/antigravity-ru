@@ -17,6 +17,7 @@ import os
 import sys
 import shutil
 import subprocess
+import json
 
 # Добавляем текущую директорию в sys.path
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -101,6 +102,93 @@ def get_all_targets():
         "agy": agy_bin,
         "vscode_js": vscode_js,
         "vscode_agy": vscode_agy,
+    }
+
+
+def get_system_status_json():
+    """Возвращает структурированный статус всех компонентов и аккаунтов в формате JSON."""
+    targets = get_all_targets()
+    mgr = targets["manager"]
+    ide = targets["ide"]
+    agy = targets["agy"]
+    vs_js = targets["vscode_js"]
+    vs_agy = targets["vscode_agy"]
+
+    mgr_unlocked = is_mgr_patched(mgr) if (mgr and os.path.isfile(mgr)) else False
+    mgr_localized = is_already_localized(mgr) if (mgr and os.path.isfile(mgr)) else False
+    mgr_version = get_antigravity_version(mgr) if (mgr and os.path.isfile(mgr)) else None
+
+    ide_patched = False
+    ide_version = None
+    if ide and os.path.isfile(ide):
+        try:
+            ver, _ = get_ag_version(ide)
+            ide_version = ver
+            with open(ide, "r", encoding="utf-8") as f:
+                ide_patched = is_ide_patched(f.read())
+        except Exception:
+            pass
+
+    agy_patched = is_agy_patched(agy) if (agy and os.path.isfile(agy)) else False
+
+    vs_js_patched = False
+    if vs_js and os.path.isfile(vs_js):
+        try:
+            with open(vs_js, "r", encoding="utf-8") as f:
+                vs_js_patched = is_vscode_patched(f.read())
+        except Exception:
+            pass
+    vs_agy_patched = is_agy_patched(vs_agy) if (vs_agy and os.path.isfile(vs_agy)) else False
+
+    cur_acc = {"authenticated": False, "email": None, "name": None, "slot": None}
+    slots_dict = {}
+    try:
+        ac_mgr = AccountManager()
+        raw_slots = ac_mgr.list_slots()
+        cur = ac_mgr.get_current_account_info()
+        meta = ac_mgr._load_metadata()
+        cur_acc = {
+            "authenticated": cur.get("authenticated", False),
+            "email": cur.get("email"),
+            "name": cur.get("name"),
+            "slot": meta.get("active_slot"),
+        }
+        for k, v in raw_slots.items():
+            slots_dict[str(k)] = v
+    except Exception:
+        pass
+
+    return {
+        "manager": {
+            "path": mgr or "",
+            "exists": bool(mgr and os.path.isfile(mgr)),
+            "version": mgr_version or "",
+            "unlocked": mgr_unlocked,
+            "localized": mgr_localized,
+        },
+        "ide": {
+            "path": ide or "",
+            "exists": bool(ide and os.path.isfile(ide)),
+            "version": ide_version or "",
+            "unlocked": ide_patched,
+        },
+        "agy": {
+            "path": agy or "",
+            "exists": bool(agy and os.path.isfile(agy)),
+            "unlocked": agy_patched,
+        },
+        "vscode": {
+            "js_path": vs_js or "",
+            "js_exists": bool(vs_js and os.path.isfile(vs_js)),
+            "js_patched": vs_js_patched,
+            "agy_path": vs_agy or "",
+            "agy_exists": bool(vs_agy and os.path.isfile(vs_agy)),
+            "agy_patched": vs_agy_patched,
+        },
+        "accounts": {
+            "current": cur_acc,
+            "slots": slots_dict,
+        },
     }
 
 
@@ -740,6 +828,9 @@ def main():
         elif arg in ("--auto-rotate", "--rotate"):
             rotator = QuotaRotator()
             rotator.start_watch()
+            sys.exit(0)
+        elif arg in ("--json-status", "--status-json"):
+            print(json.dumps(get_system_status_json(), ensure_ascii=False, indent=2))
             sys.exit(0)
 
     # Интерактивный цикл

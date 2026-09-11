@@ -1,0 +1,15 @@
+{
+  "name": "antigravity-toolkit-gui",
+  "version": "2.0.4",
+  "description": "Центр управления, снятия ограничений и локализации Antigravity 2.0",
+  "main": "gui/main.js",
+  "scripts": {
+    "start": "electron .",
+    "build:macos": "./build_gui_macos.sh"
+  },
+  "author": "Antigravity Localization Team",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^44.3.0"
+  }
+}
