@@ -1,11 +1,5 @@
 import os, sys, re, subprocess
 
-main_js_path = '/Users/Salambek/Antigravity Localization/frontend_bundle/main.js'
-
-with open(main_js_path, 'r', encoding='utf-8') as f:
-    code = f.read()
-
-print(f"Original length: {len(code)}")
 
 # Comprehensive translation dictionary
 # Format: (exact target string, replacement)
@@ -174,26 +168,40 @@ translations = [
     ('header:"Projects"', 'header:"Проекты"'),
 ]
 
-applied = 0
-for target, repl in translations:
-    if target in code:
-        count = code.count(target)
-        code = code.replace(target, repl)
-        applied += count
-        print(f"✓ Replaced ({count}x): {target[:40]}...")
+def localize_code(code):
+    applied = 0
+    for target, repl in translations:
+        if target in code:
+            count = code.count(target)
+            code = code.replace(target, repl)
+            applied += count
+    return code, applied
+
+def main():
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    main_js_path = os.path.join(script_dir, 'frontend_bundle', 'main.js')
+    if not os.path.exists(main_js_path):
+        print(f"File not found: {main_js_path}")
+        return
+
+    with open(main_js_path, 'r', encoding='utf-8') as f:
+        code = f.read()
+
+    print(f"Original length: {len(code)}")
+    code, applied = localize_code(code)
+
+    with open(main_js_path, 'w', encoding='utf-8') as f:
+        f.write(code)
+
+    print(f"\nDone! Total replacements: {applied}")
+    print(f"New length: {len(code)}")
+
+    res = subprocess.run(['node', '-c', main_js_path], capture_output=True, text=True)
+    if res.returncode == 0:
+        print("✓ JavaScript syntax validation PASSED!")
     else:
-        print(f"✗ Not found: {target[:40]}...")
+        print("✗ Syntax Error:", res.stderr)
+        sys.exit(1)
 
-with open(main_js_path, 'w', encoding='utf-8') as f:
-    f.write(code)
-
-print(f"\nDone! Total replacements: {applied}")
-print(f"New length: {len(code)}")
-
-# Verify syntax with node -c
-res = subprocess.run(['node', '-c', main_js_path], capture_output=True, text=True)
-if res.returncode == 0:
-    print("✓ JavaScript syntax validation PASSED!")
-else:
-    print("✗ Syntax Error:", res.stderr)
-    sys.exit(1)
+if __name__ == '__main__':
+    main()

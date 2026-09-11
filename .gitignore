@@ -6,6 +6,11 @@ Thumbs.db
 __pycache__/
 *.pyc
 
+# Local build artifacts (PyInstaller)
+build/
+dist/
+*.spec
+
 # Heavy binaries and backups (148MB+)
 *.orig
 *.agybak

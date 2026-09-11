@@ -75,6 +75,7 @@ from patcher.localization import (
     is_already_localized,
     get_resources_path,
 )
+from patcher.accounts import AccountManager, QuotaRotator
 
 
 def _kv(label, value_text, value_color):
@@ -177,6 +178,32 @@ def print_status_dashboard(targets):
             _kv("Патч agy:", "✅ Разблокирован" if agy_p else "⚠️ Не разблокирован", COLOR_GREEN if agy_p else COLOR_YELLOW)
     else:
         _kv("Статус:", "Не найдено в каталоге расширений VS Code", COLOR_DIM)
+    print()
+
+    # 5. Мультиаккаунт и квоты
+    print(f"  {color('● Управление аккаунтами Google (Квоты):', COLOR_BOLD, COLOR_WHITE)}")
+    try:
+        ac_mgr = AccountManager()
+        slots = ac_mgr.list_slots()
+        cur = ac_mgr.get_current_account_info()
+        meta = ac_mgr._load_metadata()
+        act_slot = meta.get("active_slot")
+
+        if cur.get("email"):
+            slot_note = f" (Слот #{act_slot})" if act_slot else ""
+            _kv("Активный аккаунт:", f"{cur['email']}{slot_note}", COLOR_GREEN)
+        elif cur.get("authenticated"):
+            _kv("Активный аккаунт:", "Авторизован в Antigravity", COLOR_GREEN)
+        else:
+            _kv("Активный аккаунт:", "Не авторизован", COLOR_YELLOW)
+
+        if slots:
+            slots_desc = ", ".join([f"#{k}: {v['email']}" for k, v in sorted(slots.items())])
+            _kv("Сохранено слотов:", f"{len(slots)} ({slots_desc})", COLOR_CYAN)
+        else:
+            _kv("Сохранено слотов:", "0 (Сохраните аккаунты в меню [9])", COLOR_DIM)
+    except Exception as e:
+        _kv("Статус аккаунтов:", f"Ошибка: {e}", COLOR_RED)
 
 
 def action_all_in_one(targets, interactive=True):
@@ -527,6 +554,133 @@ def action_custom_menu(targets):
             pause()
 
 
+def action_accounts_menu(targets=None):
+    """Интерактивное меню управления аккаунтами и авто-ротацией квот."""
+    mgr = AccountManager()
+    import time
+    while True:
+        clear_screen()
+        print_banner()
+        print_menu_section("МУЛЬТИАККАУНТ И АВТО-РОТАЦИЯ КВОТ")
+        print()
+
+        cur = mgr.get_current_account_info()
+        slots = mgr.list_slots()
+        meta = mgr._load_metadata()
+        active_slot = meta.get("active_slot")
+
+        if cur.get("email"):
+            print(f"  {color('Текущий авторизованный аккаунт:', COLOR_BOLD)} {color(cur['email'], COLOR_GREEN)}")
+        elif cur.get("authenticated"):
+            print(f"  {color('Текущий авторизованный аккаунт:', COLOR_BOLD)} {color('Авторизован в Antigravity', COLOR_GREEN)}")
+        else:
+            print(f"  {color('Текущий авторизованный аккаунт:', COLOR_BOLD)} {color('Не авторизован в Antigravity', COLOR_YELLOW)}")
+
+        if active_slot and active_slot in slots:
+            active_email = slots[active_slot]["email"]
+            print(f"  {color('Текущий активный слот:', COLOR_BOLD)}        {color(f'Слот #{active_slot} ({active_email})', COLOR_CYAN)}")
+        print()
+
+        print_menu_row("1", "💾 Сохранить текущий аккаунт", "Привязать текущую авторизацию к слоту (1..4)", COLOR_GREEN)
+        print_menu_row("2", "🔄 Переключить слот", "Быстро переключиться на аккаунт 1, 2, 3 или 4", COLOR_CYAN)
+        print_menu_row("3", "📋 Список всех слотов", "Просмотр сохранённых аккаунтов и метаданных", COLOR_CYAN)
+        print_menu_row("4", "⚡ Запустить авто-ротатор", "Авто-смена аккаунта в реальном времени при ошибках квот", COLOR_GREEN)
+        print_menu_row("5", "❌ Удалить слот", "Удалить сохранённый профиль аккаунта", COLOR_YELLOW)
+        print()
+        print_menu_row("0", "Вернуться в главное меню", "", COLOR_RED)
+        print()
+
+        c = input(color("  Выберите вариант > ", COLOR_CYAN, COLOR_BOLD)).strip()
+        if c == "0":
+            break
+        elif c == "1":
+            print()
+            step("СОХРАНЕНИЕ ТЕКУЩЕГО АККАУНТА В СЛОТ")
+            if not cur.get("authenticated"):
+                err("В Antigravity нет активной авторизации. Сначала войдите в Google-аккаунт в приложении!")
+                pause()
+                continue
+            s_num = input(color("  Введите номер слота (1-9) [по умолчанию 1] > ", COLOR_CYAN)).strip() or "1"
+            try:
+                s_int = int(s_num)
+                success, msg = mgr.save_current_account(s_int)
+                if success:
+                    ok(msg)
+                else:
+                    err(msg)
+            except ValueError:
+                err("Номер слота должен быть числом.")
+            pause()
+        elif c == "2":
+            print()
+            step("ПЕРЕКЛЮЧЕНИЕ АККАУНТА")
+            if not slots:
+                warn("Пока нет сохранённых слотов. Сначала войдите в аккаунт и сохраните его (пункт 1).")
+                pause()
+                continue
+            print("  Доступные слоты:")
+            for k, v in sorted(slots.items()):
+                is_act = " (активен)" if k == active_slot else ""
+                print(f"    • Слот #{k}: {v['email']}{is_act}")
+            s_num = input(color("\n  Введите номер слота для переключения > ", COLOR_CYAN)).strip()
+            try:
+                s_int = int(s_num)
+                success, msg = mgr.switch_to_slot(s_int, restart_ls=True)
+                if success:
+                    ok(msg)
+                    hint("language_server перезапущен. В течение 2-3 секунд Antigravity обновит квоту.")
+                else:
+                    err(msg)
+            except ValueError:
+                err("Номер слота должен быть числом.")
+            pause()
+        elif c == "3":
+            print()
+            step("СПИСОК СОХРАНЁННЫХ СЛОТОВ")
+            if not slots:
+                info("Нет сохранённых слотов.")
+            else:
+                for k, v in sorted(slots.items()):
+                    active_mark = f" {color('[АКТИВЕН]', COLOR_BOLD, COLOR_GREEN)}" if k == active_slot else ""
+                    print(f"  ● Слот #{k}:{active_mark}")
+                    print(f"      Email:     {color(v['email'], COLOR_CYAN)}")
+                    if v.get("name"):
+                        print(f"      Имя:       {v['name']}")
+                    if v.get("saved_at"):
+                        t_str = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(v['saved_at']))
+                        print(f"      Сохранён:  {t_str}")
+                    print()
+            pause()
+        elif c == "4":
+            print()
+            step("ЗАПУСК АВТО-РОТАТОРА КВОТ")
+            if len(slots) < 2:
+                warn("Для авто-ротации рекомендуется сохранить как минимум 2 аккаунта.")
+                if not prompt_yn("Продолжить запуск?"):
+                    continue
+            rotator = QuotaRotator()
+            rotator.start_watch()
+            pause()
+        elif c == "5":
+            print()
+            step("УДАЛЕНИЕ СЛОТА")
+            if not slots:
+                info("Нет сохранённых слотов.")
+                pause()
+                continue
+            s_num = input(color("  Введите номер слота для удаления > ", COLOR_CYAN)).strip()
+            try:
+                s_int = int(s_num)
+                success, msg = mgr.delete_slot(s_int)
+                if success:
+                    ok(msg)
+                else:
+                    err(msg)
+            except ValueError:
+                err("Номер слота должен быть числом.")
+            pause()
+
+
 def main():
     # Обработка неинтерактивных флагов командной строки
     if len(sys.argv) > 1:
@@ -550,6 +704,43 @@ def main():
         elif arg in ("--diagnostics", "-d"):
             action_diagnostics(targets, interactive=False)
             sys.exit(0)
+        elif arg in ("--accounts", "-ac"):
+            mgr = AccountManager()
+            slots = mgr.list_slots()
+            cur = mgr.get_current_account_info()
+            print("Текущий аккаунт:", cur.get("email") or "Не определен")
+            print("Сохраненные слоты:")
+            for k, v in sorted(slots.items()):
+                print(f"  [{k}] {v['email']} {'(активен)' if v.get('is_active') else ''}")
+            sys.exit(0)
+        elif arg in ("--account-save", "--save-account") and len(sys.argv) > 2:
+            try:
+                slot_idx = int(sys.argv[2])
+                mgr = AccountManager()
+                success, msg = mgr.save_current_account(slot_idx)
+                if success:
+                    ok(msg)
+                else:
+                    err(msg)
+            except ValueError:
+                err("Номер слота должен быть числом.")
+            sys.exit(0)
+        elif arg in ("--account-switch", "--switch-account") and len(sys.argv) > 2:
+            try:
+                slot_idx = int(sys.argv[2])
+                mgr = AccountManager()
+                success, msg = mgr.switch_to_slot(slot_idx, restart_ls=True)
+                if success:
+                    ok(msg)
+                else:
+                    err(msg)
+            except ValueError:
+                err("Номер слота должен быть числом.")
+            sys.exit(0)
+        elif arg in ("--auto-rotate", "--rotate"):
+            rotator = QuotaRotator()
+            rotator.start_watch()
+            sys.exit(0)
 
     # Интерактивный цикл
     while True:
@@ -569,6 +760,7 @@ def main():
             print_menu_row("6", "🛠 Установить правила и навыки", "Русские стандарты разработки и навык i18n", COLOR_CYAN)
             print_menu_row("7", "🎯 Выборочные патчи", "Индивидуальное управление компонентами (IDE, CLI и т.д.)", COLOR_CYAN)
             print_menu_row("8", "🔍 Подробная диагностика", "Проверка подписей, прав, контрольных сумм и модулей", COLOR_CYAN)
+            print_menu_row("9", "🔄 Мультиаккаунт и авто-ротация", "Смена 4-х Google-аккаунтов и авто-переключение при исчерпании квот", COLOR_GREEN)
             print()
             print_menu_row("0", "Выход", "Завершить работу с утилитой", COLOR_RED)
             print_menu_footer("Совет: все изменения обратимы — пункт [5] возвращает оригинальные файлы.")
@@ -596,6 +788,8 @@ def main():
                 action_custom_menu(targets)
             elif choice == "8":
                 action_diagnostics(targets)
+            elif choice == "9":
+                action_accounts_menu(targets)
 
         except KeyboardInterrupt:
             print("\n\n  Прервано пользователем. Выход.\n")

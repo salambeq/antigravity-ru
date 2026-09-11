@@ -9,9 +9,11 @@ import shutil
 def patch_language_server(app_res, script_dir, preserve_or_apply_unlock=True):
     bin_name = "language_server.exe" if os.name == "nt" else "language_server"
     orig_bin = os.path.join(app_res, "bin", bin_name + ".orig")
-    dest_bin = os.path.join(app_res, "bin", bin_name)
-    target_bin = os.path.join(script_dir, "language_server_patched" + (".exe" if os.name == "nt" else ""))
+    import tempfile
+    target_bin = os.path.join(tempfile.gettempdir(), f"antigravity_ls_patched_{os.getpid()}" + (".exe" if os.name == "nt" else ""))
     bundle_dir = os.path.join(script_dir, "frontend_bundle")
+    if not os.path.isdir(bundle_dir) and getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+        bundle_dir = os.path.join(sys._MEIPASS, "frontend_bundle")
 
     if not os.path.exists(orig_bin):
         if os.path.exists(dest_bin):

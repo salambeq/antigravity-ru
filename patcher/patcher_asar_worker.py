@@ -12,8 +12,9 @@ def patch_app_asar(app_res, script_dir):
     """
     orig_asar = os.path.join(app_res, "app.asar.orig")
     dest_asar = os.path.join(app_res, "app.asar")
-    unpacked_dir = os.path.join(app_res, "app.asar.unpacked")
     ru_asar_cache = os.path.join(script_dir, "app.asar.ru")
+    if not os.path.exists(ru_asar_cache) and getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+        ru_asar_cache = os.path.join(sys._MEIPASS, "app.asar.ru")
 
     if not os.path.exists(orig_asar):
         if os.path.exists(dest_asar):
@@ -53,6 +54,8 @@ def patch_app_asar(app_res, script_dir):
 
             # 2. Модификация файлов
             dist_dir = os.path.join(asar_extract_dir, "dist")
+            if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+                sys.path.insert(0, sys._MEIPASS)
             sys.path.insert(0, script_dir)
             import patch_asar
             patch_asar.patch_asar_dir(dist_dir)
@@ -72,7 +75,10 @@ def patch_app_asar(app_res, script_dir):
             temp_dest = dest_asar + ".tmp"
             shutil.copyfile(packed_asar, temp_dest)
             os.replace(temp_dest, dest_asar)
-            shutil.copyfile(packed_asar, ru_asar_cache)
+            try:
+                shutil.copyfile(packed_asar, ru_asar_cache)
+            except Exception:
+                pass
             ok("Модифицированный app.asar успешно собран и установлен!")
 
         finally:

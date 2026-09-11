@@ -70,12 +70,13 @@ def do_localize(manager_path=None):
         return False
 
     script_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    base_dir = sys._MEIPASS if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS") else script_dir
     
     # 1. Patch language_server
     info("1/3 Локализация ядра (language_server)...")
     try:
         from patcher.patcher_binary_worker import patch_language_server
-        patch_language_server(res_path, script_dir)
+        patch_language_server(res_path, base_dir)
         ok("Ядро language_server успешно локализовано!")
     except Exception as e:
         err(f"Ошибка при локализации language_server: {e}")
@@ -85,7 +86,7 @@ def do_localize(manager_path=None):
     info("2/3 Локализация интерфейса Electron (app.asar)...")
     try:
         from patcher.patcher_asar_worker import patch_app_asar
-        patch_app_asar(res_path, script_dir)
+        patch_app_asar(res_path, base_dir)
         ok("Интерфейс app.asar успешно локализован!")
     except Exception as e:
         err(f"Ошибка при локализации app.asar: {e}")
@@ -93,7 +94,8 @@ def do_localize(manager_path=None):
 
     # 3. Сохранение копий для быстрого переключения языков
     try:
-        shutil.copyfile(os.path.join(res_path, "app.asar"), os.path.join(script_dir, "app.asar.ru"))
+        ru_asar_dest = os.path.join(script_dir, "app.asar.ru")
+        shutil.copyfile(os.path.join(res_path, "app.asar"), ru_asar_dest)
         bin_name = "language_server.exe" if os.name == "nt" else "language_server"
         shutil.copyfile(os.path.join(res_path, "bin", bin_name), os.path.join(script_dir, "language_server.ru"))
     except Exception:
@@ -148,18 +150,22 @@ def do_switch_language(target_lang, manager_path=None):
 def do_install_rules():
     step("Установка глобальных русскоязычных правил и навыка i18n...")
     script_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    base_dir = sys._MEIPASS if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS") else script_dir
     user_home = os.path.expanduser("~")
     plugin_dir = os.path.join(user_home, ".gemini", "config", "plugins", "russian-dev-plugin")
     
     os.makedirs(os.path.join(plugin_dir, "rules"), exist_ok=True)
     os.makedirs(os.path.join(plugin_dir, "skills", "i18n-helper"), exist_ok=True)
 
-    src_rules = os.path.join(script_dir, "rules", "russian-development.md")
-    src_skill = os.path.join(script_dir, "skills", "i18n-helper", "SKILL.md")
+    src_rules = os.path.join(base_dir, "rules", "russian-development.md")
+    src_skill = os.path.join(base_dir, "skills", "i18n-helper", "SKILL.md")
 
     if os.path.exists(src_rules):
         shutil.copyfile(src_rules, os.path.join(plugin_dir, "rules", "russian-development.md"))
-        shutil.copyfile(src_rules, os.path.join(script_dir, "GEMINI.md"))
+        try:
+            shutil.copyfile(src_rules, os.path.join(script_dir, "GEMINI.md"))
+        except Exception:
+            pass
     if os.path.exists(src_skill):
         shutil.copyfile(src_skill, os.path.join(plugin_dir, "skills", "i18n-helper", "SKILL.md"))
 
