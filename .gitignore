@@ -2,8 +2,13 @@
 .DS_Store
 Thumbs.db
 
-# Heavy binaries and backups
+# Python cache
+__pycache__/
+*.pyc
+
+# Heavy binaries and backups (148MB+)
 *.orig
+*.agybak
 *.bak
 *.tmp
 *.asar
@@ -12,7 +17,6 @@ Thumbs.db
 language_server*
 !patch_binary.py
 
-# Extracted caches
+# Extracted temporary caches
 extracted_asar/
-frontend_bundle/
 node_modules/
