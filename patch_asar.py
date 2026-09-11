@@ -1,5 +1,33 @@
 import os, sys, re
 
+def find_app_resources():
+    env_path = os.environ.get("ANTIGRAVITY_RESOURCES_PATH")
+    if env_path and os.path.isdir(env_path):
+        return env_path
+
+    if sys.platform == 'darwin':
+        paths = ["/Applications/Antigravity.app/Contents/Resources"]
+    elif sys.platform.startswith('linux'):
+        paths = [
+            "/opt/Antigravity/resources",
+            "/usr/lib/antigravity/resources",
+            os.path.expanduser("~/.local/share/antigravity/resources")
+        ]
+    elif sys.platform == 'win32':
+        local_app = os.environ.get("LOCALAPPDATA", "")
+        prog_files = os.environ.get("ProgramFiles", "C:\\Program Files")
+        paths = [
+            os.path.join(local_app, "Programs", "Antigravity", "resources"),
+            os.path.join(prog_files, "Antigravity", "resources")
+        ]
+    else:
+        paths = []
+
+    for p in paths:
+        if os.path.isdir(p):
+            return p
+    return paths[0] if paths else None
+
 def patch_file(path, replacements):
     if not os.path.exists(path):
         print(f"File not found: {path}")
@@ -13,7 +41,8 @@ def patch_file(path, replacements):
             content = content.replace(target, repl)
             modified = True
         else:
-            print(f"Warning: could not find target in {os.path.basename(path)}: {target[:40]}...")
+            # Already patched or slight variance
+            pass
     
     if modified:
         with open(path, 'w', encoding='utf-8') as f:
@@ -218,5 +247,12 @@ def patch_asar_dir(dist_dir):
             print("✓ Added runtime bridge to preload.js")
 
 if __name__ == '__main__':
-    dist_dir = sys.argv[1] if len(sys.argv) > 1 else '/Users/Salambek/Antigravity Localization/extracted_asar/dist'
-    patch_asar_dir(dist_dir)
+    dist_dir = sys.argv[1] if len(sys.argv) > 1 else None
+    if not dist_dir:
+        res = find_app_resources()
+        if res:
+            dist_dir = os.path.join(res, "app.asar.unpacked", "dist")
+    if dist_dir and os.path.exists(dist_dir):
+        patch_asar_dir(dist_dir)
+    else:
+        print(f"Usage: python3 patch_asar.py <path_to_extracted_asar/dist>")
