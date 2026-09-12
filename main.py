@@ -1291,6 +1291,24 @@ def main():
             else:
                 err(msg)
                 sys.exit(1)
+        elif arg in ("--help", "-h", "help"):
+            print_banner()
+            print(f"  {color('Antigravity Toolkit v' + VERSION, COLOR_BOLD, COLOR_GREEN)} — Центр управления и локализации\n")
+            print("  Основные команды:")
+            print("    --all, -a                 Комплексная установка «Всё в один клик»")
+            print("    --patch-multiaccount, -pma Внедрить встроенный переключатель аккаунтов в Antigravity 2.0")
+            print("    --localize, -l            Полная русская локализация интерфейса и ядра")
+            print("    --unlock, -u              Снятие региональных ограничений (bypass eligibility)")
+            print("    --switch [ru|en], -s      Быстрое переключение языка интерфейса")
+            print("    --accounts, -ac           Список сохранённых Google-аккаунтов и слотов")
+            print("    --account-switch <slot>   Переключиться на указанный слот (1..4)")
+            print("    --account-add [slot]      Мастер добавления нового аккаунта (Zero-Revocation)")
+            print("    --backup-create, -bc      Создать резервную копию диалогов")
+            print("    --check-update, -cu       Проверить наличие обновлений на GitHub")
+            print("    --restore, -r             Откат изменений к оригинальным файлам")
+            print("    --diagnostics, -d         Диагностика системы и компонентов")
+            print()
+            sys.exit(0)
 
     # Интерактивный цикл
     while True:
