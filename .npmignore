@@ -1,0 +1,7 @@
+dist/
+*.dmg
+*.zip
+.git/
+.gemini/
+.DS_Store
+.npmrc
