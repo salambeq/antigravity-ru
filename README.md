@@ -1,4 +1,4 @@
-# 🇷🇺 Antigravity Toolkit & Русская локализация (v2.0.9)
+# 🇷🇺 Antigravity Toolkit & Русская локализация (v2.1.0)
 
 [![Release](https://img.shields.io/github/v/release/salambeq/antigravity-ru?color=10b981&label=Релиз)](https://github.com/salambeq/antigravity-ru/releases/latest)
 [![Platform](https://img.shields.io/badge/Платформа-macOS%20%7C%20Linux%20%7C%20Windows-blue)](https://github.com/salambeq/antigravity-ru)

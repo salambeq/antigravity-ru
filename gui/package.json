@@ -1,6 +1,6 @@
 {
   "name": "antigravity-toolkit-gui",
-  "version": "2.0.9",
+  "version": "2.1.0",
   "description": "Графический интерфейс Antigravity Toolkit RU",
   "main": "main.js",
   "scripts": {
