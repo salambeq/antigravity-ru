@@ -951,6 +951,70 @@ def action_backups_menu(targets=None):
             pause()
 
 
+def action_update_menu(targets, interactive=True):
+    """Меню проверки и безопасного применения автообновлений с гарантией сохранности данных."""
+    from patcher.utils.update import UpdateManager
+    clear_screen()
+    print_banner()
+    print_menu_section("ПРОВЕРКА И УСТАНОВКА ОБНОВЛЕНИЙ")
+    info("Поиск доступных релизов на GitHub...")
+    mgr = UpdateManager()
+    res = mgr.check_for_updates()
+
+    if not res.get("success"):
+        err(res.get("error", "Не удалось проверить обновления."))
+        if interactive:
+            pause()
+        return
+
+    cur_v = res.get("current_version")
+    lat_v = res.get("latest_version")
+    has_up = res.get("has_update")
+
+    print()
+    _kv("Текущая версия:", f"v{cur_v}", COLOR_CYAN)
+    _kv("Релиз на GitHub:", f"v{lat_v}", COLOR_GREEN if has_up else COLOR_CYAN)
+    print()
+
+    if not has_up:
+        ok(f"У вас уже установлена актуальная версия Antigravity Toolkit (v{cur_v})!")
+        if interactive:
+            pause()
+        return
+
+    ok(f"Обнаружена новая версия: {color('v' + lat_v, COLOR_GREEN, COLOR_BOLD)}")
+    if res.get("release_notes"):
+        print()
+        info("Список изменений (Release Notes):")
+        notes = res.get("release_notes", "").strip()
+        for line in notes.splitlines()[:15]:
+            print(f"  {line}")
+        if len(notes.splitlines()) > 15:
+            print("  ...")
+
+    print()
+    warn("🛡️ ГАРАНТИЯ СОХРАННОСТИ: Перед установкой будет создан защитный снимок ~/.gemini/accounts.")
+    warn("   Все 4 аккаунта, OAuth-токены и база диалогов останутся нетронутыми.")
+    print()
+
+    if interactive:
+        if prompt_yn(f"Установить обновление v{lat_v} прямо сейчас?", default=True):
+            print()
+            step("Запуск процедуры безопасного обновления...")
+            success, msg = mgr.apply_update()
+            if success:
+                ok(msg)
+            else:
+                err(msg)
+            pause()
+    else:
+        success, msg = mgr.apply_update()
+        if success:
+            ok(msg)
+        else:
+            err(msg)
+
+
 def main():
     # Обработка неинтерактивных флагов командной строки
     if len(sys.argv) > 1:
@@ -1067,6 +1131,22 @@ def main():
         elif arg in ("--json-status", "--status-json"):
             print(json.dumps(get_system_status_json(), ensure_ascii=False, indent=2))
             sys.exit(0)
+        elif arg in ("--check-update", "-cu"):
+            from patcher.utils.update import UpdateManager
+            mgr = UpdateManager()
+            res = mgr.check_for_updates()
+            print(json.dumps(res, ensure_ascii=False, indent=2))
+            sys.exit(0)
+        elif arg in ("--apply-update", "-au"):
+            from patcher.utils.update import UpdateManager
+            mgr = UpdateManager()
+            ok_res, msg = mgr.apply_update()
+            if ok_res:
+                ok(msg)
+                sys.exit(0)
+            else:
+                err(msg)
+                sys.exit(1)
 
     # Интерактивный цикл
     while True:
@@ -1088,6 +1168,7 @@ def main():
             print_menu_row("8", "🔍 Подробная диагностика", "Проверка подписей, прав, контрольных сумм и модулей", COLOR_CYAN)
             print_menu_row("9", "🔄 Мультиаккаунт и авто-ротация", "Смена 4-х Google-аккаунтов и авто-переключение при исчерпании квот", COLOR_GREEN)
             print_menu_row("10", "📦 Резервная копия чатов", "Архивация и восстановление диалогов (чтобы чаты не пропадали)", COLOR_CYAN)
+            print_menu_row("11", "🚀 Проверить обновления", "Поиск новых версий на GitHub и безопасное обновление", COLOR_GREEN)
             print()
             print_menu_row("0", "Выход", "Завершить работу с утилитой", COLOR_RED)
             print_menu_footer(f"Репозиторий: {GITHUB_REPO_URL} • Откат изменений: [5]")
@@ -1119,6 +1200,8 @@ def main():
                 action_accounts_menu(targets)
             elif choice == "10":
                 action_backups_menu(targets)
+            elif choice == "11":
+                action_update_menu(targets)
 
         except KeyboardInterrupt:
             print("\n\n  Прервано пользователем. Выход.\n")

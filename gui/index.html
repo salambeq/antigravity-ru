@@ -225,6 +225,14 @@
           <span class="text-slate-400 font-normal">Toolkit</span>
         </div>
         <span id="toolkit-version-badge" class="px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 font-sans font-medium text-[10px] border border-blue-500/25" title="Antigravity Toolkit RU">v2.0.7 RU</span>
+        <button id="btn-check-update" class="no-drag px-2 py-0.5 rounded-full bg-white/[0.04] hover:bg-white/[0.09] text-slate-400 hover:text-slate-200 font-sans font-medium text-[10px] border border-white/[0.08] transition-colors flex items-center gap-1 cursor-pointer active:scale-95" title="Проверить наличие обновлений на GitHub">
+          <span class="material-symbols-outlined text-[11px]" id="icon-check-update">sync</span>
+          <span id="text-check-update">Обновление</span>
+        </button>
+        <div id="badge-update-available" class="no-drag hidden px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-sans font-semibold text-[10px] border border-emerald-500/40 cursor-pointer animate-pulse flex items-center gap-1 shadow-lg shadow-emerald-500/10 active:scale-95" title="Доступна новая версия! Нажмите для просмотра и установки">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+          <span id="badge-update-version">Доступно обновление</span>
+        </div>
       </div>
       <span class="text-white/20 text-xs hidden lg:inline">•</span>
       <span class="text-xs text-slate-400 font-normal hidden lg:inline">Центр управления и локализации Antigravity 2.0</span>
@@ -353,7 +361,12 @@
         </div>
 
         <div class="flex items-center justify-between text-[10px] text-slate-500 px-1 pt-1.5 border-t border-white/[0.04]">
-          <span id="sb-toolkit-ver" class="font-mono text-slate-400">v2.0.7</span>
+          <div class="flex items-center gap-1.5">
+            <span id="sb-toolkit-ver" class="font-mono text-slate-400">v2.0.7</span>
+            <button id="sb-check-update-btn" class="hover:text-emerald-400 text-slate-500 transition-colors flex items-center p-0.5 rounded hover:bg-white/[0.06]" title="Проверить наличие новой версии">
+              <span class="material-symbols-outlined text-[13px]">refresh</span>
+            </button>
+          </div>
           <button id="sb-github-btn" class="hover:text-blue-400 text-slate-400 transition-colors flex items-center gap-1" title="Открыть репозиторий на GitHub">
             <span>GitHub</span>
             <span class="material-symbols-outlined text-[11px]">open_in_new</span>
@@ -1352,6 +1365,7 @@
         </button>
       </div>
     </div>
+  </div>
 
   <!-- ==================== ACCOUNT SETUP WIZARD MODAL ==================== -->
   <div id="wizardModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/85 backdrop-blur-md p-4 select-none">
@@ -1415,6 +1429,99 @@
           <span class="material-symbols-outlined text-[15px]">undo</span>
           <span>Отмена и возврат</span>
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== AUTO-UPDATE MODAL (ZERO-LOSS DATA SAFETY) ==================== -->
+  <div id="updateModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/85 backdrop-blur-md p-4 select-none">
+    <div class="relative w-full max-w-xl rounded-3xl glass-panel border border-white/10 shadow-2xl p-6 flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-150 overflow-hidden">
+      <!-- Glow effect -->
+      <div class="absolute -top-12 -right-12 w-48 h-48 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none"></div>
+
+      <!-- Header -->
+      <div class="flex items-center justify-between border-b border-white/[0.08] pb-3.5">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+            <span class="material-symbols-outlined text-[22px]">rocket_launch</span>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white tracking-tight">Обновление Antigravity Toolkit</h3>
+            <span class="text-xs text-emerald-400 font-medium" id="updateModalSubtitle">Доступна новая версия на GitHub</span>
+          </div>
+        </div>
+        <button id="closeUpdateBtn" class="p-2 rounded-xl btn-outline-glass text-slate-400 hover:text-white transition-colors">
+          <span class="material-symbols-outlined text-[18px]">close</span>
+        </button>
+      </div>
+
+      <!-- Version comparison & Info -->
+      <div class="grid grid-cols-2 gap-3">
+        <div class="p-3 rounded-2xl bg-black/40 border border-white/[0.06] flex flex-col gap-1">
+          <span class="text-[11px] text-slate-400">Текущая версия</span>
+          <span id="updateCurrentVer" class="text-sm font-mono font-bold text-slate-300">v2.0.7</span>
+        </div>
+        <div class="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 flex flex-col gap-1">
+          <span class="text-[11px] text-emerald-400">Новая версия на GitHub</span>
+          <div class="flex items-center gap-2">
+            <span id="updateNewVer" class="text-sm font-mono font-bold text-emerald-300">v2.0.8</span>
+            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">LATEST</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Zero-Loss Data Safety Guarantee Banner -->
+      <div class="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-teal-950/30 to-black/40 border border-emerald-500/30 flex items-start gap-3">
+        <div class="w-8 h-8 rounded-lg bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0 mt-0.5">
+          <span class="material-symbols-outlined text-[18px]">verified_user</span>
+        </div>
+        <div class="flex flex-col gap-1">
+          <span class="text-xs font-bold text-emerald-300 flex items-center gap-1.5">
+            <span>Гарантия сохранности данных (Zero-Loss Guarantee)</span>
+          </span>
+          <span class="text-[11.5px] text-slate-300 leading-relaxed">
+            Все ваши <strong>4 аккаунта</strong>, сохранённые OAuth-токены в Keychain, настройки и история диалогов защищены и останутся нетронутыми. Перед установкой автоматически создаётся превентивный снимок <code class="text-[10px] bg-black/40 px-1 py-0.5 rounded text-emerald-400">~/.gemini/backups/pre_update_*</code>.
+          </span>
+        </div>
+      </div>
+
+      <!-- Release Notes Box -->
+      <div class="flex flex-col gap-1.5">
+        <span class="text-xs font-semibold text-slate-300">Что нового в этом выпуске:</span>
+        <div id="updateReleaseNotes" class="max-h-40 overflow-y-auto custom-scroll p-3.5 rounded-2xl bg-black/50 border border-white/[0.06] text-xs text-slate-300 whitespace-pre-wrap leading-relaxed font-sans">
+          Загрузка описания изменений...
+        </div>
+      </div>
+
+      <!-- Progress Section (Hidden until update is started) -->
+      <div id="updateProgressSection" class="hidden flex flex-col gap-2 p-3.5 rounded-2xl bg-black/60 border border-white/10">
+        <div class="flex items-center justify-between text-xs">
+          <span id="updateProgressStatus" class="text-cyan-300 font-medium flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+            <span id="updateProgressStatusText">Подготовка обновления...</span>
+          </span>
+          <span id="updateProgressPercent" class="font-mono text-slate-400 text-[11px]">0%</span>
+        </div>
+        <div class="w-full h-2 rounded-full bg-white/[0.06] overflow-hidden">
+          <div id="updateProgressBar" class="h-full bg-gradient-to-r from-cyan-500 via-blue-500 to-emerald-400 transition-all duration-300" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- Action Footer -->
+      <div class="flex items-center justify-between border-t border-white/[0.08] pt-3.5 text-xs">
+        <button id="btnUpdateViewReleases" class="hover:text-blue-400 text-slate-400 transition-colors flex items-center gap-1">
+          <span>Открыть релиз на GitHub</span>
+          <span class="material-symbols-outlined text-[13px]">open_in_new</span>
+        </button>
+        <div class="flex items-center gap-2">
+          <button id="btnUpdatePostpone" class="btn-outline-glass px-4 py-2 rounded-xl text-xs font-medium text-slate-300 hover:text-white transition-colors">
+            Отложить
+          </button>
+          <button id="btnUpdateApply" class="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-medium text-xs shadow-lg shadow-emerald-500/20 transition-all active:scale-95 flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px]">download</span>
+            <span id="btnUpdateApplyText">Обновить и перезапустить</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -2844,6 +2951,199 @@
       document.getElementById('githubBtn').addEventListener('click', openGitHub);
       const sbGhBtn = document.getElementById('sb-github-btn');
       if (sbGhBtn) sbGhBtn.addEventListener('click', openGitHub);
+
+      // =======================================================================
+      // AUTO-UPDATE CONTROLLER (ZERO-LOSS DATA SAFETY)
+      // =======================================================================
+      let cachedUpdateData = null;
+      let isUpdating = false;
+
+      const updateModal = document.getElementById('updateModal');
+      const closeUpdateBtn = document.getElementById('closeUpdateBtn');
+      const btnUpdatePostpone = document.getElementById('btnUpdatePostpone');
+      const btnUpdateApply = document.getElementById('btnUpdateApply');
+      const btnUpdateApplyText = document.getElementById('btnUpdateApplyText');
+      const btnUpdateViewReleases = document.getElementById('btnUpdateViewReleases');
+      const btnCheckUpdate = document.getElementById('btn-check-update');
+      const iconCheckUpdate = document.getElementById('icon-check-update');
+      const textCheckUpdate = document.getElementById('text-check-update');
+      const sbCheckUpdateBtn = document.getElementById('sb-check-update-btn');
+      const badgeUpdateAvailable = document.getElementById('badge-update-available');
+      const badgeUpdateVersion = document.getElementById('badge-update-version');
+
+      const updateCurrentVer = document.getElementById('updateCurrentVer');
+      const updateNewVer = document.getElementById('updateNewVer');
+      const updateReleaseNotes = document.getElementById('updateReleaseNotes');
+      const updateProgressSection = document.getElementById('updateProgressSection');
+      const updateProgressStatusText = document.getElementById('updateProgressStatusText');
+      const updateProgressPercent = document.getElementById('updateProgressPercent');
+      const updateProgressBar = document.getElementById('updateProgressBar');
+
+      function showUpdateModal(data) {
+        if (!data) return;
+        cachedUpdateData = data;
+        if (updateCurrentVer) updateCurrentVer.textContent = `v${data.current_version || '2.0.7'}`;
+        if (updateNewVer) updateNewVer.textContent = data.latest_tag || `v${data.latest_version}`;
+        if (updateReleaseNotes) {
+          updateReleaseNotes.textContent = data.release_notes || 'Новые улучшения стабильности и исправления ошибок.';
+        }
+        if (updateProgressSection) updateProgressSection.classList.add('hidden');
+        if (btnUpdateApply) {
+          btnUpdateApply.disabled = false;
+          btnUpdateApply.classList.remove('opacity-50', 'pointer-events-none');
+          if (btnUpdateApplyText) btnUpdateApplyText.textContent = 'Обновить и перезапустить';
+        }
+        if (updateModal) updateModal.classList.remove('hidden');
+      }
+
+      function hideUpdateModal() {
+        if (isUpdating) return;
+        if (updateModal) updateModal.classList.add('hidden');
+      }
+
+      if (closeUpdateBtn) closeUpdateBtn.addEventListener('click', hideUpdateModal);
+      if (btnUpdatePostpone) btnUpdatePostpone.addEventListener('click', hideUpdateModal);
+
+      if (btnUpdateViewReleases) {
+        btnUpdateViewReleases.addEventListener('click', () => {
+          const url = cachedUpdateData?.release_url || 'https://github.com/salambeq/antigravity-ru/releases';
+          if (window.api && window.api.openExternal) {
+            window.api.openExternal(url);
+          }
+        });
+      }
+
+      if (badgeUpdateAvailable) {
+        badgeUpdateAvailable.addEventListener('click', () => {
+          if (cachedUpdateData) {
+            showUpdateModal(cachedUpdateData);
+          } else {
+            checkForUpdates(false);
+          }
+        });
+      }
+
+      async function checkForUpdates(silent = false) {
+        if (!window.api || !window.api.checkUpdate) return;
+        if (iconCheckUpdate) iconCheckUpdate.classList.add('animate-spin');
+        if (textCheckUpdate) textCheckUpdate.textContent = 'Поиск...';
+        if (!silent) {
+          appendLog('PROCESS', 'text-cyan-400', 'Поиск обновлений Antigravity Toolkit на GitHub...');
+        }
+
+        try {
+          const res = await window.api.checkUpdate();
+          if (!res || !res.success) {
+            if (!silent) {
+              appendLog('WARN', 'text-amber-400', `Проверка обновлений: ${res?.error || 'ошибка связи с GitHub'}`);
+            }
+            return;
+          }
+
+          cachedUpdateData = res;
+
+          if (res.has_update) {
+            appendLog('OK', 'text-emerald-400', `✨ Найдена новая версия: ${res.latest_tag || 'v' + res.latest_version}!`);
+            if (badgeUpdateAvailable) {
+              badgeUpdateAvailable.classList.remove('hidden');
+              if (badgeUpdateVersion) {
+                badgeUpdateVersion.textContent = res.latest_tag || `v${res.latest_version}`;
+              }
+            }
+            if (!silent) {
+              showUpdateModal(res);
+            }
+          } else {
+            if (badgeUpdateAvailable) badgeUpdateAvailable.classList.add('hidden');
+            if (!silent) {
+              appendLog('OK', 'text-emerald-400', `У вас установлена последняя актуальная версия (v${res.current_version}).`);
+            }
+          }
+        } catch (e) {
+          if (!silent) {
+            appendLog('ERR', 'text-error', `Ошибка проверки обновлений: ${e.message}`);
+          }
+        } finally {
+          if (iconCheckUpdate) iconCheckUpdate.classList.remove('animate-spin');
+          if (textCheckUpdate) textCheckUpdate.textContent = 'Обновление';
+        }
+      }
+
+      if (btnCheckUpdate) {
+        btnCheckUpdate.addEventListener('click', () => checkForUpdates(false));
+      }
+      if (sbCheckUpdateBtn) {
+        sbCheckUpdateBtn.addEventListener('click', () => checkForUpdates(false));
+      }
+
+      // Применение обновления
+      if (btnUpdateApply) {
+        btnUpdateApply.addEventListener('click', async () => {
+          if (isUpdating) return;
+          isUpdating = true;
+
+          btnUpdateApply.disabled = true;
+          btnUpdateApply.classList.add('opacity-50', 'pointer-events-none');
+          if (btnUpdatePostpone) btnUpdatePostpone.classList.add('opacity-50', 'pointer-events-none');
+          if (closeUpdateBtn) closeUpdateBtn.classList.add('opacity-50', 'pointer-events-none');
+
+          if (updateProgressSection) updateProgressSection.classList.remove('hidden');
+          if (updateProgressStatusText) updateProgressStatusText.textContent = '🛡️ Создание защитного снимка аккаунтов (Zero-Loss)...';
+          if (updateProgressBar) updateProgressBar.style.width = '25%';
+          if (updateProgressPercent) updateProgressPercent.textContent = '25%';
+
+          appendLog('PROCESS', 'text-cyan-400', 'Запуск безопасного автообновления Antigravity Toolkit...');
+
+          // Плавная анимация индикатора прогресса
+          let currentPct = 25;
+          const pctInterval = setInterval(() => {
+            if (currentPct < 85) {
+              currentPct += 5;
+              if (updateProgressBar) updateProgressBar.style.width = `${currentPct}%`;
+              if (updateProgressPercent) updateProgressPercent.textContent = `${currentPct}%`;
+              if (currentPct > 40 && currentPct < 75) {
+                if (updateProgressStatusText) updateProgressStatusText.textContent = '📥 Загрузка дистрибутива с GitHub...';
+              } else if (currentPct >= 75) {
+                if (updateProgressStatusText) updateProgressStatusText.textContent = '🗜️ Распаковка и подготовка перезапуска...';
+              }
+            }
+          }, 600);
+
+          try {
+            const res = await window.api.applyUpdate();
+            clearInterval(pctInterval);
+
+            if (res && res.success) {
+              if (updateProgressBar) updateProgressBar.style.width = '100%';
+              if (updateProgressPercent) updateProgressPercent.textContent = '100%';
+              if (updateProgressStatusText) updateProgressStatusText.textContent = '🎉 Обновление успешно применено! Перезапуск...';
+              appendLog('OK', 'text-emerald-400', '✅ Обновление установлено. Приложение перезапускается...');
+            } else {
+              isUpdating = false;
+              btnUpdateApply.disabled = false;
+              btnUpdateApply.classList.remove('opacity-50', 'pointer-events-none');
+              if (btnUpdatePostpone) btnUpdatePostpone.classList.remove('opacity-50', 'pointer-events-none');
+              if (closeUpdateBtn) closeUpdateBtn.classList.remove('opacity-50', 'pointer-events-none');
+              if (updateProgressStatusText) updateProgressStatusText.textContent = `❌ Ошибка: ${res?.error || 'Сбой обновления'}`;
+              appendLog('ERR', 'text-error', `Сбой применения обновления: ${res?.error || res?.message || 'Неизвестная ошибка'}`);
+            }
+          } catch (err) {
+            clearInterval(pctInterval);
+            isUpdating = false;
+            btnUpdateApply.disabled = false;
+            btnUpdateApply.classList.remove('opacity-50', 'pointer-events-none');
+            if (btnUpdatePostpone) btnUpdatePostpone.classList.remove('opacity-50', 'pointer-events-none');
+            if (closeUpdateBtn) closeUpdateBtn.classList.remove('opacity-50', 'pointer-events-none');
+            if (updateProgressStatusText) updateProgressStatusText.textContent = `❌ Ошибка: ${err.message}`;
+            appendLog('ERR', 'text-error', `Ошибка автообновления: ${err.message}`);
+          }
+        });
+      }
+
+      // Фоновая тихая проверка обновлений через 3.5 секунды после запуска приложения
+      setTimeout(() => {
+        checkForUpdates(true);
+      }, 3500);
 
       // Initial status load
       refreshStatus();

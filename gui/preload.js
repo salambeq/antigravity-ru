@@ -27,6 +27,8 @@ contextBridge.exposeInMainWorld('api', {
   createBackup: (type) => ipcRenderer.invoke('backup-create', type),
   restoreBackup: (file) => ipcRenderer.invoke('backup-restore', file),
   deleteBackup: (file) => ipcRenderer.invoke('backup-delete', file),
+  checkUpdate: () => ipcRenderer.invoke('check-update'),
+  applyUpdate: () => ipcRenderer.invoke('apply-update'),
   onLog: (callback) => {
     const handler = (_event, data) => callback(data);
     ipcRenderer.on('log-chunk', handler);

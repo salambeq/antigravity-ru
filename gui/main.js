@@ -531,3 +531,33 @@ ipcMain.handle('backup-delete', async (_event, file) => {
   });
 });
 
+// IPC: Auto-Update (Safe zero-loss updates)
+ipcMain.handle('check-update', async () => {
+  return new Promise((resolve) => {
+    execFile(PYTHON_BIN, [MAIN_PY, '--check-update'], { cwd: ROOT_DIR, env: DEFAULT_ENV, timeout: 25000 }, (err, stdout) => {
+      if (err) {
+        resolve({ success: false, error: err.message, raw: stdout });
+        return;
+      }
+      try {
+        const data = JSON.parse(stdout);
+        resolve(data);
+      } catch (parseErr) {
+        resolve({ success: false, error: `Ошибка парсинга JSON: ${parseErr.message}`, raw: stdout });
+      }
+    });
+  });
+});
+
+ipcMain.handle('apply-update', async (event) => {
+  const res = await streamPythonCommand(['--apply-update'], event);
+  if (res && res.success) {
+    setTimeout(() => {
+      isQuitting = true;
+      app.quit();
+    }, 2500);
+  }
+  return res;
+});
+
+
