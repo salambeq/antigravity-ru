@@ -33,12 +33,35 @@ if [ -z "$TOKEN" ]; then
     exit 1
 fi
 
-echo "🚀 Проверка существования релиза $TAG в репозитории $REPO..."
-EXISTING_RELEASE=$(curl -s -H "Authorization: token $TOKEN" \
-    -H "User-Agent: AntigravityToolkit" \
-    "https://api.github.com/repos/$REPO/releases/tags/$TAG")
+# Автоопределение системного прокси macOS для стабильного доступа к GitHub API
+CURL_PROXY_ARGS=()
+if command -v scutil &>/dev/null; then
+    PROXY_ENABLED=$(scutil --proxy | grep -E 'HTTPSEnable\s*:\s*1' || true)
+    if [ -n "$PROXY_ENABLED" ]; then
+        PROXY_HOST=$(scutil --proxy | grep -E 'HTTPSProxy\s*:' | awk '{print $3}')
+        PROXY_PORT=$(scutil --proxy | grep -E 'HTTPSPort\s*:' | awk '{print $3}')
+        if [ -n "$PROXY_HOST" ] && [ -n "$PROXY_PORT" ]; then
+            CURL_PROXY_ARGS=("-x" "http://${PROXY_HOST}:${PROXY_PORT}")
+            echo "[+] Обнаружен системный прокси: http://${PROXY_HOST}:${PROXY_PORT}"
+        fi
+    fi
+fi
 
-RELEASE_ID=$(echo "$EXISTING_RELEASE" | grep -o '"id": [0-9]*' | head -1 | awk '{print $2}')
+# Массив вызова curl с принудительным HTTP/1.1 (предотвращает сбросы соединений в локальных прокси)
+CURL_CMD=(curl --http1.1 "${CURL_PROXY_ARGS[@]}")
+
+echo "🚀 Проверка существования релиза $TAG в репозитории $REPO..."
+RELEASES_LIST=$("${CURL_CMD[@]}" -s -H "Authorization: token $TOKEN" \
+    -H "User-Agent: AntigravityToolkit" \
+    "https://api.github.com/repos/$REPO/releases")
+
+RELEASE_ID=$(node -e '
+    try {
+        const list = JSON.parse(process.argv[1]);
+        const r = list.find(x => x.tag_name === process.argv[2]);
+        if (r) console.log(r.id);
+    } catch (e) {}
+' "$RELEASES_LIST" "$TAG")
 
 BODY_TEXT='## 🇷🇺 Antigravity Toolkit GUI v2.0.4 (macOS)
 
@@ -69,11 +92,14 @@ BODY_TEXT='## 🇷🇺 Antigravity Toolkit GUI v2.0.4 (macOS)
    - Корректные отступы под системные кнопки управления окном (Traffic Lights).
    - Ad-hoc цифровая подпись Apple `codesign`, исключающая предупреждения о повреждении бандла.'
 
+TMP_PAYLOAD="/tmp/github_release_payload.json"
+
 if [ -z "$RELEASE_ID" ] || [ "$RELEASE_ID" = "null" ]; then
     echo "✨ Создание нового релиза $TAG..."
-    JSON_PAYLOAD=$(node -e '
+    node -e '
+        const fs = require("fs");
         const body = process.argv[1];
-        console.log(JSON.stringify({
+        fs.writeFileSync(process.argv[2], JSON.stringify({
             tag_name: "v2.0.4",
             target_commitish: "main",
             name: "Antigravity Toolkit GUI v2.0.4 (macOS Edition)",
@@ -81,25 +107,41 @@ if [ -z "$RELEASE_ID" ] || [ "$RELEASE_ID" = "null" ]; then
             draft: false,
             prerelease: false
         }));
-    ' "$BODY_TEXT")
+    ' "$BODY_TEXT" "$TMP_PAYLOAD"
 
-    CREATE_RESP=$(curl -s -X POST \
+    CREATE_RESP=$("${CURL_CMD[@]}" -s -X POST \
         -H "Authorization: token $TOKEN" \
         -H "Content-Type: application/json" \
         -H "User-Agent: AntigravityToolkit" \
-        -d "$JSON_PAYLOAD" \
+        --data-binary @"$TMP_PAYLOAD" \
         "https://api.github.com/repos/$REPO/releases")
 
     RELEASE_ID=$(echo "$CREATE_RESP" | grep -o '"id": [0-9]*' | head -1 | awk '{print $2}')
+    if [ -z "$RELEASE_ID" ] || [ "$RELEASE_ID" = "null" ]; then
+        echo "❌ Ошибка создания релиза: $CREATE_RESP"
+        exit 1
+    fi
     echo "[+] Релиз создан с ID: $RELEASE_ID"
 else
-    echo "[+] Найден существующий релиз ID: $RELEASE_ID"
-fi
+    echo "[+] Найден существующий релиз ID: $RELEASE_ID. Обновление описания..."
+    node -e '
+        const fs = require("fs");
+        const body = process.argv[1];
+        fs.writeFileSync(process.argv[2], JSON.stringify({
+            name: "Antigravity Toolkit GUI v2.0.4 (macOS Edition)",
+            body: body
+        }));
+    ' "$BODY_TEXT" "$TMP_PAYLOAD"
 
-if [ -z "$RELEASE_ID" ] || [ "$RELEASE_ID" = "null" ]; then
-    echo "❌ Ошибка создания релиза."
-    exit 1
+    "${CURL_CMD[@]}" -s -X PATCH \
+        -H "Authorization: token $TOKEN" \
+        -H "Content-Type: application/json" \
+        -H "User-Agent: AntigravityToolkit" \
+        --data-binary @"$TMP_PAYLOAD" \
+        "https://api.github.com/repos/$REPO/releases/$RELEASE_ID" > /dev/null
+    echo "[+] Описание релиза успешно обновлено."
 fi
+rm -f "$TMP_PAYLOAD"
 
 upload_asset() {
     local file="$1"
@@ -108,19 +150,23 @@ upload_asset() {
     local size=$(ls -lh "$file" | awk '{print $5}')
 
     echo "⬆️  Загрузка $name ($size)..."
-    curl -s -X POST \
+    local resp=$("${CURL_CMD[@]}" --progress-bar -X POST \
         -H "Authorization: token $TOKEN" \
         -H "Content-Type: $mime" \
         -H "User-Agent: AntigravityToolkit" \
         --data-binary @"$file" \
-        "https://uploads.github.com/repos/$REPO/releases/$RELEASE_ID/assets?name=$name" > /dev/null
-    echo "✅ Файл $name успешно загружен!"
+        "https://uploads.github.com/repos/$REPO/releases/$RELEASE_ID/assets?name=$name")
+    
+    local asset_state=$(echo "$resp" | grep -o '"state": "[^"]*"' | head -1)
+    echo "✅ Файл $name успешно загружен ($asset_state)!"
 }
 
 # Удаляем старые ассеты если были с такими именами
-ASSETS=$(curl -s -H "Authorization: token $TOKEN" -H "User-Agent: AntigravityToolkit" "https://api.github.com/repos/$REPO/releases/$RELEASE_ID/assets")
+echo "🔍 Проверка и очистка старых ассетов..."
+ASSETS=$("${CURL_CMD[@]}" -s -H "Authorization: token $TOKEN" -H "User-Agent: AntigravityToolkit" "https://api.github.com/repos/$REPO/releases/$RELEASE_ID/assets")
 for asset_id in $(echo "$ASSETS" | grep -o '"id": [0-9]*' | awk '{print $2}'); do
-    curl -s -X DELETE -H "Authorization: token $TOKEN" -H "User-Agent: AntigravityToolkit" "https://api.github.com/repos/$REPO/releases/assets/$asset_id" > /dev/null || true
+    echo "  - Удаление устаревшего ассета ID $asset_id..."
+    "${CURL_CMD[@]}" -s -X DELETE -H "Authorization: token $TOKEN" -H "User-Agent: AntigravityToolkit" "https://api.github.com/repos/$REPO/releases/assets/$asset_id" > /dev/null || true
 done
 
 upload_asset "$DMG_PATH" "Antigravity-Toolkit-GUI-macOS-arm64.dmg" "application/octet-stream"
