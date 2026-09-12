@@ -6,8 +6,9 @@ import mmap
 import shutil
 import contextlib
 import filecmp
-from packaging.version import Version
 from enum import Enum
+
+from patcher.utils.semver import Version
 
 from patcher.constants import COLOR_CYAN, MIN_ANTIGRAVITY_VERSION
 from patcher.utils.console import (

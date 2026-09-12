@@ -4,7 +4,7 @@ import json
 import subprocess
 import string
 from enum import Enum
-from packaging.version import Version
+from patcher.utils.semver import Version, parse_version_safe
 from patcher.constants import AG_REGISTRY_SUBKEY, MIN_AG_VERSION
 from patcher.utils.file import get_posix_invoking_user_home
 from patcher.utils.console import ok
