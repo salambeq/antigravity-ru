@@ -502,6 +502,9 @@ class AccountManager:
         slot_path = self.get_slot_path(slot_num)
         if os.path.isfile(slot_path):
             try:
+                with open(slot_path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                email_label = data.get("email", f"Слот #{slot_num}")
                 os.remove(slot_path)
                 meta = self._load_metadata()
                 if str(slot_num) in meta.get("slots", {}):
@@ -509,10 +512,10 @@ class AccountManager:
                 if meta.get("active_slot") == slot_num:
                     meta["active_slot"] = None
                 self._save_metadata(meta)
-                return True, f"Слот #{slot_num} удалён."
+                return True, f"Слот #{slot_num} ({email_label}) успешно удалён и освобождён!"
             except Exception as e:
-                return False, f"Ошибка при удалении: {e}"
-        return False, f"Слот #{slot_num} не существует."
+                return False, f"Ошибка при удалении слота: {e}"
+        return False, f"Слот #{slot_num} не существует или уже пуст."
 
     def get_next_slot_number(self, current_slot: int = None) -> int | None:
         """
@@ -598,9 +601,18 @@ class AccountManager:
         # 4. Перезапускаем language_server, чтобы Antigravity перешла в состояние ожидания логина
         self.restart_language_server()
 
-        # 5. Фокусируем окно Antigravity на macOS
+        # 5. Перезапускаем или открываем Antigravity на macOS для гарантированного открытия экрана входа
         if sys.platform == "darwin":
             try:
+                is_running = subprocess.run(
+                    ["pgrep", "-x", "Antigravity"],
+                    capture_output=True,
+                    check=False,
+                ).returncode == 0
+
+                if is_running:
+                    subprocess.run(["pkill", "-x", "Antigravity"], check=False, capture_output=True)
+                    time.sleep(0.8)
                 subprocess.run(["open", "-a", "Antigravity"], check=False, capture_output=True)
             except Exception:
                 pass
@@ -711,6 +723,20 @@ class AccountManager:
             self._save_metadata(meta)
 
         self.restart_language_server()
+
+        if sys.platform == "darwin":
+            try:
+                is_running = subprocess.run(
+                    ["pgrep", "-x", "Antigravity"],
+                    capture_output=True,
+                    check=False,
+                ).returncode == 0
+                if is_running:
+                    subprocess.run(["pkill", "-x", "Antigravity"], check=False, capture_output=True)
+                    time.sleep(0.8)
+                    subprocess.run(["open", "-a", "Antigravity"], check=False, capture_output=True)
+            except Exception:
+                pass
 
         try:
             os.remove(self.wizard_path)

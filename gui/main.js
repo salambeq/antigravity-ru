@@ -413,6 +413,13 @@ ipcMain.handle('save-account', async (event, slot) => {
   return res;
 });
 
+// IPC: Account delete
+ipcMain.handle('delete-account', async (event, slot) => {
+  const res = await streamPythonCommand(['--account-delete', String(slot)], event);
+  syncAllSlotsBackground();
+  return res;
+});
+
 // IPC: Slot Wizard handlers
 ipcMain.handle('wizard-start', async (_event, slot) => {
   return new Promise((resolve) => {

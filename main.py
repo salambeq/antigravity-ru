@@ -1071,6 +1071,18 @@ def main():
             except ValueError:
                 err("Номер слота должен быть числом.")
             sys.exit(0)
+        elif arg in ("--account-delete", "--delete-slot", "-ds") and len(sys.argv) > 2:
+            try:
+                slot_idx = int(sys.argv[2])
+                mgr = AccountManager()
+                success, msg = mgr.delete_slot(slot_idx)
+                if success:
+                    ok(msg)
+                else:
+                    err(msg)
+            except ValueError:
+                err("Номер слота должен быть числом.")
+            sys.exit(0)
         elif arg in ("--auto-rotate", "--rotate"):
             rotator = QuotaRotator()
             rotator.start_watch()

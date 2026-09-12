@@ -224,7 +224,7 @@
           <span>Antigravity</span>
           <span class="text-slate-400 font-normal">Toolkit</span>
         </div>
-        <span id="toolkit-version-badge" class="px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 font-sans font-medium text-[10px] border border-blue-500/25" title="Antigravity Toolkit RU">v2.0.8 RU</span>
+        <span id="toolkit-version-badge" class="px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 font-sans font-medium text-[10px] border border-blue-500/25" title="Antigravity Toolkit RU">v2.0.9 RU</span>
         <button id="btn-check-update" class="no-drag px-2 py-0.5 rounded-full bg-white/[0.04] hover:bg-white/[0.09] text-slate-400 hover:text-slate-200 font-sans font-medium text-[10px] border border-white/[0.08] transition-colors flex items-center gap-1 cursor-pointer active:scale-95" title="Проверить наличие обновлений на GitHub">
           <span class="material-symbols-outlined text-[11px]" id="icon-check-update">sync</span>
           <span id="text-check-update">Обновление</span>
@@ -362,7 +362,7 @@
 
         <div class="flex items-center justify-between text-[10px] text-slate-500 px-1 pt-1.5 border-t border-white/[0.04]">
           <div class="flex items-center gap-1.5">
-            <span id="sb-toolkit-ver" class="font-mono text-slate-400">v2.0.8</span>
+            <span id="sb-toolkit-ver" class="font-mono text-slate-400">v2.0.9</span>
             <button id="sb-check-update-btn" class="hover:text-emerald-400 text-slate-500 transition-colors flex items-center p-0.5 rounded hover:bg-white/[0.06]" title="Проверить наличие новой версии">
               <span class="material-symbols-outlined text-[13px]">refresh</span>
             </button>
@@ -939,7 +939,12 @@
                       <span class="slot-status-dot w-2 h-2 rounded-full bg-slate-600" id="slot-dot-1"></span>
                       <span class="text-[10px] text-blue-400 font-bold tracking-wider">СЛОТ #1</span>
                     </div>
-                    <span id="slot-badge-1" class="text-[9px] px-1.5 py-0.2 rounded bg-white/5 text-slate-400">Свободен</span>
+                    <div class="flex items-center gap-1.5">
+                      <button type="button" class="btn-slot-delete hover:text-rose-400 text-slate-500 transition-colors p-0.5 rounded hover:bg-white/[0.06] hidden" id="slot-btn-del-1" data-slot="1" title="Очистить Слот #1">
+                        <span class="material-symbols-outlined text-[13px]">delete</span>
+                      </button>
+                      <span id="slot-badge-1" class="text-[9px] px-1.5 py-0.2 rounded bg-white/5 text-slate-400">Свободен</span>
+                    </div>
                   </div>
                   <div class="flex flex-col min-w-0">
                     <span class="text-[11px] text-white font-medium truncate" id="slot-name-1">Слот #1</span>
@@ -962,7 +967,12 @@
                       <span class="slot-status-dot w-2 h-2 rounded-full bg-slate-600" id="slot-dot-2"></span>
                       <span class="text-[10px] text-blue-400 font-bold tracking-wider">СЛОТ #2</span>
                     </div>
-                    <span id="slot-badge-2" class="text-[9px] px-1.5 py-0.2 rounded bg-white/5 text-slate-400">Свободен</span>
+                    <div class="flex items-center gap-1.5">
+                      <button type="button" class="btn-slot-delete hover:text-rose-400 text-slate-500 transition-colors p-0.5 rounded hover:bg-white/[0.06] hidden" id="slot-btn-del-2" data-slot="2" title="Очистить Слот #2">
+                        <span class="material-symbols-outlined text-[13px]">delete</span>
+                      </button>
+                      <span id="slot-badge-2" class="text-[9px] px-1.5 py-0.2 rounded bg-white/5 text-slate-400">Свободен</span>
+                    </div>
                   </div>
                   <div class="flex flex-col min-w-0">
                     <span class="text-[11px] text-white font-medium truncate" id="slot-name-2">Слот #2</span>
@@ -985,7 +995,12 @@
                       <span class="slot-status-dot w-2 h-2 rounded-full bg-slate-600" id="slot-dot-3"></span>
                       <span class="text-[10px] text-blue-400 font-bold tracking-wider">СЛОТ #3</span>
                     </div>
-                    <span id="slot-badge-3" class="text-[9px] px-1.5 py-0.2 rounded bg-white/5 text-slate-400">Свободен</span>
+                    <div class="flex items-center gap-1.5">
+                      <button type="button" class="btn-slot-delete hover:text-rose-400 text-slate-500 transition-colors p-0.5 rounded hover:bg-white/[0.06] hidden" id="slot-btn-del-3" data-slot="3" title="Очистить Слот #3">
+                        <span class="material-symbols-outlined text-[13px]">delete</span>
+                      </button>
+                      <span id="slot-badge-3" class="text-[9px] px-1.5 py-0.2 rounded bg-white/5 text-slate-400">Свободен</span>
+                    </div>
                   </div>
                   <div class="flex flex-col min-w-0">
                     <span class="text-[11px] text-white font-medium truncate" id="slot-name-3">Слот #3</span>
@@ -1008,7 +1023,12 @@
                       <span class="slot-status-dot w-2 h-2 rounded-full bg-slate-600" id="slot-dot-4"></span>
                       <span class="text-[10px] text-blue-400 font-bold tracking-wider">СЛОТ #4</span>
                     </div>
-                    <span id="slot-badge-4" class="text-[9px] px-1.5 py-0.2 rounded bg-white/5 text-slate-400">Свободен</span>
+                    <div class="flex items-center gap-1.5">
+                      <button type="button" class="btn-slot-delete hover:text-rose-400 text-slate-500 transition-colors p-0.5 rounded hover:bg-white/[0.06] hidden" id="slot-btn-del-4" data-slot="4" title="Очистить Слот #4">
+                        <span class="material-symbols-outlined text-[13px]">delete</span>
+                      </button>
+                      <span id="slot-badge-4" class="text-[9px] px-1.5 py-0.2 rounded bg-white/5 text-slate-400">Свободен</span>
+                    </div>
                   </div>
                   <div class="flex flex-col min-w-0">
                     <span class="text-[11px] text-white font-medium truncate" id="slot-name-4">Слот #4</span>
@@ -1027,7 +1047,7 @@
 
             <!-- Account Actions -->
             <div class="flex flex-col gap-2.5 pt-2 border-t border-white/[0.07]">
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
                 <button id="btn-save-slot" class="btn-outline-glass hover:text-blue-400 py-2.5 px-3 rounded-xl text-xs font-medium text-center flex items-center justify-center gap-1.5 active:scale-95" title="Сохранить текущую активную в Antigravity сессию в выбранный слот">
                   <span class="material-symbols-outlined text-[15px] text-blue-400">save</span>
                   <span>Сохранить в слот <span id="lbl-selected-slot-1">#1</span></span>
@@ -1039,6 +1059,10 @@
                 <button id="btn-wizard-slot" class="btn-outline-glass hover:text-cyan-300 hover:border-cyan-500/40 py-2.5 px-3 rounded-xl text-xs font-semibold text-white text-center flex items-center justify-center gap-1.5 active:scale-95 shadow-sm" title="Запустить пошаговый мастер привязки нового аккаунта к этому слоту">
                   <span class="material-symbols-outlined text-[16px] text-cyan-400">auto_fix_high</span>
                   <span>Привязать аккаунт <span id="lbl-selected-slot-3">#1</span></span>
+                </button>
+                <button id="btn-delete-slot" class="btn-outline-glass hover:text-rose-400 hover:border-rose-500/40 py-2.5 px-3 rounded-xl text-xs font-medium text-slate-400 hover:text-rose-300 text-center flex items-center justify-center gap-1.5 active:scale-95" title="Удалить привязку аккаунта и освободить этот слот">
+                  <span class="material-symbols-outlined text-[15px] text-rose-400">delete</span>
+                  <span>Очистить слот <span id="lbl-selected-slot-4">#1</span></span>
                 </button>
               </div>
               <button id="btn-refresh-all-slots" class="w-full py-2 px-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.07] text-slate-300 hover:text-white text-xs font-medium flex items-center justify-center gap-1.5 transition-all active:scale-98" title="Принудительно обновить активность и квоты всех 4 слотов">
@@ -1459,7 +1483,7 @@
       <div class="grid grid-cols-2 gap-3">
         <div class="p-3 rounded-2xl bg-black/40 border border-white/[0.06] flex flex-col gap-1">
           <span class="text-[11px] text-slate-400">Текущая версия</span>
-          <span id="updateCurrentVer" class="text-sm font-mono font-bold text-slate-300">v2.0.8</span>
+          <span id="updateCurrentVer" class="text-sm font-mono font-bold text-slate-300">v2.0.9</span>
         </div>
         <div class="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 flex flex-col gap-1">
           <span class="text-[11px] text-emerald-400">Новая версия на GitHub</span>
@@ -1899,6 +1923,7 @@
             const quotaEl = document.getElementById(`slot-quota-${i}`);
             const actLabelEl = document.getElementById(`slot-action-label-${i}`);
             const actBtnEl = document.getElementById(`slot-btn-action-${i}`);
+            const delBtnEl = document.getElementById(`slot-btn-del-${i}`);
 
             if (slotData && (slotData.email || slotData.name)) {
               const email = slotData.email || 'Google Account';
@@ -1910,6 +1935,14 @@
               if (nameEl) {
                 nameEl.textContent = name;
                 nameEl.title = name;
+              }
+
+              if (delBtnEl) {
+                delBtnEl.classList.remove('hidden');
+                delBtnEl.onclick = (e) => {
+                  e.stopPropagation();
+                  handleSlotAction('delete', i);
+                };
               }
 
               const isRevoked = Boolean(slotData.is_revoked);
@@ -1974,6 +2007,10 @@
                 }
               }
             } else {
+              if (delBtnEl) {
+                delBtnEl.classList.add('hidden');
+                delBtnEl.onclick = null;
+              }
               if (emailEl) {
                 emailEl.textContent = '—';
                 emailEl.title = 'Свободный слот';
@@ -2318,9 +2355,11 @@
         const l1 = document.getElementById('lbl-selected-slot-1');
         const l2 = document.getElementById('lbl-selected-slot-2');
         const l3 = document.getElementById('lbl-selected-slot-3');
+        const l4 = document.getElementById('lbl-selected-slot-4');
         if (l1) l1.textContent = `#${slotNum}`;
         if (l2) l2.textContent = `#${slotNum}`;
         if (l3) l3.textContent = `#${slotNum}`;
+        if (l4) l4.textContent = `#${slotNum}`;
       }
 
       async function handleSlotAction(action, slotNum) {
@@ -2341,6 +2380,29 @@
               appendLog('OK', 'text-emerald-400', `Система переключена на Слот #${slotNum}!`);
             } else {
               appendLog('ERR', 'text-error', `Не удалось переключить аккаунт.`);
+            }
+          } catch (e) {
+            appendLog('ERR', 'text-error', `Ошибка: ${e.message}`);
+          } finally {
+            setBusy(false);
+            await refreshStatus();
+          }
+        } else if (action === 'delete') {
+          const { confirmed } = await requestConfirmation(
+            `Очистка Слота #${slotNum}`,
+            `Вы действительно хотите удалить привязанный аккаунт из Слота #${slotNum}? Токен будет удалён, слот станет свободным.`,
+            false
+          );
+          if (!confirmed) return;
+
+          setBusy(true, `Очистка Слота #${slotNum}...`);
+          appendLog('PROCESS', 'text-primary', `Удаление аккаунта из Слота #${slotNum}...`);
+          try {
+            const res = await window.api.deleteAccount(slotNum);
+            if (res.success) {
+              appendLog('OK', 'text-emerald-400', `Слот #${slotNum} успешно очищен и свободен!`);
+            } else {
+              appendLog('ERR', 'text-error', `Не удалось очистить слот #${slotNum}.`);
             }
           } catch (e) {
             appendLog('ERR', 'text-error', `Ошибка: ${e.message}`);
@@ -2517,6 +2579,15 @@
       if (btnWizardSlot) {
         btnWizardSlot.addEventListener('click', () => {
           openWizard(currentSelectedSlot);
+        });
+      }
+
+      // Delete Account from Slot
+      const btnDeleteSlot = document.getElementById('btn-delete-slot');
+      if (btnDeleteSlot) {
+        btnDeleteSlot.addEventListener('click', async () => {
+          if (isBusy) return;
+          await handleSlotAction('delete', currentSelectedSlot);
         });
       }
 

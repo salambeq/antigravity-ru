@@ -1,8 +1,8 @@
 {
-  "base_version": "2.0.8",
-  "version": "2.0.8.23",
+  "base_version": "2.0.9",
+  "version": "2.0.9.23",
   "build_rev": 23,
-  "commit": "ae5b224",
+  "commit": "381b7da",
   "github_repo": "salambeq/antigravity-ru",
   "github_url": "https://github.com/salambeq/antigravity-ru"
 }

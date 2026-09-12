@@ -6,6 +6,7 @@ contextBridge.exposeInMainWorld('api', {
   switchLanguage: (lang) => ipcRenderer.invoke('switch-language', lang),
   switchAccount: (slot) => ipcRenderer.invoke('switch-account', slot),
   saveAccount: (slot) => ipcRenderer.invoke('save-account', slot),
+  deleteAccount: (slot) => ipcRenderer.invoke('delete-account', slot),
   wizardStart: (slot) => ipcRenderer.invoke('wizard-start', slot),
   wizardStatus: () => ipcRenderer.invoke('wizard-status'),
   wizardCancel: () => ipcRenderer.invoke('wizard-cancel'),
