@@ -145,25 +145,44 @@ def get_system_status_json():
     slots_dict = {}
     quota_dict = {}
     all_quotas_dict = {}
+    cur_acc = {"authenticated": False, "logged_in": False, "email": None, "name": None, "slot": None}
     try:
         ac_mgr = AccountManager()
         raw_slots = ac_mgr.list_slots()
-        cur = ac_mgr.get_current_account_info()
         meta = ac_mgr._load_metadata()
-        cur_acc = {
-            "authenticated": cur.get("authenticated", False),
-            "email": cur.get("email"),
-            "name": cur.get("name"),
-            "picture": cur.get("picture"),
-            "slot": meta.get("active_slot"),
-        }
-        all_quotas_dict = ac_mgr.get_all_slots_quota_summary()
+        active_slot = meta.get("active_slot")
+
+        # 1. Гарантированно и мгновенно заполняем слоты из локального хранилища
         for k, v in raw_slots.items():
-            slots_dict[str(k)] = v
-            # Attach quota directly to each slot dict for easier consumption
-            slot_q = all_quotas_dict.get("slots", {}).get(str(k), {}).get("quota", {})
-            slots_dict[str(k)]["quota"] = slot_q
-        quota_dict = ac_mgr.get_slot_quota_summary()
+            slots_dict[str(k)] = dict(v)
+
+        # 2. Получаем текущий активный аккаунт с надежным фоллбэком
+        cur = ac_mgr.get_current_account_info()
+        cur_email = cur.get("email")
+        cur_name = cur.get("name")
+        if not cur_email and active_slot and str(active_slot) in slots_dict:
+            cur_email = slots_dict[str(active_slot)].get("email")
+            cur_name = slots_dict[str(active_slot)].get("name")
+
+        cur_acc = {
+            "authenticated": cur.get("authenticated", False) or bool(cur_email),
+            "logged_in": cur.get("authenticated", False) or bool(cur_email),
+            "email": cur_email,
+            "name": cur_name,
+            "picture": cur.get("picture"),
+            "slot": active_slot,
+        }
+
+        # 3. Изолированный опрос квот: сбой или таймаут сети НЕ ломает список аккаунтов!
+        try:
+            all_quotas_dict = ac_mgr.get_all_slots_quota_summary()
+            for k in slots_dict:
+                slot_q = all_quotas_dict.get("slots", {}).get(str(k), {}).get("quota", {})
+                if slot_q:
+                    slots_dict[str(k)]["quota"] = slot_q
+            quota_dict = ac_mgr.get_slot_quota_summary()
+        except Exception:
+            pass
     except Exception:
         pass
 
@@ -181,6 +200,7 @@ def get_system_status_json():
         "manager": {
             "path": mgr or "",
             "exists": bool(mgr and os.path.isfile(mgr)),
+            "installed": bool(mgr and os.path.isfile(mgr)),
             "version": mgr_version or "",
             "unlocked": mgr_unlocked,
             "localized": mgr_localized,

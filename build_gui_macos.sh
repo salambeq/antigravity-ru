@@ -25,6 +25,9 @@ fi
 
 ELECTRON_VER="44.3.0"
 
+export ELECTRON_CACHE="$HOME/Library/Caches/electron"
+export HTTP_PROXY="" HTTPS_PROXY="" ALL_PROXY="" http_proxy="" https_proxy="" all_proxy=""
+
 echo "📦 Архитектура хоста: $ARCH -> Electron arch: $ELECTRON_ARCH (v$ELECTRON_VER)"
 echo "📦 Очистка предыдущих сборок в dist/..."
 mkdir -p dist

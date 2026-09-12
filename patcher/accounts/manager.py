@@ -255,6 +255,15 @@ class AccountManager:
             account_info["email"] = google_info.get("email")
             account_info["name"] = google_info.get("name")
             account_info["picture"] = google_info.get("picture")
+        else:
+            # Локальный fallback из сохраненного активного слота
+            meta = self._load_metadata()
+            act_slot = meta.get("active_slot")
+            if act_slot:
+                slot_info = meta.get("slots", {}).get(str(act_slot), {})
+                if slot_info.get("email"):
+                    account_info["email"] = slot_info.get("email")
+                    account_info["name"] = slot_info.get("name")
 
         # Синхронизация с активным слотом
         self.sync_keychain_to_active_slot()

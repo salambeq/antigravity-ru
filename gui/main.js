@@ -26,11 +26,31 @@ function resolvePythonPaths() {
   return { rootDir: root, mainPy: path.join(root, 'main.py') };
 }
 
+function resolvePythonBin() {
+  if (process.env.PYTHON && fs.existsSync(process.env.PYTHON)) {
+    return process.env.PYTHON;
+  }
+  const candidates = [
+    '/opt/homebrew/bin/python3',
+    '/usr/local/bin/python3',
+    '/usr/bin/python3',
+  ];
+  for (const c of candidates) {
+    if (fs.existsSync(c)) return c;
+  }
+  return 'python3';
+}
+
 const { rootDir: ROOT_DIR, mainPy: MAIN_PY } = resolvePythonPaths();
-const PYTHON_BIN = process.env.PYTHON || 'python3';
+const PYTHON_BIN = resolvePythonBin();
+const DEFAULT_ENV = {
+  ...process.env,
+  PATH: `/opt/homebrew/bin:/usr/local/bin:${process.env.PATH || '/usr/bin:/bin:/usr/sbin:/sbin'}`
+};
 
 console.log('[Antigravity GUI] ROOT_DIR:', ROOT_DIR);
 console.log('[Antigravity GUI] MAIN_PY:', MAIN_PY);
+console.log('[Antigravity GUI] PYTHON_BIN:', PYTHON_BIN);
 
 function stripAnsi(text) {
   return text.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, '');
@@ -194,7 +214,7 @@ function updateTrayMenu() {
 }
 
 function switchSlotFromTray(slotNum) {
-  execFile(PYTHON_BIN, [MAIN_PY, '--account-switch', String(slotNum)], { cwd: ROOT_DIR }, () => {
+  execFile(PYTHON_BIN, [MAIN_PY, '--account-switch', String(slotNum)], { cwd: ROOT_DIR, env: DEFAULT_ENV }, () => {
     syncAllSlotsBackground();
     if (mainWindow && !mainWindow.isDestroyed()) {
       mainWindow.webContents.send('account-switched-external', { slot: slotNum });
@@ -203,8 +223,8 @@ function switchSlotFromTray(slotNum) {
 }
 
 function syncAllSlotsBackground() {
-  execFile(PYTHON_BIN, [MAIN_PY, '--refresh-all-slots'], { cwd: ROOT_DIR, timeout: 25000 }, () => {
-    execFile(PYTHON_BIN, [MAIN_PY, '--all-slots-quota-json'], { cwd: ROOT_DIR, timeout: 25000 }, (err, stdout) => {
+  execFile(PYTHON_BIN, [MAIN_PY, '--refresh-all-slots'], { cwd: ROOT_DIR, env: DEFAULT_ENV, timeout: 25000 }, () => {
+    execFile(PYTHON_BIN, [MAIN_PY, '--all-slots-quota-json'], { cwd: ROOT_DIR, env: DEFAULT_ENV, timeout: 25000 }, (err, stdout) => {
       if (!err && stdout) {
         try {
           cachedAllSlotsQuota = JSON.parse(stdout);
@@ -298,7 +318,7 @@ function streamPythonCommand(args, event) {
 // IPC: Status
 ipcMain.handle('get-status', async () => {
   return new Promise((resolve) => {
-    execFile(PYTHON_BIN, [MAIN_PY, '--json-status'], { cwd: ROOT_DIR, timeout: 20000 }, (err, stdout) => {
+    execFile(PYTHON_BIN, [MAIN_PY, '--json-status'], { cwd: ROOT_DIR, env: DEFAULT_ENV, timeout: 25000 }, (err, stdout) => {
       if (err) {
         resolve({ error: err.message, raw: stdout });
         return;
@@ -316,7 +336,7 @@ ipcMain.handle('get-status', async () => {
 // IPC: Quota
 ipcMain.handle('get-quota', async () => {
   return new Promise((resolve) => {
-    execFile(PYTHON_BIN, [MAIN_PY, '--quota-json'], { cwd: ROOT_DIR, timeout: 15000 }, (err, stdout) => {
+    execFile(PYTHON_BIN, [MAIN_PY, '--quota-json'], { cwd: ROOT_DIR, env: DEFAULT_ENV, timeout: 20000 }, (err, stdout) => {
       if (err) {
         resolve({ error: err.message, raw: stdout });
         return;
@@ -334,7 +354,7 @@ ipcMain.handle('get-quota', async () => {
 // IPC: All slots quota (Keep-Alive status for all 4 slots)
 ipcMain.handle('get-all-slots-quota', async () => {
   return new Promise((resolve) => {
-    execFile(PYTHON_BIN, [MAIN_PY, '--all-slots-quota-json'], { cwd: ROOT_DIR, timeout: 25000 }, (err, stdout) => {
+    execFile(PYTHON_BIN, [MAIN_PY, '--all-slots-quota-json'], { cwd: ROOT_DIR, env: DEFAULT_ENV, timeout: 25000 }, (err, stdout) => {
       if (err) {
         resolve({ error: err.message, raw: stdout });
         return;
@@ -354,7 +374,7 @@ ipcMain.handle('get-all-slots-quota', async () => {
 // IPC: Refresh all slots (Keep-Alive OAuth refresh)
 ipcMain.handle('refresh-all-slots', async () => {
   return new Promise((resolve) => {
-    execFile(PYTHON_BIN, [MAIN_PY, '--refresh-all-slots'], { cwd: ROOT_DIR, timeout: 30000 }, (err, stdout) => {
+    execFile(PYTHON_BIN, [MAIN_PY, '--refresh-all-slots'], { cwd: ROOT_DIR, env: DEFAULT_ENV, timeout: 30000 }, (err, stdout) => {
       syncAllSlotsBackground();
       resolve({ success: !err, message: stdout });
     });

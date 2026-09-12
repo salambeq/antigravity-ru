@@ -539,121 +539,309 @@
               </div>
             </div>
 
-            <!-- 3 Bento Columns for Quotas -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Сетка карточек всех 4 аккаунтов (All Slots Quota Grid) -->
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
 
-              <!-- 1. Gemini 5-Hour Sliding Window -->
-              <div class="p-4 rounded-xl bg-black/40 border border-white/[0.07] flex flex-col justify-between gap-3.5 hover:border-cyan-500/30 transition-all">
-                <div class="flex items-start justify-between">
-                  <div class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-cyan-400 text-[18px]">timelapse</span>
-                    <span class="text-xs font-bold text-white tracking-tight">Gemini: 5-часовой лимит</span>
+              <!-- СЛОТ #1 -->
+              <div id="qcard-slot-1" class="p-4 rounded-xl bg-black/40 border border-white/[0.08] flex flex-col gap-3.5 hover:border-cyan-500/30 transition-all">
+                <div class="flex items-center justify-between border-b border-white/[0.05] pb-2.5">
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400 text-xs font-black">#1</div>
+                    <div class="flex flex-col">
+                      <div class="flex items-center gap-2">
+                        <span id="qslot-name-1" class="text-xs font-bold text-white tracking-tight">Слот #1</span>
+                        <span id="qslot-badge-1" class="text-[9px] px-1.5 py-0.2 rounded bg-white/5 text-slate-400 font-medium">Свободен</span>
+                      </div>
+                      <span id="qslot-email-1" class="text-[11px] text-slate-400 font-mono truncate max-w-[200px] sm:max-w-[260px]">—</span>
+                    </div>
                   </div>
-                  <span id="quota-5h-badge" class="px-2 py-0.5 rounded text-[10px] font-semibold bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
-                    Flash &amp; Pro
-                  </span>
+                  <button id="qslot-btn-switch-1" class="px-2.5 py-1 rounded-lg text-[11px] font-medium bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 transition-all hidden">
+                    Включить слот
+                  </button>
                 </div>
 
-                <!-- Big Percent & Progress Bar -->
-                <div class="flex flex-col gap-2">
-                  <div class="flex items-baseline justify-between">
-                    <span id="quota-5h-pct" class="text-2xl font-extrabold text-cyan-400 tracking-tight">--%</span>
-                    <span id="quota-5h-status-text" class="text-[11px] text-slate-400 font-medium">Остаток токенов</span>
-                  </div>
-                  <div class="w-full h-2 rounded-full bg-white/[0.06] overflow-hidden">
-                    <div id="quota-5h-bar" class="h-full rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 transition-all duration-500" style="width: 0%"></div>
-                  </div>
-                </div>
-
-                <!-- Live Countdown Timer -->
-                <div class="p-2.5 rounded-lg bg-black/30 border border-white/[0.05] flex items-center justify-between text-xs">
-                  <div class="flex items-center gap-1.5 text-slate-300">
-                    <span class="material-symbols-outlined text-[15px] text-cyan-400">timer</span>
-                    <span class="text-[11px] text-slate-400">Сброс через:</span>
-                  </div>
-                  <div class="flex items-center gap-1.5">
-                    <span id="quota-5h-timer" class="font-mono font-bold text-white text-xs">--:--:--</span>
-                    <span id="quota-5h-reset-at" class="text-[10px] text-slate-500">(--:--)</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- 2. Gemini Weekly Limit -->
-              <div class="p-4 rounded-xl bg-black/40 border border-white/[0.07] flex flex-col justify-between gap-3.5 hover:border-indigo-500/30 transition-all">
-                <div class="flex items-start justify-between">
-                  <div class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-indigo-400 text-[18px]">calendar_month</span>
-                    <span class="text-xs font-bold text-white tracking-tight">Gemini: Недельный лимит</span>
-                  </div>
-                  <span id="quota-weekly-badge" class="px-2 py-0.5 rounded text-[10px] font-semibold bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
-                    Неделя
-                  </span>
-                </div>
-
-                <!-- Big Percent & Progress Bar -->
-                <div class="flex flex-col gap-2">
-                  <div class="flex items-baseline justify-between">
-                    <span id="quota-weekly-pct" class="text-2xl font-extrabold text-indigo-400 tracking-tight">--%</span>
-                    <span id="quota-weekly-status-text" class="text-[11px] text-slate-400 font-medium">Остаток токенов</span>
-                  </div>
-                  <div class="w-full h-2 rounded-full bg-white/[0.06] overflow-hidden">
-                    <div id="quota-weekly-bar" class="h-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-400 transition-all duration-500" style="width: 0%"></div>
-                  </div>
-                </div>
-
-                <!-- Reset Countdown -->
-                <div class="p-2.5 rounded-lg bg-black/30 border border-white/[0.05] flex items-center justify-between text-xs">
-                  <div class="flex items-center gap-1.5 text-slate-300">
-                    <span class="material-symbols-outlined text-[15px] text-indigo-400">event_repeat</span>
-                    <span class="text-[11px] text-slate-400">Сброс:</span>
-                  </div>
-                  <div class="flex items-center gap-1.5">
-                    <span id="quota-weekly-timer" class="font-mono font-bold text-white text-xs">-- дн. -- ч.</span>
-                    <span id="quota-weekly-reset-at" class="text-[10px] text-slate-500">(--:--)</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- 3. Claude & GPT 3P Models -->
-              <div class="p-4 rounded-xl bg-black/40 border border-white/[0.07] flex flex-col justify-between gap-3.5 hover:border-emerald-500/30 transition-all">
-                <div class="flex items-start justify-between">
-                  <div class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-emerald-400 text-[18px]">psychology</span>
-                    <span class="text-xs font-bold text-white tracking-tight">Claude &amp; GPT модели</span>
-                  </div>
-                  <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
-                    Opus • Sonnet • GPT
-                  </span>
-                </div>
-
-                <div class="flex flex-col gap-2">
-                  <div class="flex flex-col gap-1">
-                    <div class="flex justify-between text-[11px]">
-                      <span class="text-slate-400">5-часовой лимит:</span>
-                      <span id="quota-claude-5h-pct" class="font-bold text-emerald-400 font-mono">100%</span>
+                <div id="qslot-content-1" class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  <div class="p-2.5 rounded-lg bg-white/[0.02] border border-white/[0.05] flex flex-col justify-between gap-1.5">
+                    <div class="flex items-center justify-between text-[10px] text-slate-400 font-medium">
+                      <span>⚡ Gemini 5ч</span>
+                      <span class="text-[9px] text-cyan-400 font-semibold">Flash/Pro</span>
+                    </div>
+                    <div class="flex items-baseline justify-between">
+                      <span id="qslot-5h-pct-1" class="text-lg font-extrabold text-cyan-400">100%</span>
+                      <span id="qslot-5h-reset-1" class="text-[10px] text-slate-400 font-mono">--:--</span>
                     </div>
                     <div class="w-full h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
-                      <div id="quota-claude-5h-bar" class="h-full rounded-full bg-emerald-400 transition-all duration-500" style="width: 100%"></div>
+                      <div id="qslot-5h-bar-1" class="h-full rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 transition-all duration-500" style="width: 100%"></div>
                     </div>
                   </div>
 
-                  <div class="flex flex-col gap-1">
-                    <div class="flex justify-between text-[11px]">
-                      <span class="text-slate-400">Недельный лимит:</span>
-                      <span id="quota-claude-weekly-pct" class="font-bold text-emerald-400 font-mono">100%</span>
+                  <div class="p-2.5 rounded-lg bg-white/[0.02] border border-white/[0.05] flex flex-col justify-between gap-1.5">
+                    <div class="flex items-center justify-between text-[10px] text-slate-400 font-medium">
+                      <span>📅 Неделя</span>
+                      <span class="text-[9px] text-indigo-400 font-semibold">Лимит</span>
+                    </div>
+                    <div class="flex items-baseline justify-between">
+                      <span id="qslot-w-pct-1" class="text-lg font-extrabold text-indigo-400">100%</span>
+                      <span id="qslot-w-reset-1" class="text-[10px] text-slate-400 font-mono">-- дн.</span>
                     </div>
                     <div class="w-full h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
-                      <div id="quota-claude-weekly-bar" class="h-full rounded-full bg-emerald-400 transition-all duration-500" style="width: 100%"></div>
+                      <div id="qslot-w-bar-1" class="h-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-400 transition-all duration-500" style="width: 100%"></div>
+                    </div>
+                  </div>
+
+                  <div class="p-2.5 rounded-lg bg-white/[0.02] border border-white/[0.05] flex flex-col justify-between gap-1.5">
+                    <div class="flex items-center justify-between text-[10px] text-slate-400 font-medium">
+                      <span>🧠 3P Модели</span>
+                      <span class="text-[9px] text-emerald-400 font-semibold">Claude/GPT</span>
+                    </div>
+                    <div class="flex flex-col gap-1 text-[10px]">
+                      <div class="flex justify-between">
+                        <span class="text-slate-400">5ч:</span>
+                        <span id="qslot-c5-pct-1" class="font-bold text-emerald-400 font-mono">100%</span>
+                      </div>
+                      <div class="flex justify-between">
+                        <span class="text-slate-400">Нед:</span>
+                        <span id="qslot-cw-pct-1" class="font-bold text-emerald-400 font-mono">100%</span>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                <div class="p-2 rounded-lg bg-black/30 border border-white/[0.05] flex items-center justify-between text-xs">
-                  <span class="text-[10px] text-slate-400">Обновление 5ч / нед.:</span>
-                  <span id="quota-claude-reset-text" class="text-[10px] font-mono text-slate-300">Готов к работе</span>
+                <div id="qslot-empty-1" class="py-4 border border-dashed border-white/10 rounded-lg flex flex-col items-center justify-center gap-1.5 text-center hidden">
+                  <span class="material-symbols-outlined text-slate-600 text-[20px]">person_add</span>
+                  <span class="text-xs text-slate-400 font-medium">Слот свободен</span>
                 </div>
               </div>
 
+              <!-- СЛОТ #2 -->
+              <div id="qcard-slot-2" class="p-4 rounded-xl bg-black/40 border border-white/[0.08] flex flex-col gap-3.5 hover:border-emerald-500/30 transition-all">
+                <div class="flex items-center justify-between border-b border-white/[0.05] pb-2.5">
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-xs font-black">#2</div>
+                    <div class="flex flex-col">
+                      <div class="flex items-center gap-2">
+                        <span id="qslot-name-2" class="text-xs font-bold text-white tracking-tight">Слот #2</span>
+                        <span id="qslot-badge-2" class="text-[9px] px-1.5 py-0.2 rounded bg-white/5 text-slate-400 font-medium">Свободен</span>
+                      </div>
+                      <span id="qslot-email-2" class="text-[11px] text-slate-400 font-mono truncate max-w-[200px] sm:max-w-[260px]">—</span>
+                    </div>
+                  </div>
+                  <button id="qslot-btn-switch-2" class="px-2.5 py-1 rounded-lg text-[11px] font-medium bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 transition-all hidden">
+                    Включить слот
+                  </button>
+                </div>
+
+                <div id="qslot-content-2" class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  <div class="p-2.5 rounded-lg bg-white/[0.02] border border-white/[0.05] flex flex-col justify-between gap-1.5">
+                    <div class="flex items-center justify-between text-[10px] text-slate-400 font-medium">
+                      <span>⚡ Gemini 5ч</span>
+                      <span class="text-[9px] text-cyan-400 font-semibold">Flash/Pro</span>
+                    </div>
+                    <div class="flex items-baseline justify-between">
+                      <span id="qslot-5h-pct-2" class="text-lg font-extrabold text-cyan-400">100%</span>
+                      <span id="qslot-5h-reset-2" class="text-[10px] text-slate-400 font-mono">--:--</span>
+                    </div>
+                    <div class="w-full h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+                      <div id="qslot-5h-bar-2" class="h-full rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 transition-all duration-500" style="width: 100%"></div>
+                    </div>
+                  </div>
+
+                  <div class="p-2.5 rounded-lg bg-white/[0.02] border border-white/[0.05] flex flex-col justify-between gap-1.5">
+                    <div class="flex items-center justify-between text-[10px] text-slate-400 font-medium">
+                      <span>📅 Неделя</span>
+                      <span class="text-[9px] text-indigo-400 font-semibold">Лимит</span>
+                    </div>
+                    <div class="flex items-baseline justify-between">
+                      <span id="qslot-w-pct-2" class="text-lg font-extrabold text-indigo-400">100%</span>
+                      <span id="qslot-w-reset-2" class="text-[10px] text-slate-400 font-mono">-- дн.</span>
+                    </div>
+                    <div class="w-full h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+                      <div id="qslot-w-bar-2" class="h-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-400 transition-all duration-500" style="width: 100%"></div>
+                    </div>
+                  </div>
+
+                  <div class="p-2.5 rounded-lg bg-white/[0.02] border border-white/[0.05] flex flex-col justify-between gap-1.5">
+                    <div class="flex items-center justify-between text-[10px] text-slate-400 font-medium">
+                      <span>🧠 3P Модели</span>
+                      <span class="text-[9px] text-emerald-400 font-semibold">Claude/GPT</span>
+                    </div>
+                    <div class="flex flex-col gap-1 text-[10px]">
+                      <div class="flex justify-between">
+                        <span class="text-slate-400">5ч:</span>
+                        <span id="qslot-c5-pct-2" class="font-bold text-emerald-400 font-mono">100%</span>
+                      </div>
+                      <div class="flex justify-between">
+                        <span class="text-slate-400">Нед:</span>
+                        <span id="qslot-cw-pct-2" class="font-bold text-emerald-400 font-mono">100%</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div id="qslot-empty-2" class="py-4 border border-dashed border-white/10 rounded-lg flex flex-col items-center justify-center gap-1.5 text-center hidden">
+                  <span class="material-symbols-outlined text-slate-600 text-[20px]">person_add</span>
+                  <span class="text-xs text-slate-400 font-medium">Слот свободен</span>
+                </div>
+              </div>
+
+              <!-- СЛОТ #3 -->
+              <div id="qcard-slot-3" class="p-4 rounded-xl bg-black/40 border border-white/[0.08] flex flex-col gap-3.5 hover:border-purple-500/30 transition-all">
+                <div class="flex items-center justify-between border-b border-white/[0.05] pb-2.5">
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-400 text-xs font-black">#3</div>
+                    <div class="flex flex-col">
+                      <div class="flex items-center gap-2">
+                        <span id="qslot-name-3" class="text-xs font-bold text-white tracking-tight">Слот #3</span>
+                        <span id="qslot-badge-3" class="text-[9px] px-1.5 py-0.2 rounded bg-white/5 text-slate-400 font-medium">Свободен</span>
+                      </div>
+                      <span id="qslot-email-3" class="text-[11px] text-slate-400 font-mono truncate max-w-[200px] sm:max-w-[260px]">—</span>
+                    </div>
+                  </div>
+                  <button id="qslot-btn-switch-3" class="px-2.5 py-1 rounded-lg text-[11px] font-medium bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/30 transition-all hidden">
+                    Включить слот
+                  </button>
+                </div>
+
+                <div id="qslot-content-3" class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  <div class="p-2.5 rounded-lg bg-white/[0.02] border border-white/[0.05] flex flex-col justify-between gap-1.5">
+                    <div class="flex items-center justify-between text-[10px] text-slate-400 font-medium">
+                      <span>⚡ Gemini 5ч</span>
+                      <span class="text-[9px] text-cyan-400 font-semibold">Flash/Pro</span>
+                    </div>
+                    <div class="flex items-baseline justify-between">
+                      <span id="qslot-5h-pct-3" class="text-lg font-extrabold text-cyan-400">100%</span>
+                      <span id="qslot-5h-reset-3" class="text-[10px] text-slate-400 font-mono">--:--</span>
+                    </div>
+                    <div class="w-full h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+                      <div id="qslot-5h-bar-3" class="h-full rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 transition-all duration-500" style="width: 100%"></div>
+                    </div>
+                  </div>
+
+                  <div class="p-2.5 rounded-lg bg-white/[0.02] border border-white/[0.05] flex flex-col justify-between gap-1.5">
+                    <div class="flex items-center justify-between text-[10px] text-slate-400 font-medium">
+                      <span>📅 Неделя</span>
+                      <span class="text-[9px] text-indigo-400 font-semibold">Лимит</span>
+                    </div>
+                    <div class="flex items-baseline justify-between">
+                      <span id="qslot-w-pct-3" class="text-lg font-extrabold text-indigo-400">100%</span>
+                      <span id="qslot-w-reset-3" class="text-[10px] text-slate-400 font-mono">-- дн.</span>
+                    </div>
+                    <div class="w-full h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+                      <div id="qslot-w-bar-3" class="h-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-400 transition-all duration-500" style="width: 100%"></div>
+                    </div>
+                  </div>
+
+                  <div class="p-2.5 rounded-lg bg-white/[0.02] border border-white/[0.05] flex flex-col justify-between gap-1.5">
+                    <div class="flex items-center justify-between text-[10px] text-slate-400 font-medium">
+                      <span>🧠 3P Модели</span>
+                      <span class="text-[9px] text-emerald-400 font-semibold">Claude/GPT</span>
+                    </div>
+                    <div class="flex flex-col gap-1 text-[10px]">
+                      <div class="flex justify-between">
+                        <span class="text-slate-400">5ч:</span>
+                        <span id="qslot-c5-pct-3" class="font-bold text-emerald-400 font-mono">100%</span>
+                      </div>
+                      <div class="flex justify-between">
+                        <span class="text-slate-400">Нед:</span>
+                        <span id="qslot-cw-pct-3" class="font-bold text-emerald-400 font-mono">100%</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div id="qslot-empty-3" class="py-4 border border-dashed border-white/10 rounded-lg flex flex-col items-center justify-center gap-1.5 text-center hidden">
+                  <span class="material-symbols-outlined text-slate-600 text-[20px]">person_add</span>
+                  <span class="text-xs text-slate-400 font-medium">Слот свободен</span>
+                </div>
+              </div>
+
+              <!-- СЛОТ #4 -->
+              <div id="qcard-slot-4" class="p-4 rounded-xl bg-black/40 border border-white/[0.08] flex flex-col gap-3.5 hover:border-amber-500/30 transition-all">
+                <div class="flex items-center justify-between border-b border-white/[0.05] pb-2.5">
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xs font-black">#4</div>
+                    <div class="flex flex-col">
+                      <div class="flex items-center gap-2">
+                        <span id="qslot-name-4" class="text-xs font-bold text-white tracking-tight">Слот #4</span>
+                        <span id="qslot-badge-4" class="text-[9px] px-1.5 py-0.2 rounded bg-white/5 text-slate-400 font-medium">Свободен</span>
+                      </div>
+                      <span id="qslot-email-4" class="text-[11px] text-slate-400 font-mono truncate max-w-[200px] sm:max-w-[260px]">—</span>
+                    </div>
+                  </div>
+                  <button id="qslot-btn-switch-4" class="px-2.5 py-1 rounded-lg text-[11px] font-medium bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 transition-all hidden">
+                    Включить слот
+                  </button>
+                </div>
+
+                <div id="qslot-content-4" class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  <div class="p-2.5 rounded-lg bg-white/[0.02] border border-white/[0.05] flex flex-col justify-between gap-1.5">
+                    <div class="flex items-center justify-between text-[10px] text-slate-400 font-medium">
+                      <span>⚡ Gemini 5ч</span>
+                      <span class="text-[9px] text-cyan-400 font-semibold">Flash/Pro</span>
+                    </div>
+                    <div class="flex items-baseline justify-between">
+                      <span id="qslot-5h-pct-4" class="text-lg font-extrabold text-cyan-400">100%</span>
+                      <span id="qslot-5h-reset-4" class="text-[10px] text-slate-400 font-mono">--:--</span>
+                    </div>
+                    <div class="w-full h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+                      <div id="qslot-5h-bar-4" class="h-full rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 transition-all duration-500" style="width: 100%"></div>
+                    </div>
+                  </div>
+
+                  <div class="p-2.5 rounded-lg bg-white/[0.02] border border-white/[0.05] flex flex-col justify-between gap-1.5">
+                    <div class="flex items-center justify-between text-[10px] text-slate-400 font-medium">
+                      <span>📅 Неделя</span>
+                      <span class="text-[9px] text-indigo-400 font-semibold">Лимит</span>
+                    </div>
+                    <div class="flex items-baseline justify-between">
+                      <span id="qslot-w-pct-4" class="text-lg font-extrabold text-indigo-400">100%</span>
+                      <span id="qslot-w-reset-4" class="text-[10px] text-slate-400 font-mono">-- дн.</span>
+                    </div>
+                    <div class="w-full h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+                      <div id="qslot-w-bar-4" class="h-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-400 transition-all duration-500" style="width: 100%"></div>
+                    </div>
+                  </div>
+
+                  <div class="p-2.5 rounded-lg bg-white/[0.02] border border-white/[0.05] flex flex-col justify-between gap-1.5">
+                    <div class="flex items-center justify-between text-[10px] text-slate-400 font-medium">
+                      <span>🧠 3P Модели</span>
+                      <span class="text-[9px] text-emerald-400 font-semibold">Claude/GPT</span>
+                    </div>
+                    <div class="flex flex-col gap-1 text-[10px]">
+                      <div class="flex justify-between">
+                        <span class="text-slate-400">5ч:</span>
+                        <span id="qslot-c5-pct-4" class="font-bold text-emerald-400 font-mono">100%</span>
+                      </div>
+                      <div class="flex justify-between">
+                        <span class="text-slate-400">Нед:</span>
+                        <span id="qslot-cw-pct-4" class="font-bold text-emerald-400 font-mono">100%</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div id="qslot-empty-4" class="py-4 border border-dashed border-white/10 rounded-lg flex flex-col items-center justify-center gap-1.5 text-center hidden">
+                  <span class="material-symbols-outlined text-slate-600 text-[20px]">person_add</span>
+                  <span class="text-xs text-slate-400 font-medium">Слот свободен</span>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Скрытый блок совместимости со старыми селекторами -->
+            <div class="hidden" aria-hidden="true">
+              <span id="quota-5h-pct">--%</span>
+              <div id="quota-5h-bar"></div>
+              <span id="quota-5h-timer">--:--:--</span>
+              <span id="quota-5h-reset-at"></span>
+              <span id="quota-weekly-pct">--%</span>
+              <div id="quota-weekly-bar"></div>
+              <span id="quota-weekly-timer"></span>
+              <span id="quota-weekly-reset-at"></span>
+              <span id="quota-claude-5h-pct"></span>
+              <div id="quota-claude-5h-bar"></div>
+              <span id="quota-claude-weekly-pct"></span>
+              <div id="quota-claude-weekly-bar"></div>
             </div>
           </section>
         </div>
@@ -1285,9 +1473,12 @@
         if (!window.api || !window.api.getStatus) return;
         try {
           const status = await window.api.getStatus();
-          if (status.error) {
+          if (status.error && !status.accounts && !status.manager) {
             appendLog('ERR', 'text-error', `Ошибка статуса: ${status.error}`);
             return;
+          }
+          if (status.error) {
+            appendLog('WARN', 'text-amber-400', `Предупреждение статуса: ${status.error}`);
           }
 
           // 1. Antigravity Core
@@ -1301,13 +1492,14 @@
           const tagMgrLocalized = document.getElementById('tag-mgr-localized');
           const heroStatCore = document.getElementById('hero-stat-core');
 
-          if (mgr.installed) {
+          const isMgrInstalled = Boolean(mgr.installed || mgr.exists);
+          if (isMgrInstalled) {
             mgrBadgeText.textContent = `Ядро v${mgr.version || '2.0'}`;
             mgrBadge.className = 'flex items-center gap-1.5 h-6 px-2.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-[11px] font-medium text-emerald-400';
             mgrBadge.querySelector('span:first-child').className = 'w-1.5 h-1.5 rounded-full bg-emerald-400';
             if (mgrDot) mgrDot.className = 'w-2 h-2 rounded-full bg-emerald-400 glowing-dot text-emerald-400';
             if (mgrVerLabel) mgrVerLabel.textContent = `Версия ${mgr.version || '2.0'}`;
-            if (mgrPathLabel) mgrPathLabel.textContent = mgr.binary_path || mgr.install_path || 'Установлено';
+            if (mgrPathLabel) mgrPathLabel.textContent = mgr.binary_path || mgr.install_path || mgr.path || 'Установлено';
             if (heroStatCore) heroStatCore.textContent = `v${mgr.version || '2.0'}`;
           } else {
             mgrBadgeText.textContent = 'Ядро не найдено';
@@ -1422,7 +1614,8 @@
           const sbSlotEl = document.getElementById('sb-account-slot');
           const dashAccSummary = document.getElementById('dash-account-summary');
 
-          if (cur.logged_in) {
+          const isAccountAuth = Boolean(cur.logged_in || cur.authenticated || (cur.email && cur.email.length > 0));
+          if (isAccountAuth) {
             activeEmailEl.textContent = cur.email || 'Подключен';
             activeNameEl.textContent = cur.name || 'Google Account';
             if (activeSlotTag) activeSlotTag.textContent = cur.slot ? `#${cur.slot}` : '#1';
@@ -1524,6 +1717,7 @@
           }
 
           // Render Quotas
+          renderAllSlotsQuotas(slots, cur.slot, accounts.quota);
           if (accounts.quota) {
             renderQuota(accounts.quota);
           }
@@ -1571,6 +1765,118 @@
       let countdownInterval = null;
       let targetResetTime5h = null;
       let targetResetTimeWeekly = null;
+
+      function renderAllSlotsQuotas(slots, activeSlot, currentQuota) {
+        if (!slots) return;
+        const actSlot = activeSlot || 1;
+
+        for (let i = 1; i <= 4; i++) {
+          const sData = slots[String(i)] || slots[i];
+          const nameEl = document.getElementById(`qslot-name-${i}`);
+          const emailEl = document.getElementById(`qslot-email-${i}`);
+          const badgeEl = document.getElementById(`qslot-badge-${i}`);
+          const contentEl = document.getElementById(`qslot-content-${i}`);
+          const emptyEl = document.getElementById(`qslot-empty-${i}`);
+          const btnSwitch = document.getElementById(`qslot-btn-switch-${i}`);
+
+          if (sData && (sData.email || sData.name)) {
+            const email = sData.email || 'Google Account';
+            const name = sData.name || `Слот #${i}`;
+            if (nameEl) { nameEl.textContent = name; nameEl.title = name; }
+            if (emailEl) { emailEl.textContent = email; emailEl.title = email; }
+
+            const isActive = Boolean(sData.is_active || actSlot === i);
+            if (badgeEl) {
+              badgeEl.textContent = isActive ? 'Активен' : 'Готов';
+              badgeEl.className = isActive
+                ? 'text-[9px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-400 font-semibold'
+                : 'text-[9px] px-1.5 py-0.2 rounded bg-blue-500/20 text-blue-300 font-medium';
+            }
+
+            if (btnSwitch) {
+              if (isActive) {
+                btnSwitch.classList.add('hidden');
+              } else {
+                btnSwitch.classList.remove('hidden');
+                btnSwitch.onclick = async (e) => {
+                  e.stopPropagation();
+                  if (isBusy) return;
+                  await handleSlotAction('switch', i);
+                };
+              }
+            }
+
+            if (contentEl) contentEl.classList.remove('hidden');
+            if (emptyEl) emptyEl.classList.add('hidden');
+
+            // Quotas for slot i
+            const q = sData.quota || (isActive ? currentQuota : null);
+            if (q) {
+              // 1. Gemini 5h
+              const g5 = q.gemini_5h;
+              const p5El = document.getElementById(`qslot-5h-pct-${i}`);
+              const b5El = document.getElementById(`qslot-5h-bar-${i}`);
+              const r5El = document.getElementById(`qslot-5h-reset-${i}`);
+              if (g5 && p5El) {
+                const p5 = typeof g5.remaining_pct === 'number' ? g5.remaining_pct : 100;
+                p5El.textContent = `${p5.toFixed(0)}%`;
+                p5El.className = p5 > 50 ? 'text-lg font-extrabold text-cyan-400' : (p5 > 20 ? 'text-lg font-extrabold text-amber-400' : 'text-lg font-extrabold text-rose-500');
+                if (b5El) {
+                  b5El.style.width = `${Math.min(100, Math.max(0, p5))}%`;
+                  b5El.className = p5 > 50 ? 'h-full rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 transition-all duration-500' : (p5 > 20 ? 'h-full rounded-full bg-gradient-to-r from-amber-500 to-yellow-400 transition-all duration-500' : 'h-full rounded-full bg-gradient-to-r from-rose-600 to-red-500 transition-all duration-500');
+                }
+                if (r5El) {
+                  r5El.textContent = g5.formatted_reset || '--:--';
+                  if (g5.reset_time) r5El.title = `Сброс: ${new Date(g5.reset_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+                }
+              }
+
+              // 2. Gemini Weekly
+              const gw = q.gemini_weekly;
+              const pwEl = document.getElementById(`qslot-w-pct-${i}`);
+              const bwEl = document.getElementById(`qslot-w-bar-${i}`);
+              const rwEl = document.getElementById(`qslot-w-reset-${i}`);
+              if (gw && pwEl) {
+                const pw = typeof gw.remaining_pct === 'number' ? gw.remaining_pct : 100;
+                pwEl.textContent = `${pw.toFixed(0)}%`;
+                pwEl.className = pw > 50 ? 'text-lg font-extrabold text-indigo-400' : (pw > 20 ? 'text-lg font-extrabold text-amber-400' : 'text-lg font-extrabold text-rose-500');
+                if (bwEl) {
+                  bwEl.style.width = `${Math.min(100, Math.max(0, pw))}%`;
+                  bwEl.className = pw > 50 ? 'h-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-400 transition-all duration-500' : (pw > 20 ? 'h-full rounded-full bg-gradient-to-r from-amber-500 to-yellow-400 transition-all duration-500' : 'h-full rounded-full bg-gradient-to-r from-rose-600 to-red-500 transition-all duration-500');
+                }
+                if (rwEl) {
+                  rwEl.textContent = gw.formatted_reset || '-- дн.';
+                }
+              }
+
+              // 3. Claude & GPT
+              const c5 = q.claude_5h;
+              const cw = q.claude_weekly;
+              const pc5El = document.getElementById(`qslot-c5-pct-${i}`);
+              const pcwEl = document.getElementById(`qslot-cw-pct-${i}`);
+              if (c5 && pc5El) {
+                const pc5 = typeof c5.remaining_pct === 'number' ? c5.remaining_pct : 100;
+                pc5El.textContent = `${pc5.toFixed(0)}%`;
+              }
+              if (cw && pcwEl) {
+                const pcw = typeof cw.remaining_pct === 'number' ? cw.remaining_pct : 100;
+                pcwEl.textContent = `${pcw.toFixed(0)}%`;
+              }
+            }
+          } else {
+            // Empty slot
+            if (nameEl) nameEl.textContent = `Слот #${i}`;
+            if (emailEl) emailEl.textContent = '—';
+            if (badgeEl) {
+              badgeEl.textContent = 'Свободен';
+              badgeEl.className = 'text-[9px] px-1.5 py-0.2 rounded bg-white/5 text-slate-400 font-medium';
+            }
+            if (btnSwitch) btnSwitch.classList.add('hidden');
+            if (contentEl) contentEl.classList.add('hidden');
+            if (emptyEl) emptyEl.classList.remove('hidden');
+          }
+        }
+      }
 
       function renderQuota(quota) {
         if (!quota) return;
@@ -1917,9 +2223,25 @@
       if (window.api && window.api.onSlotsUpdated) {
         window.api.onSlotsUpdated((allQuotaData) => {
           if (allQuotaData && allQuotaData.slots) {
+            renderAllSlotsQuotas(allQuotaData.slots, allQuotaData.active_slot);
+
             for (let i = 1; i <= 4; i++) {
               const sData = allQuotaData.slots[String(i)];
               const qEl = document.getElementById(`slot-quota-${i}`);
+              const emEl = document.getElementById(`slot-email-${i}`);
+              const nmEl = document.getElementById(`slot-name-${i}`);
+              const bgEl = document.getElementById(`slot-badge-${i}`);
+
+              if (sData && (sData.email || sData.name)) {
+                if (emEl && sData.email) emEl.textContent = sData.email;
+                if (nmEl && sData.name) nmEl.textContent = sData.name;
+                const isAct = Boolean(sData.is_active || (allQuotaData.active_slot === i));
+                if (bgEl) {
+                  bgEl.textContent = isAct ? 'Активен' : 'Готов';
+                  bgEl.className = isAct ? 'text-[9px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-400 font-semibold' : 'text-[9px] px-1.5 py-0.2 rounded bg-blue-500/20 text-blue-300 font-medium';
+                }
+              }
+
               if (sData && sData.quota && sData.quota.gemini_5h && qEl) {
                 const p5 = typeof sData.quota.gemini_5h.remaining_pct === 'number' ? sData.quota.gemini_5h.remaining_pct.toFixed(0) : '100';
                 const pW = (sData.quota.gemini_weekly && typeof sData.quota.gemini_weekly.remaining_pct === 'number') ? sData.quota.gemini_weekly.remaining_pct.toFixed(0) : '—';
@@ -2091,14 +2413,27 @@
       document.getElementById('btn-refresh-quota').addEventListener('click', async () => {
         const icon = document.getElementById('icon-refresh-quota');
         if (icon) icon.classList.add('animate-spin');
-        appendLog('SYNC', 'text-cyan-400', 'Запрос актуальных квот токенов через локальный RPC language_server...');
+        appendLog('SYNC', 'text-cyan-400', 'Запрос актуальных квот токенов для всех аккаунтов...');
         try {
-          const quota = await window.api.getQuota();
-          if (quota && !quota.error) {
-            renderQuota(quota);
-            appendLog('OK', 'text-emerald-400', 'Квоты токенов успешно обновлены (Gemini 5ч / неделя, Claude & GPT).');
+          let allQ = null;
+          if (window.api && window.api.getAllSlotsQuota) {
+            allQ = await window.api.getAllSlotsQuota();
+          }
+          if (allQ && allQ.slots) {
+            renderAllSlotsQuotas(allQ.slots, allQ.active_slot);
+            const actData = allQ.slots[String(allQ.active_slot || 1)];
+            if (actData && actData.quota) {
+              renderQuota(actData.quota);
+            }
+            appendLog('OK', 'text-emerald-400', 'Квоты токенов всех аккаунтов успешно синхронизированы!');
           } else {
-            appendLog('WARN', 'text-amber-400', `Квоты: ${quota.error || 'нет данных'}`);
+            const fallbackQuota = await window.api.getQuota();
+            if (fallbackQuota && !fallbackQuota.error) {
+              renderQuota(fallbackQuota);
+              appendLog('OK', 'text-emerald-400', 'Квоты текущего аккаунта обновлены.');
+            } else {
+              appendLog('WARN', 'text-amber-400', `Квоты: ${fallbackQuota?.error || 'нет данных'}`);
+            }
           }
         } catch (e) {
           appendLog('ERR', 'text-rose-500', `Ошибка получения квот: ${e.message}`);
