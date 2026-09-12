@@ -8,8 +8,8 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
 cd "$DIR"
 
 REPO="salambeq/antigravity-ru"
-TAG="v2.0.5"
-NAME="Antigravity Toolkit GUI v2.0.5 (macOS Edition)"
+TAG="v2.0.6"
+NAME="Antigravity Toolkit GUI v2.0.6 (macOS Edition)"
 
 ARCH="$(uname -m)"
 DMG_PATH="dist/Antigravity-Toolkit-GUI-macOS-${ARCH}.dmg"
@@ -63,30 +63,31 @@ RELEASE_ID=$(node -e '
     } catch (e) {}
 ' "$RELEASES_LIST" "$TAG")
 
-BODY_TEXT='## 🇷🇺 Antigravity Toolkit GUI v2.0.5 (macOS)
+BODY_TEXT='## 🇷🇺 Antigravity Toolkit GUI v2.0.6 (macOS)
 
 Готовый бинарный дистрибутив десктопного приложения **Antigravity Toolkit GUI** для macOS (Apple Silicon).
 
 ### 📦 Загрузка дистрибутива (Пакеты macOS):
-- **💿 Образ установщика DMG (рекомендуется)**: [Antigravity-Toolkit-GUI-macOS-arm64.dmg](https://github.com/salambeq/antigravity-ru/releases/download/v2.0.5/Antigravity-Toolkit-GUI-macOS-arm64.dmg)
-- **🗜️ Портативный архив ZIP**: [Antigravity-Toolkit-GUI-macOS-arm64.zip](https://github.com/salambeq/antigravity-ru/releases/download/v2.0.5/Antigravity-Toolkit-GUI-macOS-arm64.zip)
+- **💿 Образ установщика DMG (рекомендуется)**: [Antigravity-Toolkit-GUI-macOS-arm64.dmg](https://github.com/salambeq/antigravity-ru/releases/download/v2.0.6/Antigravity-Toolkit-GUI-macOS-arm64.dmg)
+- **🗜️ Портативный архив ZIP**: [Antigravity-Toolkit-GUI-macOS-arm64.zip](https://github.com/salambeq/antigravity-ru/releases/download/v2.0.6/Antigravity-Toolkit-GUI-macOS-arm64.zip)
 
 ---
 
-### ✨ Ключевые возможности релиза v2.0.5:
-1. 🛡️ **Защита аккаунтов от слёта и разлогинивания (Zero-Logout)**:
-   - Интегрированы официальные client_id и client_secret из бинарника language_server для автоматического обновления истекающих refresh_token.
-   - Двухфазная синхронизация токенов macOS Keychain перед ротацией слотов — аккаунты сохраняются при любых перезагрузках и перезапусках.
-2. 👤 **Реальные email, имена и аватарки аккаунтов**:
-   - Автоматическое извлечение реальных адресов электронной почты Google (напр. `user@gmail.com`) и display names пользователя для всех слотов вместо заглушек `account_1@google`.
-3. ⚡ **Мониторинг квот и лимитов токенов (5ч, неделя, Claude/GPT)**:
-   - 100% Zero-Leak офлайн сбор данных о квотах через локальный gRPC-Web RPC-порт `language_server` с CSRF-авторизацией (время отклика 10 мс).
-   - Точные проценты остатка токенов и прогресс-бары для 5-часового и недельного лимитов Gemini, а также моделей Claude 3.7 Sonnet / Opus и GPT-OSS.
-   - Живой посекундный таймер обратного отсчета до сброса лимита (`ЧЧ:ММ:СС`) в Bento-панели и в сайдбаре.
+### ✨ Новые возможности релиза v2.0.6:
+1. 🛡️ **Фоновый Keep-Alive 24/7 для всех 4 слотов аккаунтов**:
+   - Гарантия от слёта токенов и разлогинивания: если вы активно пользуетесь одним аккаунтом на протяжении нескольких дней, остальные 3 аккаунта остаются активными и валидными благодаря упреждающему обновлению OAuth-токенов в фоновом режиме каждые 20 минут.
+   - Мгновенное и бесшовное переключение между всеми 4 Google-профилями без повторного входа в браузере.
+2. 🍏 **Интеграция с системным треем macOS (Menu Bar Tray) и Close-to-Tray**:
+   - При закрытии на красный крестик окно сворачивается в трей macOS (не прерывая фоновый Keep-Alive и защиту чатов).
+   - В меню трея отображается текущий активный слот, email, 5-часовой лимит и таймер сброса.
+   - Быстрое переключение любого из 4 аккаунтов прямо из менюбара macOS.
+   - Завершение приложения доступно через пункт «Завершить Antigravity Toolkit» в меню трея.
+3. ⚡ **Отображение квот токенов для всех 4 слотов одновременно**:
+   - На карточке каждого из 4 слотов в реальном времени выводятся остатки 5-часового и недельного лимитов (`⚡ 5ч: X% • 📅 нед: Y%`).
 4. 📦 **Защита и бэкап чатов (Backup & Restore)**:
-   - Локальное сохранение 100+ баз данных SQLite, сессий и конфигураций без риска потери истории.
-5. 🍏 **Нативная интеграция с macOS**:
-   - Чистая верстка в стиле Google Antigravity, поддержка кнопок окна macOS и подпись Apple `codesign`.'
+   - Полное сохранение истории диалогов, сессий и конфигураций SQLite (100+ диалогов) локально на диске.
+5. 🔒 **100% Zero-Leak & Офлайн**:
+   - Все токены и персональные данные хранятся исключительно локально в Keychain macOS.'
 
 TMP_PAYLOAD="/tmp/github_release_payload.json"
 
@@ -96,9 +97,9 @@ if [ -z "$RELEASE_ID" ] || [ "$RELEASE_ID" = "null" ]; then
         const fs = require("fs");
         const body = process.argv[1];
         fs.writeFileSync(process.argv[2], JSON.stringify({
-            tag_name: "v2.0.5",
+            tag_name: "v2.0.6",
             target_commitish: "main",
-            name: "Antigravity Toolkit GUI v2.0.5 (macOS Edition)",
+            name: "Antigravity Toolkit GUI v2.0.6 (macOS Edition)",
             body: body,
             draft: false,
             prerelease: false

@@ -1,10 +1,14 @@
-const { app, BrowserWindow, ipcMain, shell } = require('electron');
+const { app, BrowserWindow, ipcMain, shell, Tray, Menu, nativeImage } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const { spawn, execFile } = require('child_process');
 
 let mainWindow = null;
 let autoRotateProcess = null;
+let tray = null;
+let isQuitting = false;
+let cachedAllSlotsQuota = null;
+let backgroundSyncTimer = null;
 
 function resolvePythonPaths() {
   const root = app.getAppPath();
@@ -57,6 +61,14 @@ function createWindow() {
     mainWindow.show();
   });
 
+  mainWindow.on('close', (event) => {
+    if (!isQuitting) {
+      event.preventDefault();
+      mainWindow.hide();
+      return false;
+    }
+  });
+
   mainWindow.on('closed', () => {
     mainWindow = null;
     if (autoRotateProcess) {
@@ -66,18 +78,174 @@ function createWindow() {
   });
 }
 
+function createTray() {
+  if (tray) return;
+
+  const iconPath = path.join(__dirname, 'icon.png');
+  let icon = nativeImage.createEmpty();
+  if (fs.existsSync(iconPath)) {
+    icon = nativeImage.createFromPath(iconPath).resize({ width: 18, height: 18 });
+  }
+
+  tray = new Tray(icon);
+  tray.setToolTip('Antigravity Toolkit 2.0 RU');
+
+  tray.on('click', () => {
+    if (mainWindow) {
+      if (mainWindow.isVisible()) {
+        mainWindow.hide();
+      } else {
+        mainWindow.show();
+        mainWindow.focus();
+      }
+    } else {
+      createWindow();
+    }
+  });
+
+  updateTrayMenu();
+}
+
+function updateTrayMenu() {
+  if (!tray) return;
+
+  const slotsData = (cachedAllSlotsQuota && cachedAllSlotsQuota.slots) ? cachedAllSlotsQuota.slots : {};
+  const activeSlot = (cachedAllSlotsQuota && cachedAllSlotsQuota.active_slot) ? cachedAllSlotsQuota.active_slot : 1;
+  const activeData = slotsData[String(activeSlot)] || {};
+  const activeEmail = activeData.email || 'Google Account';
+  const activeG5h = (activeData.quota && activeData.quota.gemini_5h) ? activeData.quota.gemini_5h : null;
+  const active5hPct = activeG5h ? `${activeG5h.remaining_pct}%` : 'активен';
+  const activeReset = (activeG5h && activeG5h.formatted_reset) ? activeG5h.formatted_reset : '';
+
+  const menuItems = [
+    {
+      label: 'Antigravity Toolkit 2.0 RU',
+      enabled: false,
+    },
+    {
+      label: `🟢 Слот #${activeSlot}: ${activeEmail} (${active5hPct})`,
+      enabled: false,
+    },
+  ];
+
+  if (activeReset) {
+    menuItems.push({
+      label: `⏳ Сброс 5ч: ${activeReset}`,
+      enabled: false,
+    });
+  }
+
+  menuItems.push({ type: 'separator' });
+  menuItems.push({
+    label: 'Смена Google-аккаунта (Keep-Alive):',
+    enabled: false,
+  });
+
+  for (let i = 1; i <= 4; i++) {
+    const sData = slotsData[String(i)];
+    if (sData) {
+      const isCur = (i === activeSlot);
+      const sPct = (sData.quota && sData.quota.gemini_5h) ? ` [${sData.quota.gemini_5h.remaining_pct}%]` : '';
+      menuItems.push({
+        label: `${isCur ? '● ' : '○ '}Слот #${i}: ${sData.email || sData.name || 'Аккаунт'}${sPct}`,
+        type: 'checkbox',
+        checked: isCur,
+        click: () => {
+          switchSlotFromTray(i);
+        },
+      });
+    } else {
+      menuItems.push({
+        label: `  Слот #${i}: (свободен)`,
+        enabled: false,
+      });
+    }
+  }
+
+  menuItems.push({ type: 'separator' });
+  menuItems.push({
+    label: '🖥️ Открыть Antigravity Toolkit',
+    click: () => {
+      if (mainWindow) {
+        mainWindow.show();
+        mainWindow.focus();
+      } else {
+        createWindow();
+      }
+    },
+  });
+  menuItems.push({
+    label: '🔄 Обновить квоты всех слотов',
+    click: () => {
+      syncAllSlotsBackground();
+    },
+  });
+  menuItems.push({ type: 'separator' });
+  menuItems.push({
+    label: '🚪 Завершить Antigravity Toolkit',
+    click: () => {
+      isQuitting = true;
+      app.quit();
+    },
+  });
+
+  const contextMenu = Menu.buildFromTemplate(menuItems);
+  tray.setContextMenu(contextMenu);
+}
+
+function switchSlotFromTray(slotNum) {
+  execFile(PYTHON_BIN, [MAIN_PY, '--account-switch', String(slotNum)], { cwd: ROOT_DIR }, () => {
+    syncAllSlotsBackground();
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('account-switched-external', { slot: slotNum });
+    }
+  });
+}
+
+function syncAllSlotsBackground() {
+  execFile(PYTHON_BIN, [MAIN_PY, '--refresh-all-slots'], { cwd: ROOT_DIR, timeout: 25000 }, () => {
+    execFile(PYTHON_BIN, [MAIN_PY, '--all-slots-quota-json'], { cwd: ROOT_DIR, timeout: 25000 }, (err, stdout) => {
+      if (!err && stdout) {
+        try {
+          cachedAllSlotsQuota = JSON.parse(stdout);
+          updateTrayMenu();
+          if (mainWindow && !mainWindow.isDestroyed()) {
+            mainWindow.webContents.send('all-slots-quota-updated', cachedAllSlotsQuota);
+          }
+        } catch (e) {}
+      }
+    });
+  });
+}
+
 app.whenReady().then(() => {
   createWindow();
+  createTray();
+  syncAllSlotsBackground();
+
+  // Фоновый Keep-Alive каждые 20 минут
+  backgroundSyncTimer = setInterval(syncAllSlotsBackground, 20 * 60 * 1000);
 
   app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    if (mainWindow) {
+      mainWindow.show();
+      mainWindow.focus();
+    } else {
+      createWindow();
+    }
   });
 });
 
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
+app.on('before-quit', () => {
+  isQuitting = true;
+  if (backgroundSyncTimer) {
+    clearInterval(backgroundSyncTimer);
+    backgroundSyncTimer = null;
   }
+});
+
+app.on('window-all-closed', () => {
+  // На macOS приложение продолжает работу в системном трее (менюбаре)
 });
 
 // Window Controls
@@ -86,7 +254,15 @@ ipcMain.on('window-max', () => {
   if (!mainWindow) return;
   mainWindow.isMaximized() ? mainWindow.unmaximize() : mainWindow.maximize();
 });
-ipcMain.on('window-close', () => mainWindow && mainWindow.close());
+ipcMain.on('window-close', () => {
+  if (mainWindow) {
+    if (!isQuitting) {
+      mainWindow.hide();
+    } else {
+      mainWindow.close();
+    }
+  }
+});
 ipcMain.on('open-external', (_event, url) => shell.openExternal(url));
 
 // Stream Python Execution
@@ -155,6 +331,36 @@ ipcMain.handle('get-quota', async () => {
   });
 });
 
+// IPC: All slots quota (Keep-Alive status for all 4 slots)
+ipcMain.handle('get-all-slots-quota', async () => {
+  return new Promise((resolve) => {
+    execFile(PYTHON_BIN, [MAIN_PY, '--all-slots-quota-json'], { cwd: ROOT_DIR, timeout: 25000 }, (err, stdout) => {
+      if (err) {
+        resolve({ error: err.message, raw: stdout });
+        return;
+      }
+      try {
+        const data = JSON.parse(stdout);
+        cachedAllSlotsQuota = data;
+        updateTrayMenu();
+        resolve(data);
+      } catch (parseErr) {
+        resolve({ error: `Ошибка парсинга JSON: ${parseErr.message}`, raw: stdout });
+      }
+    });
+  });
+});
+
+// IPC: Refresh all slots (Keep-Alive OAuth refresh)
+ipcMain.handle('refresh-all-slots', async () => {
+  return new Promise((resolve) => {
+    execFile(PYTHON_BIN, [MAIN_PY, '--refresh-all-slots'], { cwd: ROOT_DIR, timeout: 30000 }, (err, stdout) => {
+      syncAllSlotsBackground();
+      resolve({ success: !err, message: stdout });
+    });
+  });
+});
+
 // IPC: Run actions
 ipcMain.handle('run-action', async (event, action) => {
   const map = {
@@ -175,12 +381,16 @@ ipcMain.handle('switch-language', async (event, lang) => {
 
 // IPC: Account switch
 ipcMain.handle('switch-account', async (event, slot) => {
-  return streamPythonCommand(['--account-switch', String(slot)], event);
+  const res = await streamPythonCommand(['--account-switch', String(slot)], event);
+  syncAllSlotsBackground();
+  return res;
 });
 
 // IPC: Account save
 ipcMain.handle('save-account', async (event, slot) => {
-  return streamPythonCommand(['--account-save', String(slot)], event);
+  const res = await streamPythonCommand(['--account-save', String(slot)], event);
+  syncAllSlotsBackground();
+  return res;
 });
 
 // IPC: Auto-rotate toggle

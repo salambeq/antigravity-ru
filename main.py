@@ -144,6 +144,7 @@ def get_system_status_json():
     cur_acc = {"authenticated": False, "email": None, "name": None, "slot": None, "picture": None}
     slots_dict = {}
     quota_dict = {}
+    all_quotas_dict = {}
     try:
         ac_mgr = AccountManager()
         raw_slots = ac_mgr.list_slots()
@@ -156,8 +157,12 @@ def get_system_status_json():
             "picture": cur.get("picture"),
             "slot": meta.get("active_slot"),
         }
+        all_quotas_dict = ac_mgr.get_all_slots_quota_summary()
         for k, v in raw_slots.items():
             slots_dict[str(k)] = v
+            # Attach quota directly to each slot dict for easier consumption
+            slot_q = all_quotas_dict.get("slots", {}).get(str(k), {}).get("quota", {})
+            slots_dict[str(k)]["quota"] = slot_q
         quota_dict = ac_mgr.get_slot_quota_summary()
     except Exception:
         pass
@@ -203,6 +208,7 @@ def get_system_status_json():
             "current": cur_acc,
             "slots": slots_dict,
             "quota": quota_dict,
+            "all_quotas": all_quotas_dict,
         },
         "backups": backups_data,
     }
@@ -977,6 +983,14 @@ def main():
         elif arg in ("--quota-json", "-qj"):
             am = AccountManager()
             print(json.dumps(am.get_slot_quota_summary(), ensure_ascii=False, indent=2))
+            sys.exit(0)
+        elif arg in ("--refresh-all-slots", "-ras"):
+            am = AccountManager()
+            print(json.dumps(am.refresh_all_slots(), ensure_ascii=False, indent=2))
+            sys.exit(0)
+        elif arg in ("--all-slots-quota-json", "-asq"):
+            am = AccountManager()
+            print(json.dumps(am.get_all_slots_quota_summary(), ensure_ascii=False, indent=2))
             sys.exit(0)
         elif arg in ("--json-status", "--status-json"):
             print(json.dumps(get_system_status_json(), ensure_ascii=False, indent=2))

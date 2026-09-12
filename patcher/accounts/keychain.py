@@ -371,16 +371,17 @@ def fetch_local_language_server_quota() -> dict:
     return {}
 
 
-def fetch_user_quota_summary(access_token: str) -> dict:
+def fetch_user_quota_summary(access_token: str, force_remote: bool = False) -> dict:
     """
     Запрашивает актуальный баланс квот и лимитов (5-часовой и недельный).
-    1. Приоритет: опрос локального language_server (10 мс, 100% офлайн).
-    2. Fallback: официальный внешний эндпоинт Cloud Code / Antigravity.
+    1. Приоритет (для активного слота): опрос локального language_server (10 мс, 100% офлайн).
+    2. Fallback или force_remote (для неактивных слотов): официальный внешний эндпоинт Cloud Code / Antigravity.
     """
-    # 1. Приоритет: локальный language_server
-    local_quota = fetch_local_language_server_quota()
-    if local_quota and (local_quota.get("gemini_5h") or local_quota.get("gemini_weekly")):
-        return local_quota
+    # 1. Приоритет: локальный language_server (только если не запрошен прямой опрос конкретного токена)
+    if not force_remote:
+        local_quota = fetch_local_language_server_quota()
+        if local_quota and (local_quota.get("gemini_5h") or local_quota.get("gemini_weekly")):
+            return local_quota
 
     if not access_token:
         return {}

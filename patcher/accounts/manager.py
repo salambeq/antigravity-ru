@@ -386,6 +386,10 @@ class AccountManager:
         Возвращает баланс квот и лимитов (5-часовых и недельных) для указанного слота
         или для текущего активного аккаунта.
         """
+        meta = self._load_metadata()
+        active_slot = meta.get("active_slot")
+        is_active = (slot_num is None or slot_num == active_slot)
+
         access_token = ""
         if slot_num is not None:
             self.ensure_slot_token_fresh(slot_num)
@@ -408,7 +412,63 @@ class AccountManager:
         if not access_token:
             return {}
 
-        return fetch_user_quota_summary(access_token)
+        return fetch_user_quota_summary(access_token, force_remote=(not is_active))
+
+    def refresh_all_slots(self) -> dict:
+        """
+        Фоновый Keep-Alive: обходит все сохраненные слоты (1..4) и упреждающе обновляет
+        их токены через refresh_google_oauth_token, если они истекли или истекают.
+        Гарантирует, что ни один аккаунт не «слетит», даже если пользователь днями работает на другом слоте.
+        """
+        results = {}
+        slots = self.list_slots()
+        meta = self._load_metadata()
+        active_slot = meta.get("active_slot")
+
+        for s_str in slots.keys():
+            s_num = int(s_str)
+            refreshed = self.ensure_slot_token_fresh(s_num)
+            results[str(s_num)] = {
+                "email": slots[s_str].get("email"),
+                "name": slots[s_str].get("name"),
+                "is_active": (s_num == active_slot),
+                "refreshed": refreshed,
+            }
+
+        return {
+            "refreshed_at": int(time.time()),
+            "slots": results,
+        }
+
+    def get_all_slots_quota_summary(self) -> dict:
+        """
+        Собирает и возвращает баланс квот и лимитов для ВСЕХ слотов.
+        Для активного слота опрашивается локальный language_server (10 мс).
+        Для остальных слотов токены упреждающе освежаются и опрашивается удаленный эндпоинт.
+        """
+        meta = self._load_metadata()
+        active_slot = meta.get("active_slot")
+        slots = self.list_slots()
+
+        slots_quota = {}
+        for s_str, info in slots.items():
+            s_num = int(s_str)
+            is_active = (s_num == active_slot)
+            quota_data = self.get_slot_quota_summary(s_num)
+            slots_quota[str(s_num)] = {
+                "slot": s_num,
+                "email": info.get("email"),
+                "name": info.get("name"),
+                "picture": info.get("picture"),
+                "is_active": is_active,
+                "quota": quota_data,
+            }
+
+        return {
+            "active_slot": active_slot,
+            "updated_at": int(time.time()),
+            "slots": slots_quota,
+        }
 
     def delete_slot(self, slot_num: int) -> tuple[bool, str]:
         """Удаляет сохраненный слот."""

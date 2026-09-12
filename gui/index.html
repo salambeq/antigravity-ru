@@ -673,7 +673,12 @@
                   <span class="material-symbols-outlined text-[22px]">manage_accounts</span>
                 </div>
                 <div>
-                  <h3 class="text-sm font-bold text-white tracking-tight">Мультиаккаунт и слоты</h3>
+                  <div class="flex items-center gap-2">
+                    <h3 class="text-sm font-bold text-white tracking-tight">Мультиаккаунт и слоты</h3>
+                    <span class="px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-[10px] text-emerald-400 font-semibold flex items-center gap-1" title="Фоновый сервис автоматически поддерживает авторизацию всех 4 слотов каждые 20 минут в трее macOS">
+                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>Keep-Alive 24/7
+                    </span>
+                  </div>
                   <span class="text-[11px] text-slate-400 font-medium">Безопасное переключение без слёта токенов</span>
                 </div>
               </div>
@@ -705,7 +710,7 @@
               </span>
             </div>
 
-            <!-- Slots Grid (2x2 with clear Email and Name) -->
+            <!-- Slots Grid (2x2 with clear Email, Name & Live Quotas) -->
             <div class="grid grid-cols-2 gap-2.5">
               <button data-slot="1" class="slot-card p-2.5 rounded-xl bg-black/30 border border-white/[0.07] hover:border-blue-500/40 text-left flex flex-col gap-1 transition-all active:scale-95 cursor-pointer">
                 <div class="flex justify-between items-center">
@@ -718,6 +723,7 @@
                 <div class="flex flex-col min-w-0">
                   <span class="text-[11px] text-white font-medium truncate" id="slot-name-1">Слот #1</span>
                   <span class="text-[10px] text-slate-400 truncate font-mono" id="slot-email-1">—</span>
+                  <div class="text-[9.5px] text-cyan-400 font-mono mt-0.5 truncate hidden" id="slot-quota-1"></div>
                 </div>
               </button>
 
@@ -732,6 +738,7 @@
                 <div class="flex flex-col min-w-0">
                   <span class="text-[11px] text-white font-medium truncate" id="slot-name-2">Слот #2</span>
                   <span class="text-[10px] text-slate-400 truncate font-mono" id="slot-email-2">—</span>
+                  <div class="text-[9.5px] text-cyan-400 font-mono mt-0.5 truncate hidden" id="slot-quota-2"></div>
                 </div>
               </button>
 
@@ -746,6 +753,7 @@
                 <div class="flex flex-col min-w-0">
                   <span class="text-[11px] text-white font-medium truncate" id="slot-name-3">Слот #3</span>
                   <span class="text-[10px] text-slate-400 truncate font-mono" id="slot-email-3">—</span>
+                  <div class="text-[9.5px] text-cyan-400 font-mono mt-0.5 truncate hidden" id="slot-quota-3"></div>
                 </div>
               </button>
 
@@ -760,22 +768,30 @@
                 <div class="flex flex-col min-w-0">
                   <span class="text-[11px] text-white font-medium truncate" id="slot-name-4">Слот #4</span>
                   <span class="text-[10px] text-slate-400 truncate font-mono" id="slot-email-4">—</span>
+                  <div class="text-[9.5px] text-cyan-400 font-mono mt-0.5 truncate hidden" id="slot-quota-4"></div>
                 </div>
               </button>
             </div>
           </div>
 
           <!-- Account Actions -->
-          <div class="grid grid-cols-2 gap-2 mt-4 pt-3.5 border-t border-white/[0.07]">
-            <button id="btn-save-slot" class="btn-outline-glass hover:text-blue-400 py-2 px-3 rounded-xl text-xs font-medium text-center flex items-center justify-center gap-1.5 active:scale-95">
-              <span class="material-symbols-outlined text-[15px] text-blue-400">save</span>
-              <span>Сохранить в слот <span id="lbl-selected-slot-1">#1</span></span>
-            </button>
-            <button id="btn-switch-slot" class="btn-gemini py-2 px-3 rounded-xl text-xs font-semibold text-white text-center flex items-center justify-center gap-1.5 active:scale-95">
-              <span class="material-symbols-outlined text-[15px]">sync_alt</span>
-              <span>Включить слот <span id="lbl-selected-slot-2">#1</span></span>
+          <div class="flex flex-col gap-2 mt-4 pt-3.5 border-t border-white/[0.07]">
+            <div class="grid grid-cols-2 gap-2">
+              <button id="btn-save-slot" class="btn-outline-glass hover:text-blue-400 py-2 px-3 rounded-xl text-xs font-medium text-center flex items-center justify-center gap-1.5 active:scale-95">
+                <span class="material-symbols-outlined text-[15px] text-blue-400">save</span>
+                <span>Сохранить в слот <span id="lbl-selected-slot-1">#1</span></span>
+              </button>
+              <button id="btn-switch-slot" class="btn-gemini py-2 px-3 rounded-xl text-xs font-semibold text-white text-center flex items-center justify-center gap-1.5 active:scale-95">
+                <span class="material-symbols-outlined text-[15px]">sync_alt</span>
+                <span>Включить слот <span id="lbl-selected-slot-2">#1</span></span>
+              </button>
+            </div>
+            <button id="btn-refresh-all-slots" class="w-full py-1.5 px-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.07] text-slate-300 hover:text-white text-[11px] font-medium flex items-center justify-center gap-1.5 transition-all active:scale-98" title="Принудительно обновить активность и квоты всех 4 слотов">
+              <span class="material-symbols-outlined text-[14px] text-cyan-400">published_with_changes</span>
+              <span>Обновить активность всех слотов (Keep-Alive)</span>
             </button>
           </div>
+        </div>
         </div>
 
         <!-- CARD 3: Antigravity IDE -->
@@ -1339,13 +1355,14 @@
             if (activeAvatarEl) activeAvatarEl.classList.add('hidden');
           }
 
-          // Update 4 slot buttons (2x2 grid)
+          // Update 4 slot buttons (2x2 grid with live quotas)
           for (let i = 1; i <= 4; i++) {
             const slotData = slots[String(i)] || slots[i];
             const emailEl = document.getElementById(`slot-email-${i}`);
             const nameEl = document.getElementById(`slot-name-${i}`);
             const dotEl = document.getElementById(`slot-dot-${i}`);
             const badgeEl = document.getElementById(`slot-badge-${i}`);
+            const quotaEl = document.getElementById(`slot-quota-${i}`);
 
             if (slotData) {
               const email = slotData.email || 'Google Account';
@@ -1372,6 +1389,24 @@
                   badgeEl.className = 'text-[9px] px-1.5 py-0.2 rounded bg-blue-500/20 text-blue-300 font-medium';
                 }
               }
+
+              // Display slot quota if available
+              if (quotaEl) {
+                const q = slotData.quota;
+                if (q && q.gemini_5h) {
+                  const p5 = typeof q.gemini_5h.remaining_pct === 'number' ? q.gemini_5h.remaining_pct.toFixed(0) : '100';
+                  const pW = (q.gemini_weekly && typeof q.gemini_weekly.remaining_pct === 'number') ? q.gemini_weekly.remaining_pct.toFixed(0) : '—';
+                  const colorClass = Number(p5) > 50 ? 'text-emerald-400' : (Number(p5) > 20 ? 'text-amber-400' : 'text-rose-400');
+                  quotaEl.innerHTML = `<span class="${colorClass} font-semibold">⚡ 5ч: ${p5}%</span> <span class="text-slate-500">•</span> <span class="text-slate-400">нед: ${pW}%</span>`;
+                  if (q.gemini_5h.formatted_reset) {
+                    quotaEl.title = `Сброс 5ч: ${q.gemini_5h.formatted_reset}`;
+                  }
+                  quotaEl.classList.remove('hidden');
+                } else {
+                  quotaEl.textContent = '';
+                  quotaEl.classList.add('hidden');
+                }
+              }
             } else {
               if (emailEl) {
                 emailEl.textContent = '—';
@@ -1385,6 +1420,10 @@
               if (badgeEl) {
                 badgeEl.textContent = 'Пусто';
                 badgeEl.className = 'text-[9px] px-1.5 py-0.2 rounded bg-white/5 text-slate-500';
+              }
+              if (quotaEl) {
+                quotaEl.textContent = '';
+                quotaEl.classList.add('hidden');
               }
             }
           }
@@ -1785,6 +1824,54 @@
           await refreshStatus();
         }
       });
+
+      // Refresh All Slots (Keep-Alive OAuth Refresh)
+      const btnRefreshAll = document.getElementById('btn-refresh-all-slots');
+      if (btnRefreshAll) {
+        btnRefreshAll.addEventListener('click', async () => {
+          if (isBusy) return;
+          setBusy(true, 'Проверка и обновление активности всех 4 аккаунтов...');
+          appendLog('PROCESS', 'text-cyan-400', 'Keep-Alive: обновление токенов и квот всех слотов...');
+          try {
+            if (window.api && window.api.refreshAllSlots) {
+              await window.api.refreshAllSlots();
+              appendLog('OK', 'text-tertiary', 'Keep-Alive: все 4 слота проверены, OAuth токены актуализированы!');
+            }
+          } catch (err) {
+            appendLog('WARN', 'text-yellow-400', `Keep-Alive предупреждение: ${err.message}`);
+          } finally {
+            setBusy(false);
+            await refreshStatus();
+          }
+        });
+      }
+
+      // Listen for background Keep-Alive updates (every 20 min from main process)
+      if (window.api && window.api.onSlotsUpdated) {
+        window.api.onSlotsUpdated((allQuotaData) => {
+          if (allQuotaData && allQuotaData.slots) {
+            for (let i = 1; i <= 4; i++) {
+              const sData = allQuotaData.slots[String(i)];
+              const qEl = document.getElementById(`slot-quota-${i}`);
+              if (sData && sData.quota && sData.quota.gemini_5h && qEl) {
+                const p5 = typeof sData.quota.gemini_5h.remaining_pct === 'number' ? sData.quota.gemini_5h.remaining_pct.toFixed(0) : '100';
+                const pW = (sData.quota.gemini_weekly && typeof sData.quota.gemini_weekly.remaining_pct === 'number') ? sData.quota.gemini_weekly.remaining_pct.toFixed(0) : '—';
+                const colorClass = Number(p5) > 50 ? 'text-emerald-400' : (Number(p5) > 20 ? 'text-amber-400' : 'text-rose-400');
+                qEl.innerHTML = `<span class="${colorClass} font-semibold">⚡ 5ч: ${p5}%</span> <span class="text-slate-500">•</span> <span class="text-slate-400">нед: ${pW}%</span>`;
+                if (sData.quota.gemini_5h.formatted_reset) {
+                  qEl.title = `Сброс 5ч: ${sData.quota.gemini_5h.formatted_reset}`;
+                }
+                qEl.classList.remove('hidden');
+              }
+            }
+            const activeSlot = allQuotaData.active_slot || 1;
+            const activeData = allQuotaData.slots[String(activeSlot)];
+            if (activeData && activeData.quota) {
+              renderQuota(activeData.quota);
+            }
+          }
+        });
+      }
 
       // Backup Creation Trigger
       async function triggerBackupCreation(btype = 'chats') {
