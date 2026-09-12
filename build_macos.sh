@@ -36,6 +36,7 @@ echo "Компиляция бинарника через PyInstaller..."
     --add-data "skills:skills" \
     --add-data "patch_asar.py:." \
     --add-data "localize_frontend.py:." \
+    --add-data "version.json:." \
     --hidden-import=packaging \
     --hidden-import=packaging.version \
     --hidden-import=packaging.specifiers \

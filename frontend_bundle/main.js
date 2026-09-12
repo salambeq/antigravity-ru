@@ -9378,10 +9378,10 @@ var AccountSlotsSwitcher=()=>{
       if(typeof window!=="undefined"&&window.antigravityAccounts?.switchSlot){
         var res=await window.antigravityAccounts.switchSlot(slotNum);
         if(res&&res.success){
-          setStatusMsg("Успешно переключено! Сервер перезапускается...");
+          setStatusMsg("Успешно переключено на "+(res?.email||"Слот #"+slotNum)+"! Обновление страницы...");
           setTimeout(()=>{
             try{window.location.reload()}catch(e){}
-          },4000);
+          },2500);
         }else{
           setStatusMsg(res?.error||"Ошибка переключения");
           setSwitchingSlot(null);
@@ -9405,7 +9405,9 @@ var AccountSlotsSwitcher=()=>{
           setTimeout(()=>{
             try{
               var auth=Ld?.()?.core?.authService;
-              if(auth?.showLoginFlow){
+              if(auth?.loginWithRedirect){
+                auth.loginWithRedirect({isGcpTos:!1,enableBusinessLogin:!1});
+              }else if(auth?.showLoginFlow){
                 auth.showLoginFlow();
               }
             }catch(e){}
@@ -9436,7 +9438,9 @@ var AccountSlotsSwitcher=()=>{
           setTimeout(()=>{
             try{
               var auth=Ld?.()?.core?.authService;
-              if(auth?.showLoginFlow){
+              if(auth?.loginWithRedirect){
+                auth.loginWithRedirect({isGcpTos:!1,enableBusinessLogin:!1});
+              }else if(auth?.showLoginFlow){
                 auth.showLoginFlow();
               }
             }catch(e){}
@@ -9492,7 +9496,9 @@ var AccountSlotsSwitcher=()=>{
           onClick:()=>{
             try{
               var auth=Ld?.()?.core?.authService;
-              if(auth?.showLoginFlow){
+              if(auth?.loginWithRedirect){
+                auth.loginWithRedirect({isGcpTos:!1,enableBusinessLogin:!1});
+              }else if(auth?.showLoginFlow){
                 auth.showLoginFlow();
               }
             }catch(e){console.error(e)}

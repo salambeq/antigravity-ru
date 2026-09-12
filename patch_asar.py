@@ -94,8 +94,12 @@ def patch_asar_dir(dist_dir):
     if os.path.exists(ipc_path):
         with open(ipc_path, 'r', encoding='utf-8') as f:
             ipc_code = f.read()
-        if "accounts:get-slots" not in ipc_code:
-            ipc_injection = """
+        marker = "Antigravity Multi-Account Switcher IPC Handlers"
+        if marker in ipc_code:
+            idx = ipc_code.find("// =========================================================================")
+            if idx != -1 and marker in ipc_code[idx:]:
+                ipc_code = ipc_code[:idx].rstrip() + "\n}\n"
+        ipc_injection = """
     // =========================================================================
     // Antigravity Multi-Account Switcher IPC Handlers (Zero-Revocation)
     // =========================================================================
@@ -229,8 +233,10 @@ def patch_asar_dir(dist_dir):
 
     function restartLanguageServer() {
         try {
-            if (process.platform === 'darwin' || process.platform.startsWith('linux')) {
-                child_process_accounts.spawnSync('pkill', ['-f', 'language_server.*--standalone'], { stdio: 'ignore' });
+            if (process.platform === 'win32') {
+                child_process_accounts.spawnSync('taskkill', ['/F', '/IM', 'language_server.exe'], { stdio: 'ignore' });
+            } else {
+                child_process_accounts.spawnSync('killall', ['-9', 'language_server'], { stdio: 'ignore' });
             }
         } catch {}
     }
@@ -256,8 +262,23 @@ def patch_asar_dir(dist_dir):
                         try {
                             const b64 = curRaw.startsWith('go-keyring-base64:') ? curRaw.slice(18) : curRaw;
                             const tokObj = JSON.parse(Buffer.from(b64, 'base64').toString('utf8'));
-                            if (tokObj.email) email = tokObj.email;
-                            else if (tokObj.token && tokObj.token.email) email = tokObj.token.email;
+                            const acc = (tokObj.token && tokObj.token.access_token) || tokObj.access_token;
+                            if (acc) {
+                                try {
+                                    const ures = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+                                        headers: { Authorization: `Bearer ${acc}` }
+                                    });
+                                    if (ures.ok) {
+                                        const uinfo = await ures.json();
+                                        if (uinfo.email) email = uinfo.email;
+                                        if (uinfo.name) name = uinfo.name;
+                                    }
+                                } catch {}
+                            }
+                            if (!email.includes('@')) {
+                                if (tokObj.email) email = tokObj.email;
+                                else if (tokObj.token && tokObj.token.email) email = tokObj.token.email;
+                            }
                         } catch {}
                         if (!fs_accounts.existsSync(slotsDir)) {
                             fs_accounts.mkdirSync(slotsDir, { recursive: true });
@@ -483,12 +504,12 @@ def patch_asar_dir(dist_dir):
     });
 }
 """
-            last_brace_idx = ipc_code.rfind('}')
-            if last_brace_idx != -1:
-                new_ipc = ipc_code[:last_brace_idx] + ipc_injection
-                with open(ipc_path, 'w', encoding='utf-8') as f:
-                    f.write(new_ipc)
-                print("✓ Added accounts IPC handlers to ipcHandlers.js")
+        last_brace_idx = ipc_code.rfind('}')
+        if last_brace_idx != -1:
+            new_ipc = ipc_code[:last_brace_idx] + ipc_injection
+            with open(ipc_path, 'w', encoding='utf-8') as f:
+                f.write(new_ipc)
+            print("✓ Updated accounts IPC handlers in ipcHandlers.js")
 
     # 6. preload.js runtime bridge
     preload_path = os.path.join(dist_dir, 'preload.js')
