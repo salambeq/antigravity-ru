@@ -166,6 +166,9 @@ translations = [
     ('aria-label:"Settings"', 'aria-label:"Настройки"'),
     ('header:"Workspaces"', 'header:"Рабочие области"'),
     ('header:"Projects"', 'header:"Проекты"'),
+
+    # 10. Zero-Revocation: Защита токенов от аннулирования серверами Google при выходе
+    ('b(await a(this._lsClient.authLogout({})))', 'b(await a(Promise.resolve({})))'),
 ]
 
 def localize_code(code):

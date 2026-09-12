@@ -428,8 +428,25 @@ def action_all_in_one(targets, interactive=True):
             warn(f"Не удалось пропатчить VS Code расширение: {e}")
 
     # 4. Установка русскоязычных правил разработки и навыка i18n
-    info("[4/4] Установка глобальных правил разработки и навыка i18n...")
+    info("[4/5] Установка глобальных правил разработки и навыка i18n...")
     do_install_rules()
+
+    # 5. Инициализация и защита мультиаккаунтинга (Zero-Revocation) «из коробки»
+    info("[5/5] Настройка мультиаккаунтинга и защита сессий (Zero-Revocation)...")
+    try:
+        from patcher.accounts.manager import AccountManager
+        ac_mgr = AccountManager()
+        ac_mgr._ensure_dirs()
+        cur_acc = ac_mgr.get_current_account_info()
+        meta = ac_mgr._load_metadata()
+        if cur_acc.get("authenticated") and not meta.get("active_slot"):
+            ac_mgr.save_current_account(1)
+            ok(f"Текущая авторизованная сессия ({cur_acc.get('email', 'Google')}) автоматически сохранена в Слот #1!")
+        else:
+            ac_mgr.sync_keychain_to_active_slot()
+        ok("Мультиаккаунт готов к работе «из коробки» (слоты в ~/.gemini/accounts)!")
+    except Exception as e:
+        warn(f"Предупреждение при настройке мультиаккаунта: {e}")
 
     print()
     ok("🎉 ВСЕ ОПЕРАЦИИ УСПЕШНО ЗАВЕРШЕНЫ!")
@@ -768,11 +785,12 @@ def action_accounts_menu(targets=None):
             print(f"  {color('Текущий активный слот:', COLOR_BOLD)}        {color(f'Слот #{active_slot} ({active_email})', COLOR_CYAN)}")
         print()
 
-        print_menu_row("1", "💾 Сохранить текущий аккаунт", "Привязать текущую авторизацию к слоту (1..4)", COLOR_GREEN)
-        print_menu_row("2", "🔄 Переключить слот", "Быстро переключиться на аккаунт 1, 2, 3 или 4", COLOR_CYAN)
-        print_menu_row("3", "📋 Список всех слотов", "Просмотр сохранённых аккаунтов и метаданных", COLOR_CYAN)
-        print_menu_row("4", "⚡ Запустить авто-ротатор", "Авто-смена аккаунта в реальном времени при ошибках квот", COLOR_GREEN)
-        print_menu_row("5", "❌ Удалить слот", "Удалить сохранённый профиль аккаунта", COLOR_YELLOW)
+        print_menu_row("1", "➕ Добавить новый аккаунт", "Безопасный мастер входа в Google (Zero-Revocation)", COLOR_GREEN)
+        print_menu_row("2", "💾 Сохранить текущий аккаунт", "Привязать текущую авторизацию к слоту (1..4)", COLOR_CYAN)
+        print_menu_row("3", "🔄 Переключить слот", "Быстро переключиться на аккаунт 1, 2, 3 или 4", COLOR_CYAN)
+        print_menu_row("4", "📋 Список всех слотов", "Просмотр сохранённых аккаунтов и метаданных", COLOR_CYAN)
+        print_menu_row("5", "⚡ Запустить авто-ротатор", "Авто-смена аккаунта в реальном времени при ошибках квот", COLOR_GREEN)
+        print_menu_row("6", "❌ Удалить слот", "Удалить сохранённый профиль аккаунта", COLOR_YELLOW)
         print()
         print_menu_row("0", "Вернуться в главное меню", "", COLOR_RED)
         print()
@@ -781,6 +799,10 @@ def action_accounts_menu(targets=None):
         if c == "0":
             break
         elif c == "1":
+            from scripts.add_account import run_add_account_wizard
+            run_add_account_wizard()
+            pause()
+        elif c == "2":
             print()
             step("СОХРАНЕНИЕ ТЕКУЩЕГО АККАУНТА В СЛОТ")
             if not cur.get("authenticated"):
@@ -798,11 +820,11 @@ def action_accounts_menu(targets=None):
             except ValueError:
                 err("Номер слота должен быть числом.")
             pause()
-        elif c == "2":
+        elif c == "3":
             print()
             step("ПЕРЕКЛЮЧЕНИЕ АККАУНТА")
             if not slots:
-                warn("Пока нет сохранённых слотов. Сначала войдите в аккаунт и сохраните его (пункт 1).")
+                warn("Пока нет сохранённых слотов. Сначала войдите в аккаунт и сохраните его (пункт 2).")
                 pause()
                 continue
             print("  Доступные слоты:")
@@ -821,7 +843,7 @@ def action_accounts_menu(targets=None):
             except ValueError:
                 err("Номер слота должен быть числом.")
             pause()
-        elif c == "3":
+        elif c == "4":
             print()
             step("СПИСОК СОХРАНЁННЫХ СЛОТОВ")
             if not slots:
@@ -838,7 +860,7 @@ def action_accounts_menu(targets=None):
                         print(f"      Сохранён:  {t_str}")
                     print()
             pause()
-        elif c == "4":
+        elif c == "5":
             print()
             step("ЗАПУСК АВТО-РОТАТОРА КВОТ")
             if len(slots) < 2:
@@ -848,7 +870,7 @@ def action_accounts_menu(targets=None):
             rotator = QuotaRotator()
             rotator.start_watch()
             pause()
-        elif c == "5":
+        elif c == "6":
             print()
             step("УДАЛЕНИЕ СЛОТА")
             if not slots:
@@ -1046,6 +1068,17 @@ def main():
             print("Сохраненные слоты:")
             for k, v in sorted(slots.items()):
                 print(f"  [{k}] {v['email']} {'(активен)' if v.get('is_active') else ''}")
+            sys.exit(0)
+        elif arg in ("--account-add", "--add-account", "--wizard-run"):
+            from scripts.add_account import run_add_account_wizard
+            target_s = None
+            if len(sys.argv) > 2:
+                try:
+                    target_s = int(sys.argv[2])
+                except ValueError:
+                    err("Номер слота должен быть числом.")
+                    sys.exit(1)
+            run_add_account_wizard(target_s)
             sys.exit(0)
         elif arg in ("--account-save", "--save-account") and len(sys.argv) > 2:
             try:

@@ -28,6 +28,7 @@ from patcher.accounts.keychain import (
 from patcher.utils.console import info, ok, warn, err, step
 
 DEFAULT_ACCOUNTS_DIR = os.path.expanduser("~/.gemini/accounts")
+ALT_ACCOUNTS_DIR = os.path.expanduser("~/.gemini/antigravity_accounts")
 
 
 class AccountManager:
@@ -35,11 +36,12 @@ class AccountManager:
         self.accounts_dir = accounts_dir
         self.slots_dir = os.path.join(self.accounts_dir, "slots")
         self.meta_path = os.path.join(self.accounts_dir, "metadata.json")
+        self.alt_meta_path = os.path.join(self.accounts_dir, "accounts_meta.json")
         self.wizard_path = os.path.join(self.accounts_dir, "pending_wizard.json")
         self._ensure_dirs()
 
     def _ensure_dirs(self):
-        """Создает необходимые директории с безопасными правами (0700)."""
+        """Создает необходимые директории с безопасными правами (0700) и симлинки совместимости."""
         if not os.path.exists(self.slots_dir):
             os.makedirs(self.slots_dir, mode=0o700, exist_ok=True)
         try:
@@ -48,22 +50,41 @@ class AccountManager:
         except OSError:
             pass
 
+        # Совместимость с ~/.gemini/antigravity_accounts/
+        try:
+            if not os.path.exists(ALT_ACCOUNTS_DIR) and not os.path.islink(ALT_ACCOUNTS_DIR):
+                os.symlink(self.slots_dir, ALT_ACCOUNTS_DIR)
+        except OSError:
+            pass
+
     def _load_metadata(self) -> dict:
-        if os.path.isfile(self.meta_path):
-            try:
-                with open(self.meta_path, "r", encoding="utf-8") as f:
-                    return json.load(f)
-            except Exception:
-                pass
+        for p in [self.meta_path, self.alt_meta_path]:
+            if os.path.isfile(p):
+                try:
+                    with open(p, "r", encoding="utf-8") as f:
+                        return json.load(f)
+                except Exception:
+                    pass
         return {"active_slot": None, "slots": {}}
 
     def _save_metadata(self, meta: dict):
         self._ensure_dirs()
-        with open(self.meta_path, "w", encoding="utf-8") as f:
-            json.dump(meta, f, indent=2, ensure_ascii=False)
+        # Сохраняем в оба файла (metadata.json и accounts_meta.json) для полной совместимости
+        for p in [self.meta_path, self.alt_meta_path]:
+            try:
+                with open(p, "w", encoding="utf-8") as f:
+                    json.dump(meta, f, indent=2, ensure_ascii=False)
+                os.chmod(p, 0o600)
+            except Exception:
+                pass
+
+        # Дублируем accounts_meta.json в каталог слотов для прямого доступа через ~/.gemini/antigravity_accounts/
         try:
-            os.chmod(self.meta_path, 0o600)
-        except OSError:
+            slots_meta = os.path.join(self.slots_dir, "accounts_meta.json")
+            with open(slots_meta, "w", encoding="utf-8") as f:
+                json.dump(meta, f, indent=2, ensure_ascii=False)
+            os.chmod(slots_meta, 0o600)
+        except Exception:
             pass
 
     def get_slot_path(self, slot_num: int) -> str:
@@ -562,23 +583,37 @@ class AccountManager:
 
     def prepare_slot_wizard(self, target_slot: int) -> tuple[bool, str]:
         """
-        Запускает Мастер привязки аккаунта к указанному слоту.
-        1. Безопасно синхронизирует текущую активную сессию в её слот (Zero-Leak).
+        Запускает Мастер безопасной привязки аккаунта к указанному слоту (Zero-Revocation).
+        1. Проверяет наличие текущей сессии в macOS Keychain и гарантированно бэкапит её в слот.
         2. Сохраняет снимок активного токена для возможности отмены.
-        3. Удаляет токен из Keychain БЕЗ отправки сетевого запроса на отзыв (revoke).
-        4. Мягко перезапускает language_server и выводит Antigravity на передний план.
+        3. Удаляет токен из Keychain БЕЗ отправки сетевого запроса на отзыв (Zero-Revocation).
+        4. Мягко завершает Antigravity и language_server (pkill -x Antigravity, pkill -f language_server).
+        5. Перезапускает Antigravity (open -a Antigravity) на чистый экран авторизации.
         """
         if target_slot < 1:
-            return False, "Номер слота должен быть положительным числом (1..4)."
+            return False, "Номер слота должен быть положительным числом (например, 1, 2, 3, 4)."
 
-        # 1. Синхронизируем текущий активный аккаунт в его слот
-        self.sync_keychain_to_active_slot()
-
+        prev_raw = read_current_token_raw()
         meta = self._load_metadata()
         active_slot = meta.get("active_slot")
-        prev_raw = read_current_token_raw()
 
-        # 2. Сохраняем состояние мастера
+        # 1. Изоляция и бэкап активной сессии перед сбросом
+        if prev_raw:
+            if not active_slot or not os.path.isfile(self.get_slot_path(active_slot)):
+                # Автоматически определяем свободный слот для бэкапа текущей сессии
+                backup_slot = None
+                for s in range(1, 10):
+                    if s != target_slot and not os.path.isfile(self.get_slot_path(s)):
+                        backup_slot = s
+                        break
+                if not backup_slot:
+                    backup_slot = 1 if target_slot != 1 else 2
+                self.save_current_account(backup_slot)
+                active_slot = backup_slot
+            else:
+                self.sync_keychain_to_active_slot()
+
+        # 2. Сохраняем снимок состояния мастера для отката
         wizard_state = {
             "target_slot": target_slot,
             "previous_active_slot": active_slot,
@@ -595,34 +630,28 @@ class AccountManager:
         except Exception as e:
             return False, f"Не удалось инициализировать мастер: {e}"
 
-        # 3. Безопасно очищаем Keychain локально
+        # 3. Локальный сброс Keychain БЕЗ сетевого отзыва (Zero-Revocation)
         delete_current_token_raw()
 
-        # 4. Перезапускаем language_server, чтобы Antigravity перешла в состояние ожидания логина
-        self.restart_language_server()
-
-        # 5. Перезапускаем или открываем Antigravity на macOS для гарантированного открытия экрана входа
+        # 4. Мягкий перезапуск Electron-клиента и language_server
         if sys.platform == "darwin":
             try:
-                is_running = subprocess.run(
-                    ["pgrep", "-x", "Antigravity"],
-                    capture_output=True,
-                    check=False,
-                ).returncode == 0
-
-                if is_running:
-                    subprocess.run(["pkill", "-x", "Antigravity"], check=False, capture_output=True)
-                    time.sleep(0.8)
-                subprocess.run(["open", "-a", "Antigravity"], check=False, capture_output=True)
+                subprocess.run(["pkill", "-x", "Antigravity"], capture_output=True, check=False)
+                subprocess.run(["pkill", "-f", "language_server"], capture_output=True, check=False)
+                time.sleep(1.0)
+                subprocess.run(["open", "-a", "Antigravity"], capture_output=True, check=False)
             except Exception:
                 pass
+        else:
+            self.restart_language_server()
 
         return True, f"Слот #{target_slot} подготовлен! Перейдите в Antigravity и нажмите «Войти через Google»."
 
     def check_wizard_status(self) -> dict:
         """
         Опрашивает статус мастера привязки слота.
-        Если обнаружен новый вошедший Google-аккаунт, автоматически фиксирует его в слоте.
+        При обнаружении нового токена в Keychain запрашивает профиль через Google UserInfo API
+        и сохраняет связку в целевой слот slot_<target>.json.
         """
         if not os.path.isfile(self.wizard_path):
             return {"in_progress": False, "message": "Мастер не запущен."}
@@ -645,6 +674,7 @@ class AccountManager:
             id_token = tok.get("id_token", "") or (payload.get("id_token", "") if isinstance(payload, dict) else "")
 
             if access_token:
+                # Запрос актуальных данных профиля через Google UserInfo API
                 uinfo = fetch_google_account_info(access_token, id_token=id_token, allow_network=True)
                 email = uinfo.get("email") or f"account_{target_slot}@google"
                 name = uinfo.get("name") or ""
@@ -688,6 +718,7 @@ class AccountManager:
                     "target_slot": target_slot,
                     "email": email,
                     "name": name,
+                    "picture": picture,
                     "message": f"Аккаунт {email} успешно привязан к Слоту #{target_slot}!",
                 }
 
@@ -698,9 +729,47 @@ class AccountManager:
             "elapsed": int(time.time()) - started_at,
         }
 
+    def run_wizard_loop(
+        self,
+        target_slot: int,
+        timeout: int = 180,
+        poll_interval: float = 2.0,
+        on_tick=None,
+    ) -> tuple[bool, str, dict]:
+        """
+        Фоновый мастер захвата нового токена (Wizard Polling).
+        1. Подготавливает систему (бэкап + сброс Keychain + перезапуск Antigravity).
+        2. Запускает цикл поллинга (проверка раз в 2 секунды, таймаут 180 секунд).
+        3. При успешном входе сохраняет токен и метаданные.
+        4. При таймауте автоматически отменяет мастер и восстанавливает сессию.
+        """
+        ok_prep, prep_msg = self.prepare_slot_wizard(target_slot)
+        if not ok_prep:
+            return False, prep_msg, {}
+
+        start_time = time.time()
+        while time.time() - start_time < timeout:
+            time.sleep(poll_interval)
+            elapsed = int(time.time() - start_time)
+            status = self.check_wizard_status()
+
+            if status.get("completed"):
+                return True, status.get("message", "Успешно!"), status
+
+            if on_tick:
+                on_tick(elapsed, timeout, status)
+
+        # Время ожидания истекло — безопасный откат
+        self.cancel_wizard()
+        return False, f"Время ожидания авторизации ({timeout} сек.) истекло. Предыдущая сессия восстановлена.", {}
+
     def cancel_wizard(self) -> tuple[bool, str]:
         """
         Отменяет работу мастера и восстанавливает предыдущий активный аккаунт.
+        1. Восстанавливает токен предыдущего активного слота обратно в Keychain.
+        2. Восстанавливает метаданные активного слота.
+        3. Мягко перезапускает Antigravity и language_server в исходное состояние.
+        4. Удаляет файл состояния мастера.
         """
         if not os.path.isfile(self.wizard_path):
             return True, "Мастер не был запущен."
@@ -722,21 +791,16 @@ class AccountManager:
             meta["active_slot"] = prev_active_slot
             self._save_metadata(meta)
 
-        self.restart_language_server()
-
         if sys.platform == "darwin":
             try:
-                is_running = subprocess.run(
-                    ["pgrep", "-x", "Antigravity"],
-                    capture_output=True,
-                    check=False,
-                ).returncode == 0
-                if is_running:
-                    subprocess.run(["pkill", "-x", "Antigravity"], check=False, capture_output=True)
-                    time.sleep(0.8)
-                    subprocess.run(["open", "-a", "Antigravity"], check=False, capture_output=True)
+                subprocess.run(["pkill", "-x", "Antigravity"], capture_output=True, check=False)
+                subprocess.run(["pkill", "-f", "language_server"], capture_output=True, check=False)
+                time.sleep(1.0)
+                subprocess.run(["open", "-a", "Antigravity"], capture_output=True, check=False)
             except Exception:
                 pass
+        else:
+            self.restart_language_server()
 
         try:
             os.remove(self.wizard_path)

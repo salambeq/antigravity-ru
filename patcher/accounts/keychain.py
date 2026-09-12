@@ -45,9 +45,11 @@ def encode_token_payload(data: dict) -> str:
 def read_current_token_raw() -> str:
     """
     Считывает текущую сырую строку токена из системного хранилища ключей.
+    Поддерживает сервисы "gemini" (родной для language_server) и "Antigravity".
     Возвращает пустую строку, если ключ не найден.
     """
     if sys.platform == "darwin":
+        # 1. Проверяем основной сервис language_server ("gemini", "antigravity")
         try:
             res = subprocess.run(
                 ["security", "find-generic-password", "-s", SERVICE_NAME, "-a", ACCOUNT_NAME, "-w"],
@@ -55,10 +57,22 @@ def read_current_token_raw() -> str:
                 text=True,
                 check=False,
             )
-            if res.returncode == 0:
+            if res.returncode == 0 and res.stdout.strip():
                 return res.stdout.strip()
         except Exception:
             pass
+
+        # 2. Проверяем альтернативный сервис "Antigravity"
+        for alt_cmd in [
+            ["security", "find-generic-password", "-s", "Antigravity", "-a", ACCOUNT_NAME, "-w"],
+            ["security", "find-generic-password", "-s", "Antigravity", "-w"],
+        ]:
+            try:
+                res = subprocess.run(alt_cmd, capture_output=True, text=True, check=False)
+                if res.returncode == 0 and res.stdout.strip():
+                    return res.stdout.strip()
+            except Exception:
+                pass
     elif sys.platform.startswith("linux"):
         # Попытка через secret-tool
         try:
@@ -101,6 +115,7 @@ def read_current_token_raw() -> str:
 def write_token_raw(raw_value: str) -> bool:
     """
     Записывает сырую строку токена в системное хранилище ключей.
+    Поддерживает сервисы "gemini" и "Antigravity".
     """
     if not raw_value:
         return False
@@ -108,6 +123,7 @@ def write_token_raw(raw_value: str) -> bool:
     raw_value = raw_value.strip()
 
     if sys.platform == "darwin":
+        success = False
         try:
             res = subprocess.run(
                 ["security", "add-generic-password", "-U", "-s", SERVICE_NAME, "-a", ACCOUNT_NAME, "-w", raw_value],
@@ -115,9 +131,23 @@ def write_token_raw(raw_value: str) -> bool:
                 text=True,
                 check=False,
             )
-            return res.returncode == 0
+            if res.returncode == 0:
+                success = True
         except Exception:
-            return False
+            pass
+
+        # Также дублируем в сервис "Antigravity"
+        try:
+            subprocess.run(
+                ["security", "add-generic-password", "-U", "-s", "Antigravity", "-a", ACCOUNT_NAME, "-w", raw_value],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+        except Exception:
+            pass
+
+        return success
 
     elif sys.platform.startswith("linux"):
         try:
@@ -156,20 +186,32 @@ def write_token_raw(raw_value: str) -> bool:
 
 def delete_current_token_raw() -> bool:
     """
-    Безопасно удаляет текущий токен из связки ключей без отправки сетевого запроса на отзыв (revoke).
-    Используется мастером авторизации для подготовки входа в новый аккаунт.
+    Безопасно удаляет текущий токен из связки ключей БЕЗ отправки сетевого запроса на отзыв (Zero-Revocation).
+    Удаляет записи 'Antigravity' и 'gemini'. Сессия на серверах Google остается на 100% валидной.
     """
     if sys.platform == "darwin":
+        # 1. Локальное удаление записи сервиса "Antigravity"
+        for cmd in [
+            ["security", "delete-generic-password", "-s", "Antigravity"],
+            ["security", "delete-generic-password", "-s", "Antigravity", "-a", ACCOUNT_NAME],
+        ]:
+            try:
+                subprocess.run(cmd, capture_output=True, text=True, check=False)
+            except Exception:
+                pass
+
+        # 2. Локальное удаление записи сервиса "gemini" (языковой сервер)
         try:
-            res = subprocess.run(
+            subprocess.run(
                 ["security", "delete-generic-password", "-s", SERVICE_NAME, "-a", ACCOUNT_NAME],
                 capture_output=True,
                 text=True,
                 check=False,
             )
-            return res.returncode == 0 or "could not be found" in res.stderr.lower()
         except Exception:
-            return False
+            pass
+
+        return True
     elif sys.platform.startswith("linux"):
         try:
             res = subprocess.run(
@@ -314,42 +356,43 @@ def decode_jwt_payload_offline(jwt_token: str) -> dict:
 
 def fetch_google_account_info(access_token: str, id_token: str = "", allow_network: bool = True, timeout: int = 4) -> dict:
     """
-    Возвращает реальную информацию об аккаунте (email, имя, аватар).
-    1. Пробует декодировать id_token локально (офлайн).
-    2. Если email не найден и allow_network=True, обращается к Google OAuth userinfo.
+    Возвращает актуальную информацию об аккаунте (email, имя, аватар).
+    1. При allow_network=True и наличии access_token обращается к официальному
+       Google UserInfo API (https://www.googleapis.com/oauth2/v3/userinfo).
+    2. При ошибке сети или allow_network=False декодирует id_token локально (офлайн).
     """
-    # 1. Приоритет: локальное декодирование id_token
+    # 1. Приоритет: получение свежих данных профиля через официальный Google UserInfo API
+    if allow_network and access_token:
+        url = "https://www.googleapis.com/oauth2/v3/userinfo"
+        req = urllib.request.Request(
+            url,
+            headers={
+                "Authorization": f"Bearer {access_token}",
+                "User-Agent": "antigravity/2.12.2",
+            },
+        )
+
+        opener = _get_url_opener()
+        try:
+            with opener.open(req, timeout=timeout) as resp:
+                if resp.status == 200:
+                    data = json.loads(resp.read().decode("utf-8"))
+                    email = data.get("email", "")
+                    if email:
+                        return {
+                            "email": email,
+                            "name": data.get("name", ""),
+                            "picture": data.get("picture", ""),
+                            "sub": data.get("sub", ""),
+                        }
+        except Exception:
+            pass
+
+    # 2. Офлайн Fallback: локальное декодирование id_token
     if id_token:
         offline_info = decode_jwt_payload_offline(id_token)
         if offline_info.get("email"):
             return offline_info
-
-    # 2. Обращение к Google Userinfo с действующим access_token
-    if not allow_network or not access_token:
-        return {}
-
-    url = "https://www.googleapis.com/oauth2/v3/userinfo"
-    req = urllib.request.Request(
-        url,
-        headers={
-            "Authorization": f"Bearer {access_token}",
-            "User-Agent": "antigravity/2.12.2",
-        },
-    )
-
-    opener = _get_url_opener()
-    try:
-        with opener.open(req, timeout=timeout) as resp:
-            if resp.status == 200:
-                data = json.loads(resp.read().decode("utf-8"))
-                return {
-                    "email": data.get("email", ""),
-                    "name": data.get("name", ""),
-                    "picture": data.get("picture", ""),
-                    "sub": data.get("sub", ""),
-                }
-    except Exception:
-        pass
 
     return {}
 

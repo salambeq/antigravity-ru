@@ -86,13 +86,323 @@ def patch_asar_dir(dist_dir):
     ])
 
     # 5. ipcHandlers.js
-    patch_file(os.path.join(dist_dir, 'ipcHandlers.js'), [
+    ipc_path = os.path.join(dist_dir, 'ipcHandlers.js')
+    patch_file(ipc_path, [
         ("title: 'Open workspace'", "title: 'Открыть рабочую область'"),
         ("title: 'Open workspaces'", "title: 'Открыть рабочие области'")
     ])
+    if os.path.exists(ipc_path):
+        with open(ipc_path, 'r', encoding='utf-8') as f:
+            ipc_code = f.read()
+        if "accounts:get-slots" not in ipc_code:
+            ipc_injection = """
+    // =========================================================================
+    // Antigravity Multi-Account Switcher IPC Handlers (Zero-Revocation)
+    // =========================================================================
+    const child_process_accounts = require("child_process");
+    const path_accounts = require("path");
+    const os_accounts = require("os");
+    const fs_accounts = require("fs");
+
+    const accountsDir = path_accounts.join(os_accounts.homedir(), '.gemini', 'accounts');
+    const slotsDir = path_accounts.join(accountsDir, 'slots');
+    const metaPath = path_accounts.join(accountsDir, 'metadata.json');
+    const altMetaPath = path_accounts.join(accountsDir, 'accounts_meta.json');
+    const pendingPath = path_accounts.join(accountsDir, 'pending_wizard.json');
+
+    function getMacKeychainToken(service = 'gemini', account = 'antigravity') {
+        try {
+            return child_process_accounts.execSync(`security find-generic-password -s "${service}" -a "${account}" -w`, {
+                encoding: 'utf8',
+                stdio: ['ignore', 'pipe', 'ignore']
+            }).trim();
+        } catch {
+            return '';
+        }
+    }
+
+    function setMacKeychainToken(rawVal, service = 'gemini', account = 'antigravity') {
+        if (!rawVal) return false;
+        try {
+            const child = child_process_accounts.spawnSync('security', [
+                'add-generic-password', '-U',
+                '-s', service,
+                '-a', account,
+                '-w', rawVal
+            ], { stdio: ['ignore', 'ignore', 'ignore'] });
+            return child.status === 0;
+        } catch {
+            return false;
+        }
+    }
+
+    function deleteMacKeychainToken(service = 'gemini', account = 'antigravity') {
+        try {
+            child_process_accounts.spawnSync('security', [
+                'delete-generic-password',
+                '-s', service,
+                '-a', account
+            ], { stdio: ['ignore', 'ignore', 'ignore'] });
+            return true;
+        } catch {
+            return false;
+        }
+    }
+
+    function restartLanguageServer() {
+        try {
+            if (process.platform === 'darwin' || process.platform.startsWith('linux')) {
+                child_process_accounts.spawnSync('pkill', ['-f', 'language_server.*--standalone'], { stdio: 'ignore' });
+            }
+        } catch {}
+    }
+
+    electron_1.ipcMain.handle('accounts:get-slots', async () => {
+        try {
+            let meta = { active_slot: 1, slots: {} };
+            if (fs_accounts.existsSync(metaPath)) {
+                try {
+                    meta = JSON.parse(fs_accounts.readFileSync(metaPath, 'utf8'));
+                } catch {}
+            }
+
+            if (fs_accounts.existsSync(pendingPath)) {
+                try {
+                    const pendingData = JSON.parse(fs_accounts.readFileSync(pendingPath, 'utf8'));
+                    const curRaw = getMacKeychainToken('gemini', 'antigravity') || getMacKeychainToken('Antigravity', 'antigravity');
+                    if (curRaw && curRaw !== pendingData.prev_raw_payload) {
+                        const targetSlot = pendingData.target_slot || ((Object.keys(meta.slots || {}).length) + 1);
+                        let email = `Слот #${targetSlot}`;
+                        let name = '';
+                        try {
+                            const b64 = curRaw.startsWith('go-keyring-base64:') ? curRaw.slice(18) : curRaw;
+                            const tokObj = JSON.parse(Buffer.from(b64, 'base64').toString('utf8'));
+                            if (tokObj.email) email = tokObj.email;
+                            else if (tokObj.token && tokObj.token.email) email = tokObj.token.email;
+                        } catch {}
+                        if (!fs_accounts.existsSync(slotsDir)) {
+                            fs_accounts.mkdirSync(slotsDir, { recursive: true });
+                        }
+                        const slotFile = path_accounts.join(slotsDir, `slot_${targetSlot}.json`);
+                        const slotData = {
+                            slot: targetSlot,
+                            email: email,
+                            name: name,
+                            saved_at: Math.floor(Date.now() / 1000),
+                            raw_payload: curRaw,
+                            is_revoked: false
+                        };
+                        fs_accounts.writeFileSync(slotFile, JSON.stringify(slotData, null, 2), 'utf8');
+                        meta.active_slot = targetSlot;
+                        if (!meta.slots) meta.slots = {};
+                        meta.slots[String(targetSlot)] = {
+                            email: email,
+                            name: name,
+                            saved_at: slotData.saved_at,
+                            is_revoked: false
+                        };
+                        fs_accounts.writeFileSync(metaPath, JSON.stringify(meta, null, 2), 'utf8');
+                        fs_accounts.writeFileSync(altMetaPath, JSON.stringify(meta, null, 2), 'utf8');
+                        fs_accounts.unlinkSync(pendingPath);
+                    }
+                } catch {}
+            }
+
+            const slotsList = [];
+            const metaSlots = meta.slots || {};
+            const activeSlot = meta.active_slot || 1;
+
+            if (fs_accounts.existsSync(slotsDir)) {
+                const files = fs_accounts.readdirSync(slotsDir);
+                for (const f of files) {
+                    if (f.startsWith('slot_') && f.endsWith('.json')) {
+                        const num = parseInt(f.replace('slot_', '').replace('.json', ''), 10);
+                        if (!isNaN(num)) {
+                            try {
+                                const sData = JSON.parse(fs_accounts.readFileSync(path_accounts.join(slotsDir, f), 'utf8'));
+                                slotsList.push({
+                                    slot: num,
+                                    email: sData.email || metaSlots[num]?.email || `Слот #${num}`,
+                                    name: sData.name || metaSlots[num]?.name || '',
+                                    is_active: (num === activeSlot),
+                                    is_revoked: Boolean(sData.is_revoked)
+                                });
+                            } catch {}
+                        }
+                    }
+                }
+            }
+
+            slotsList.sort((a, b) => a.slot - b.slot);
+
+            let pendingWizard = null;
+            if (fs_accounts.existsSync(pendingPath)) {
+                try {
+                    pendingWizard = JSON.parse(fs_accounts.readFileSync(pendingPath, 'utf8'));
+                } catch {}
+            }
+
+            return {
+                active_slot: activeSlot,
+                slots: slotsList,
+                pending_wizard: pendingWizard
+            };
+        } catch (err) {
+            return { active_slot: 1, slots: [], error: String(err) };
+        }
+    });
+
+    electron_1.ipcMain.handle('accounts:switch-slot', async (_event, targetSlot) => {
+        try {
+            const slotNum = parseInt(targetSlot, 10);
+            if (isNaN(slotNum) || slotNum < 1) {
+                return { success: false, error: 'Неверный номер слота' };
+            }
+
+            const slotFile = path_accounts.join(slotsDir, `slot_${slotNum}.json`);
+            if (!fs_accounts.existsSync(slotFile)) {
+                return { success: false, error: `Слот #${slotNum} не существует` };
+            }
+
+            let curMeta = { active_slot: 1, slots: {} };
+            if (fs_accounts.existsSync(metaPath)) {
+                try { curMeta = JSON.parse(fs_accounts.readFileSync(metaPath, 'utf8')); } catch {}
+            }
+            const currentActive = curMeta.active_slot || 1;
+            const curRaw = getMacKeychainToken('gemini', 'antigravity') || getMacKeychainToken('Antigravity', 'antigravity');
+            if (curRaw) {
+                const curSlotFile = path_accounts.join(slotsDir, `slot_${currentActive}.json`);
+                if (fs_accounts.existsSync(curSlotFile)) {
+                    try {
+                        const curData = JSON.parse(fs_accounts.readFileSync(curSlotFile, 'utf8'));
+                        curData.raw_payload = curRaw;
+                        curData.saved_at = Math.floor(Date.now() / 1000);
+                        fs_accounts.writeFileSync(curSlotFile, JSON.stringify(curData, null, 2), 'utf8');
+                    } catch {}
+                }
+            }
+
+            const targetData = JSON.parse(fs_accounts.readFileSync(slotFile, 'utf8'));
+            const targetRaw = targetData.raw_payload;
+            if (!targetRaw) {
+                return { success: false, error: `В слоте #${slotNum} отсутствуют данные токена` };
+            }
+
+            setMacKeychainToken(targetRaw, 'gemini', 'antigravity');
+            setMacKeychainToken(targetRaw, 'Antigravity', 'antigravity');
+
+            curMeta.active_slot = slotNum;
+            if (!curMeta.slots) curMeta.slots = {};
+            curMeta.slots[String(slotNum)] = {
+                email: targetData.email || `Слот #${slotNum}`,
+                name: targetData.name || '',
+                saved_at: Math.floor(Date.now() / 1000),
+                is_revoked: false
+            };
+            fs_accounts.writeFileSync(metaPath, JSON.stringify(curMeta, null, 2), 'utf8');
+            fs_accounts.writeFileSync(altMetaPath, JSON.stringify(curMeta, null, 2), 'utf8');
+
+            restartLanguageServer();
+
+            return { success: true, email: targetData.email, slot: slotNum };
+        } catch (err) {
+            return { success: false, error: String(err) };
+        }
+    });
+
+    electron_1.ipcMain.handle('accounts:prepare-add', async (_event, targetSlot) => {
+        try {
+            const slotNum = parseInt(targetSlot, 10);
+            let curMeta = { active_slot: 1, slots: {} };
+            if (fs_accounts.existsSync(metaPath)) {
+                try { curMeta = JSON.parse(fs_accounts.readFileSync(metaPath, 'utf8')); } catch {}
+            }
+            const currentActive = curMeta.active_slot || 1;
+            const curRaw = getMacKeychainToken('gemini', 'antigravity') || getMacKeychainToken('Antigravity', 'antigravity');
+
+            const pendingData = {
+                target_slot: slotNum,
+                prev_active_slot: currentActive,
+                prev_raw_payload: curRaw,
+                started_at: Math.floor(Date.now() / 1000)
+            };
+            fs_accounts.writeFileSync(pendingPath, JSON.stringify(pendingData, null, 2), 'utf8');
+
+            if (curRaw) {
+                const curSlotFile = path_accounts.join(slotsDir, `slot_${currentActive}.json`);
+                if (fs_accounts.existsSync(curSlotFile)) {
+                    try {
+                        const curData = JSON.parse(fs_accounts.readFileSync(curSlotFile, 'utf8'));
+                        curData.raw_payload = curRaw;
+                        curData.saved_at = Math.floor(Date.now() / 1000);
+                        fs_accounts.writeFileSync(curSlotFile, JSON.stringify(curData, null, 2), 'utf8');
+                    } catch {}
+                }
+            }
+
+            deleteMacKeychainToken('gemini', 'antigravity');
+            deleteMacKeychainToken('Antigravity', 'antigravity');
+
+            restartLanguageServer();
+
+            return { success: true, target_slot: slotNum };
+        } catch (err) {
+            return { success: false, error: String(err) };
+        }
+    });
+
+    electron_1.ipcMain.handle('accounts:cancel-add', async () => {
+        try {
+            if (!fs_accounts.existsSync(pendingPath)) {
+                return { success: false, error: 'Мастер добавления не запущен' };
+            }
+            const pendingData = JSON.parse(fs_accounts.readFileSync(pendingPath, 'utf8'));
+            const prevRaw = pendingData.prev_raw_payload;
+            if (prevRaw) {
+                setMacKeychainToken(prevRaw, 'gemini', 'antigravity');
+                setMacKeychainToken(prevRaw, 'Antigravity', 'antigravity');
+            }
+            try { fs_accounts.unlinkSync(pendingPath); } catch {}
+            restartLanguageServer();
+            return { success: true };
+        } catch (err) {
+            return { success: false, error: String(err) };
+        }
+    });
+}
+"""
+            last_brace_idx = ipc_code.rfind('}')
+            if last_brace_idx != -1:
+                new_ipc = ipc_code[:last_brace_idx] + ipc_injection
+                with open(ipc_path, 'w', encoding='utf-8') as f:
+                    f.write(new_ipc)
+                print("✓ Added accounts IPC handlers to ipcHandlers.js")
 
     # 6. preload.js runtime bridge
     preload_path = os.path.join(dist_dir, 'preload.js')
+    if os.path.exists(preload_path):
+        with open(preload_path, 'r', encoding='utf-8') as f:
+            code = f.read()
+        if "antigravityAccounts" not in code:
+            acc_preload = """
+const accountsAPI = {
+    getSlots: () => electron_1.ipcRenderer.invoke('accounts:get-slots'),
+    switchSlot: (slotNum) => electron_1.ipcRenderer.invoke('accounts:switch-slot', slotNum),
+    prepareAdd: (slotNum) => electron_1.ipcRenderer.invoke('accounts:prepare-add', slotNum),
+    cancelAdd: () => electron_1.ipcRenderer.invoke('accounts:cancel-add'),
+    reloadWindow: () => window.location.reload(),
+};
+electron_1.contextBridge.exposeInMainWorld('antigravityAccounts', accountsAPI);
+"""
+            # Insert before '// Antigravity 2.0 Russian' or at end
+            if "// Antigravity 2.0 Russian" in code:
+                code = code.replace("// Antigravity 2.0 Russian", acc_preload + "\n// Antigravity 2.0 Russian")
+            else:
+                code += acc_preload
+            with open(preload_path, 'w', encoding='utf-8') as f:
+                f.write(code)
+            print("✓ Added antigravityAccounts bridge to preload.js")
+
     if os.path.exists(preload_path):
         with open(preload_path, 'r', encoding='utf-8') as f:
             code = f.read()

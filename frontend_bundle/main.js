@@ -2171,7 +2171,7 @@ h=f.context;f.matches("authenticating")?(f=f.children?.authenticatingActor?.getS
 sensitiveData:{errorMessage:c,errorStack:e}})}catch{}}get authStateProvider(){return this._authStateProvider}async initialize(){var a=d,b=d;try{b(await a(lt(this,4)))}finally{a()}}async loginWithRedirect(a){var b=d,c=d;try{this._currentSessionId++;let f=this._currentSessionId;this._authActor.getSnapshot().value==="signedIn"?this._authActor.send({type:"RE_SIGN_IN"}):this._authActor.send(a.isGcpTos?{type:"GCP_SIGN_IN"}:{type:"SIGN_IN"});try{let g=c(await b(this._lsClient.login({isGcpTos:a.isGcpTos,
 additionalScopes:a.additionalScopes,enableBusinessLogin:a.enableBusinessLogin,wifLoginInfo:a.wifLoginInfo?{providerName:a.wifLoginInfo.providerName}:void 0})));if(this._currentSessionId===f){var e=g.authResult;if(e?.hasValidAuth){let h={isGcpTos:e.isGcpTos??!1,project:e.projectId??"",location:e.location??"",grantedScopes:e.grantedScopes??[],wifProvider:e.wifProvider};this._authActor.send({type:"AUTH_SUCCESS",tokenInfo:{accessToken:""},scopes:h.grantedScopes,isGcpTos:h.isGcpTos,project:h.project,location:h.location,
 wifProvider:h.wifProvider});this.broadcastChannel?.broadcastSignIn(h)}else mt(this,e)}}catch(g){c(),this._currentSessionId===f&&this._authActor.send({type:"SET_ERROR",message:lp(g)})}}finally{b()}}async getGrantedScopes(){var a=d,b=d;try{let c=this._authStateProvider.getState().context.isGcpTos;return b(await a(this._lsClient.getGrantedScopes({isGcpTos:c}))).scopes||[]}finally{a()}}async showLoginFlow(){this._onDidRequestLoginFlow.fire()}async logout(){var a=d,b=d;try{this.isLoggingOut=!0;this._currentSessionId++;
-let c=this._currentSessionId;try{b(await a(this._lsClient.authLogout({})))}catch(e){b(),this.recordError("auth_logout_failed",e)}finally{jt(this,!0),this._currentSessionId===c&&(this.isLoggingOut=!1)}}finally{a()}}async submitProject(a,b){var c=d,e=d;try{this._authActor.send({type:"SUBMIT_PROJECT",project:a,location:b});try{let f=e(await c(this._lsClient.validateProject({projectId:a,location:b}))).authResult;f?.hasValidAuth?this._authActor.send({type:"AUTH_SUCCESS",tokenInfo:{accessToken:""},scopes:f.grantedScopes,
+let c=this._currentSessionId;try{b(await a(Promise.resolve({})))}catch(e){b(),this.recordError("auth_logout_failed",e)}finally{jt(this,!0),this._currentSessionId===c&&(this.isLoggingOut=!1)}}finally{a()}}async submitProject(a,b){var c=d,e=d;try{this._authActor.send({type:"SUBMIT_PROJECT",project:a,location:b});try{let f=e(await c(this._lsClient.validateProject({projectId:a,location:b}))).authResult;f?.hasValidAuth?this._authActor.send({type:"AUTH_SUCCESS",tokenInfo:{accessToken:""},scopes:f.grantedScopes,
 isGcpTos:!0,project:f.projectId,location:f.location,wifProvider:f.wifProvider}):(f?.failureDetails?.case==="projectRequired"?this._authActor.send({type:"SHOW_PROJECT_PICKER",showProjectError:!0}):mt(this,f),kt(this))}catch(f){e(),this._authActor.send({type:"SET_ERROR",message:lp(f)}),kt(this)}}finally{c()}}showAutoAssignPicker(){this._authActor.send({type:"SHOW_AUTO_ASSIGN_PICKER"})}async inspectAutoAssign(a,b){var c=d,e=d;try{let f=e(await c(this._lsClient.selfAssignLicense({projectId:a,location:b}))),
 g=f.license;return{assigned:f.assigned??!1,license:g?{userTier:g.userTier,tierDisplayName:g.tierDisplayName,projectId:g.projectId,location:g.location}:void 0,errorMessage:f.errorMessage||void 0}}finally{c()}}retryAuth(){this._authActor.send({type:"RETRY"})}navigateToPreviousAuthScreen(){this._authActor.getSnapshot().matches({authenticating:"enterprise"})||this._authStateProvider.getState().context.isGcpTos?this._authActor.send({type:"NAVIGATE_PREVIOUS_AUTH_SCREEN"}):this._authActor.send({type:"RETRY"})}async checkCurrentAuthStatus(){var a=
 d,b=d;try{b(await a(lt(this)))}finally{a()}}async getAvailableLicenses(){var a=d,b=d;try{try{return(b(await a(this._lsClient.listLicenses({}))).licenses||[]).map(c=>({userTier:c.userTier,tierDisplayName:c.tierDisplayName,projectId:c.projectId,location:c.location}))}catch(c){return b(),this.recordError("user_settings_fetch_failed",c),[]}}finally{a()}}async refreshUserStatus(){var a=d,b=d;try{try{let c=b(await a(this._lsClient.getUserStatus({}))).userStatus;if(c)return{settings:{telemetryEnabled:!c.disableTelemetry,
@@ -9340,11 +9340,172 @@ l=ml().userTier?.description;c=async m=>{var n=d,p=d;try{e("SETTING_CHANGED",{ex
 description:b,checked:c,onCheckedChange:e,disabled:f})=>z.createElement(CR,{label:a,description:b,rightElement:z.createElement(oQ,{checked:c,onCheckedChange:e,disabled:f})});var cwb=({onBack:a})=>{var b=Ld().core.authService,[c,e]=(0,z.useState)([]),[f,g]=(0,z.useState)(!0),[h,k]=(0,z.useState)(!1),[l,m]=(0,z.useState)(""),[n,p]=(0,z.useState)("global"),[r,t]=(0,z.useState)(!1),[u,v]=(0,z.useState)(null);(0,z.useEffect)(()=>{var B=!0;(async()=>{var C=d,D=d;try{if(b.getAvailableLicenses){let E=D(await C(b.getAvailableLicenses()));B&&e(E)}B&&g(!1)}finally{C()}})();return()=>{B=!1}},[b]);var w=async B=>{var C=d,D=d;try{b.selectLicense&&(t(!0),D(await C(b.selectLicense(B.userTier,
 B.projectId||"",B.location||"",B.tierDisplayName))),a())}finally{C()}},y=async(B,C)=>{var D=d,E=d;try{B.trim()&&(t(!0),E(await D(b.selectPaygo?.(B.trim(),C||"global"))),a())}finally{D()}},A=async(B,C)=>b.inspectAutoAssign?b.inspectAutoAssign(B,C):{assigned:!1,errorMessage:"Auto-assignment not configured"};return h||!f&&c.length===0?z.createElement(N0,{title:"Select your license",onBack:()=>{h&&c.length>0?k(!1):a()}},z.createElement("div",{className:"-mt-4 flex flex-col gap-6"},z.createElement(Kvb,
 {initialProjectId:l,initialRegion:n,selectedLicense:u,onProjectChange:B=>{m(B)},onRegionChange:B=>{p(B)},onInspectAutoAssign:A,onSelectLicense:B=>{v(B)},onSelectPaygo:(B,C)=>{m(B);p(C);v(null)}}),z.createElement("div",{className:"flex justify-end px-6 pb-6"},z.createElement(Yz,{variant:"primary",size:"sm",disabled:!l.trim()||r,onClick:()=>{u?w(u):y(l,n)}},r?"Submitting...":"Confirm Selection")))):z.createElement(N0,{title:"Select your license",onBack:a},f?z.createElement("div",{className:"flex justify-center p-8 text-sm text-muted-foreground"},
-"Loading licenses..."):z.createElement("div",{className:"-mt-8"},z.createElement(Nvb,{licenses:c,selectedLicense:null,onSelectLicense:w,onSelectOther:()=>{k(!0)}})))};var dwb=U("app.name","Antigravity");U("app.description","Google Antigravity - Experience liftoff");var ewb=()=>{var a=Ld().core.authService,b=xK(),c=ml(),e=MM(Kk.DEMO_MODE_ENABLED),f=ol(),g=f?.state??"signedOut",h=f?.context.isGcpTos??!1;f=f?.context.project;var k=Dvb(),l=Sl(),m=l.get("settingsFeature"),n=l.get("isRemoteControl")??!1,p=m?.useCloseSettings()??(()=>{});m=V0a();var [r,t]=(0,z.useState)(!1),[u,v]=(0,z.useState)(!1),w=c&&c.userTier?.description,y=c.userTier?.upgradeSubscriptionText||"";l=!l.get("settings")?.hideTelemetry;var A=!b.product.isGoogleInternal&&!h;return r?z.createElement(cwb,
+"Loading licenses..."):z.createElement("div",{className:"-mt-8"},z.createElement(Nvb,{licenses:c,selectedLicense:null,onSelectLicense:w,onSelectOther:()=>{k(!0)}})))};var dwb=U("app.name","Antigravity");U("app.description","Google Antigravity - Experience liftoff");
+var AccountSlotsSwitcher=()=>{
+  var [slotsData,setSlotsData]=(0,z.useState)(null),
+      [switchingSlot,setSwitchingSlot]=(0,z.useState)(null),
+      [loading,setLoading]=(0,z.useState)(!0),
+      [statusMsg,setStatusMsg]=(0,z.useState)("");
+
+  var loadSlots=(0,z.useCallback)(async()=>{
+    try{
+      if(typeof window!=="undefined"&&window.antigravityAccounts?.getSlots){
+        var res=await window.antigravityAccounts.getSlots();
+        setSlotsData(res);
+      }
+    }catch(err){
+      console.error("Failed to load account slots:",err);
+    }finally{
+      setLoading(!1);
+    }
+  },[]);
+
+  (0,z.useEffect)(()=>{
+    loadSlots();
+  },[loadSlots]);
+
+  var handleSwitch=async slotNum=>{
+    try{
+      setSwitchingSlot(slotNum);
+      setStatusMsg("Переключение аккаунта...");
+      if(typeof window!=="undefined"&&window.antigravityAccounts?.switchSlot){
+        var res=await window.antigravityAccounts.switchSlot(slotNum);
+        if(res&&res.success){
+          setStatusMsg("Успешно! Перезагрузка...");
+          setTimeout(()=>{
+            if(window.antigravityAccounts?.reloadWindow){
+              window.antigravityAccounts.reloadWindow();
+            }else{
+              window.location.reload();
+            }
+          },1200);
+        }else{
+          setStatusMsg(res?.error||"Ошибка переключения");
+          setSwitchingSlot(null);
+        }
+      }
+    }catch(err){
+      setStatusMsg("Ошибка: "+(err?.message||String(err)));
+      setSwitchingSlot(null);
+    }
+  };
+
+  var handleAdd=async()=>{
+    try{
+      var curSlots=slotsData?.slots||[];
+      var nextSlot=curSlots.length>0?Math.max(...curSlots.map(s=>s.slot))+1:1;
+      setSwitchingSlot(999);
+      setStatusMsg("Подготовка слота #"+nextSlot+"...");
+      if(typeof window!=="undefined"&&window.antigravityAccounts?.prepareAdd){
+        var res=await window.antigravityAccounts.prepareAdd(nextSlot);
+        if(res&&res.success){
+          setStatusMsg("Готово! Перезагрузка для входа...");
+          setTimeout(()=>{
+            if(window.antigravityAccounts?.reloadWindow){
+              window.antigravityAccounts.reloadWindow();
+            }else{
+              window.location.reload();
+            }
+          },1000);
+        }else{
+          setStatusMsg(res?.error||"Ошибка создания слота");
+          setSwitchingSlot(null);
+        }
+      }
+    }catch(err){
+      setStatusMsg("Ошибка: "+(err?.message||String(err)));
+      setSwitchingSlot(null);
+    }
+  };
+
+  var handleCancelAdd=async()=>{
+    try{
+      setSwitchingSlot(998);
+      setStatusMsg("Восстановление сессии...");
+      if(typeof window!=="undefined"&&window.antigravityAccounts?.cancelAdd){
+        await window.antigravityAccounts.cancelAdd();
+        setTimeout(()=>{
+          if(window.antigravityAccounts?.reloadWindow){
+            window.antigravityAccounts.reloadWindow();
+          }else{
+            window.location.reload();
+          }
+        },1000);
+      }
+    }catch(err){
+      setStatusMsg("Ошибка: "+(err?.message||String(err)));
+      setSwitchingSlot(null);
+    }
+  };
+
+  if(loading){
+    return z.createElement("div",{className:"p-4 text-xs text-muted-foreground flex items-center gap-2"},
+      z.createElement("div",{className:"w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"}),
+      "Загрузка слотов аккаунтов..."
+    );
+  }
+
+  var slots=slotsData?.slots||[];
+  var hasPending=Boolean(slotsData?.pending_wizard);
+
+  return z.createElement(O0,null,
+    hasPending&&z.createElement(CR,{
+      label:z.createElement("span",{className:"text-amber-500 font-medium text-xs"},"⚠️ Режим добавления нового аккаунта"),
+      description:"Предыдущая сессия в безопасности. Войдите в Google или отмените добавление.",
+      rightElement:z.createElement(Yz,{
+        variant:"secondary",
+        size:"sm",
+        disabled:switchingSlot!==null,
+        onClick:handleCancelAdd
+      },switchingSlot===998?"Восстановление...":"Отменить добавление")
+    }),
+    slots.map(s=>{
+      var isActive=Boolean(s.is_active);
+      var isThisSwitching=switchingSlot===s.slot;
+      return z.createElement(CR,{
+        key:`slot-${s.slot}`,
+        label:z.createElement("div",{className:"flex items-center gap-2"},
+          z.createElement("span",{className:"font-semibold text-sm"},`Слот ${s.slot}`),
+          isActive&&z.createElement("span",{className:"text-[10px] font-medium bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-1.5 py-0.5 rounded-full"},"Активен"),
+          s.name&&z.createElement("span",{className:"text-xs text-muted-foreground"},`(${s.name})`)
+        ),
+        description:s.email,
+        rightElement:isActive?
+          z.createElement(Yz,{
+            variant:"secondary",
+            size:"sm",
+            disabled:!0,
+            className:"opacity-60 cursor-default"
+          },"Текущий"):
+          z.createElement(Yz,{
+            variant:"secondary",
+            size:"sm",
+            disabled:switchingSlot!==null,
+            onClick:()=>handleSwitch(s.slot)
+          },isThisSwitching?"Переключение...":"Переключить")
+      });
+    }),
+    z.createElement(CR,{
+      label:z.createElement("span",{className:"text-sm text-foreground font-medium"},"+ Добавить Google-аккаунт"),
+      description:"Безопасное добавление нового аккаунта без сброса существующих сессий (Zero-Revocation)",
+      rightElement:z.createElement(Yz,{
+        variant:"primary",
+        size:"sm",
+        disabled:switchingSlot!==null,
+        onClick:handleAdd
+      },switchingSlot===999?"Подготовка...":"Добавить")
+    }),
+    statusMsg&&z.createElement("div",{className:"px-3 py-2 text-xs text-primary bg-primary/10 border-t border-border flex items-center gap-2"},
+      switchingSlot!==null&&z.createElement("div",{className:"w-3 h-3 border-2 border-primary border-t-transparent rounded-full animate-spin"}),
+      statusMsg
+    )
+  );
+};
+var ewb=()=>{var a=Ld().core.authService,b=xK(),c=ml(),e=MM(Kk.DEMO_MODE_ENABLED),f=ol(),g=f?.state??"signedOut",h=f?.context.isGcpTos??!1;f=f?.context.project;var k=Dvb(),l=Sl(),m=l.get("settingsFeature"),n=l.get("isRemoteControl")??!1,p=m?.useCloseSettings()??(()=>{});m=V0a();var [r,t]=(0,z.useState)(!1),[u,v]=(0,z.useState)(!1),w=c&&c.userTier?.description,y=c.userTier?.upgradeSubscriptionText||"";l=!l.get("settings")?.hideTelemetry;var A=!b.product.isGoogleInternal&&!h;return r?z.createElement(cwb,
 {onBack:()=>{t(!1)}}):z.createElement(N0,{title:"Account",description:"Manage your plan, credentials, and general preferences."},g==="signedIn"&&(l||A)&&z.createElement(qQ,{title:"General"},z.createElement(O0,null,l&&z.createElement($vb,{label:"Enable Telemetry",description:`When toggled on, ${b.product.nameShort} collects usage data to help Google enhance performance and features.`,userSettings:k,disabled:h}),A&&z.createElement(awb,{label:"Marketing Emails",description:`Receive product updates, tips, and promotions from Google ${b.product.nameShort} via email.`,
 userSettings:k}))),z.createElement(qQ,{title:"Account"},z.createElement(O0,null,g==="signedIn"&&w&&z.createElement(CR,{label:z.createElement("div",{className:"text-sm font-medium"},"Your Plan: ",w),description:h&&f?z.createElement(z.Fragment,null,z.createElement("span",{className:"text-foreground"},"Project ID: ",f),y&&z.createElement(z.Fragment,null,z.createElement("br",null),y)):y,rightElement:m&&h?z.createElement(Yz,{variant:"secondary",size:"sm",onClick:()=>{t(!0)}},"Manage"):c.userTier?.upgradeSubscriptionUri?
 z.createElement("a",{href:eB(c.userTier?.upgradeSubscriptionUri,"utm_campaign","ARGON_SETTINGS_PAGE"),target:"_blank",rel:"noopener noreferrer",className:"select-none rounded px-3 py-1 text-sm font-medium transition-colors cursor-pointer bg-primary text-primary-foreground hover:bg-primary/90"},c.userTier?.upgradeButtonText||"Upgrade"):void 0}),g==="signedIn"?z.createElement(CR,{label:"Email",description:e?"Peter Pan":c.email,rightElement:z.createElement(Yz,{variant:"secondary",size:"sm",disabled:n||
-u,tooltip:n?"You cannot sign out from Remote Control. Please sign out on your local application.":void 0,onClick:async()=>{var B=d,C=d;try{v(!0);try{C(await B(a.logout()))}finally{C(),v(!1)}}finally{B()}}},u?"Signing Out...":"Sign Out")}):z.createElement(CR,{label:"Not Signed In",description:`Sign in to use ${dwb}!`,rightElement:z.createElement(Yz,{variant:"primary",size:"sm",onClick:()=>{p();a.showLoginFlow()}},"Sign In")}))),!b.product.isGoogleInternal&&z.createElement("div",{className:"text-xs text-muted-foreground mt-auto pt-4"},
+u,tooltip:n?"You cannot sign out from Remote Control. Please sign out on your local application.":void 0,onClick:async()=>{var B=d,C=d;try{v(!0);try{C(await B(a.logout()))}finally{C(),v(!1)}}finally{B()}}},u?"Signing Out...":"Sign Out")}):z.createElement(CR,{label:"Not Signed In",description:`Sign in to use ${dwb}!`,rightElement:z.createElement(Yz,{variant:"primary",size:"sm",onClick:()=>{p();a.showLoginFlow()}},"Sign In")}))),z.createElement(qQ,{title:"Аккаунты Google (Быстрое переключение)"},z.createElement(AccountSlotsSwitcher,null)),!b.product.isGoogleInternal&&z.createElement("div",{className:"text-xs text-muted-foreground mt-auto pt-4"},
 "By using this app, you agree to its"," ",z.createElement("a",{href:h?"https://cloud.google.com/terms":"https://antigravity.google/terms",className:"text-link hover:underline",target:"_blank",rel:"noreferrer"},"Terms of Service")))};const fwb=xk(!1),gwb=xk(0),hwb=xk("");var P0=()=>{var a=Sl().get("manualUpdateNudgeFeature"),b=dl(a?.shouldShow??fwb),c=dl(a?.updateLevel??gwb),e=dl(a?.currentVersion??hwb);return{shouldShow:b,updateLevel:c,currentVersion:e,fallbackInstructionsComponent:a?.fallbackInstructionsComponent??null,onUpdate:a?.onUpdate}};function iwb(){var {currentVersion:a}=P0(),{electronNativeFeature:b}=(0,z.useContext)(Rl);return(a=a||b?.appVersion)?z.createElement("div",{className:"flex flex-col gap-4"},z.createElement("div",{className:"text-sm font-medium"},"Version"),z.createElement(O0,null,z.createElement(CR,{label:"App version",rightElement:z.createElement("span",{"data-testid":"app-version",className:"text-sm text-muted-foreground font-mono select-text"},a)}))):null};var jwb=({title:a="Notifications"})=>{var b=Ld().core.notificationService,c=(0,z.useCallback)(async()=>{var e=d,f=d;try{f(await e(b.openPreferences()))}finally{e()}},[b]);return z.createElement(qQ,{title:a},z.createElement(O0,null,z.createElement(rQ,null,z.createElement("div",{className:"flex items-center justify-between gap-8"},z.createElement("div",{className:"flex-1"},z.createElement("div",{className:"text-sm font-medium"},"Notification Settings"),z.createElement("div",{className:"text-xs text-muted-foreground mt-0.5"},
 "To modify notification settings, open your operating system's system preferences.")),z.createElement(Yz,{variant:"secondary",size:"sm",onClick:c},"Open System Preferences")))))};var Q0=({label:a,description:b,placeholder:c,type:e="string",value:f,onChange:g,disabled:h,onFocus:k,onBlur:l,compact:m=!1,onKeyDown:n,multiline:p,rows:r=4,footer:t,unpadded:u})=>{var v=y=>{g(y.target.value)},w={fontSize:"12px",borderRadius:"4px",padding:"4px 8px"};e=z.createElement("input",{type:e==="number"?"number":"text",value:f,"aria-label":a,onChange:v,onFocus:k,onBlur:l,onKeyDown:n,placeholder:c,disabled:h,className:Pk("placeholder:text-placeholder focus:!outline-none focus:!ring-0 transition-all !border !border-border !bg-muted disabled:opacity-50 !shadow-none",
 m?"w-[120px]":"w-full mt-1"),style:w});c=z.createElement("textarea",{value:f,"aria-label":a,onChange:v,onFocus:k,onBlur:l,onKeyDown:n,placeholder:c,disabled:h,rows:r,className:Pk("placeholder:text-placeholder focus:!outline-none focus:!ring-0 transition-all !border !border-border !bg-muted disabled:opacity-50 !shadow-none","w-full resize-y font-mono"),style:w});return z.createElement(CR,{label:a,description:b,unpadded:u,alignItems:p||t?"start":"center",rightElement:!p&&m?e:void 0,extraContent:p?z.createElement(z.Fragment,
