@@ -48,8 +48,8 @@ if command -v scutil &>/dev/null; then
     fi
 fi
 
-# Массив вызова curl с принудительным HTTP/1.1 (предотвращает сбросы соединений в локальных прокси)
-CURL_CMD=(curl --http1.1 "${CURL_PROXY_ARGS[@]}")
+# Массив вызова curl с прокси без повторного использования сокетов (предотвращает RST от локального прокси)
+CURL_CMD=(curl --no-keepalive "${CURL_PROXY_ARGS[@]}")
 
 echo "🚀 Проверка существования релиза $TAG в репозитории $REPO..."
 RELEASES_LIST=$("${CURL_CMD[@]}" -s -H "Authorization: token $TOKEN" \
@@ -64,35 +64,33 @@ RELEASE_ID=$(node -e '
     } catch (e) {}
 ' "$RELEASES_LIST" "$TAG")
 
-BODY_TEXT='## 🇷🇺 Antigravity Toolkit GUI v2.0.6 (macOS)
+BODY_TEXT="## 🇷🇺 Antigravity Toolkit GUI ${TAG} (macOS)
 
 Готовый бинарный дистрибутив десктопного приложения **Antigravity Toolkit GUI** для macOS (Apple Silicon).
 
 ### 📦 Загрузка дистрибутива (Пакеты macOS):
-- **💿 Образ установщика DMG (рекомендуется)**: [Antigravity-Toolkit-GUI-macOS-arm64.dmg](https://github.com/salambeq/antigravity-ru/releases/download/v2.0.6/Antigravity-Toolkit-GUI-macOS-arm64.dmg)
-- **🗜️ Портативный архив ZIP**: [Antigravity-Toolkit-GUI-macOS-arm64.zip](https://github.com/salambeq/antigravity-ru/releases/download/v2.0.6/Antigravity-Toolkit-GUI-macOS-arm64.zip)
+- **💿 Образ установщика DMG (рекомендуется)**: [Antigravity-Toolkit-GUI-macOS-arm64.dmg](https://github.com/${REPO}/releases/download/${TAG}/Antigravity-Toolkit-GUI-macOS-arm64.dmg)
+- **🗜️ Портативный архив ZIP**: [Antigravity-Toolkit-GUI-macOS-arm64.zip](https://github.com/${REPO}/releases/download/${TAG}/Antigravity-Toolkit-GUI-macOS-arm64.zip)
 
 ---
 
-### ✨ Новые возможности релиза v2.0.6:
-1. 🛡️ **Фоновый Keep-Alive 24/7 для всех 4 слотов аккаунтов**:
-   - Гарантия от слёта токенов и разлогинивания: если вы активно пользуетесь одним аккаунтом на протяжении нескольких дней, остальные 3 аккаунта остаются активными и валидными благодаря упреждающему обновлению OAuth-токенов в фоновом режиме каждые 20 минут.
-   - Мгновенное и бесшовное переключение между всеми 4 Google-профилями без повторного входа в браузере.
-2. 🍏 **Интеграция с системным треем macOS (Menu Bar Tray) и Close-to-Tray**:
-   - При закрытии на красный крестик окно сворачивается в трей macOS (не прерывая фоновый Keep-Alive и защиту чатов).
-   - В меню трея отображается текущий активный слот, email, 5-часовой лимит и таймер сброса.
-   - Быстрое переключение любого из 4 аккаунтов прямо из менюбара macOS.
-   - Завершение приложения доступно через пункт «Завершить Antigravity Toolkit» в меню трея.
-3. ⚡ **Отображение квот токенов для всех 4 слотов одновременно**:
-   - На карточке каждого из 4 слотов в реальном времени выводятся остатки 5-часового и недельного лимитов (`⚡ 5ч: X% • 📅 нед: Y%`).
-4. 📦 **Защита и бэкап чатов (Backup & Restore)**:
-   - Полное сохранение истории диалогов, сессий и конфигураций SQLite (100+ диалогов) локально на диске.
-5. 🎨 **Переосмысленный модульный интерфейс (Tabs & Drawer)**:
-   - Исправлена верстка и устранены любые перекрытия блоков.
-   - Удобная навигация по вкладкам (Панель, Квоты, Аккаунты, Компоненты, Резервные копии).
-   - Выдвижная консоль операций (Drawer Terminal) с авто-раскрытием при фоновых процессах.
-6. 🔒 **100% Zero-Leak & Офлайн**:
-   - Все токены и персональные данные хранятся исключительно локально в Keychain macOS.'
+### ✨ Новые возможности релиза ${TAG}:
+1. 🪄 **Мастер привязки Google-аккаунтов (Setup Wizard)**:
+   - Добавление любого из 4 аккаунтов в 1 клик прямо из интерфейса Тулкита.
+   - Тулкит безопасно бэкапит текущую сессию, открывает Antigravity для чистого входа в Google и автоматически перехватывает новые OAuth-токены из Keychain.
+2. 💡 **«Золотое правило» и защита от слёта токенов**:
+   - Предупреждение и защита от нажатия «Выйти» (Sign Out) в меню Antigravity, предотвращающая сетевой отзыв токена (\`invalid_grant\`) серверами Google.
+   - Быстрое и безопасное переключение профилей через Тулкит без закрытия сессий.
+3. ⚠️ **Graceful-обработка отозванных токенов**:
+   - Если токен был сброшен или изменен пароль, слот не ломает приложение, а подсвечивается статусом «Сессия отозвана» с кнопкой «Войти заново».
+4. ⚡ **Квоты токенов для всех 4 аккаунтов одновременно**:
+   - На экране «Квоты токенов» выводится Bento-сетка 2x2 со всеми 4 аккаунтами одновременно: Gemini 5ч, Gemini Неделя, Claude & GPT, таймеры обратного отсчёта.
+5. 🛡️ **Фоновый Keep-Alive 24/7 в трее macOS Menu Bar**:
+   - Работа в системном трее при закрытии на крестик, поддержка актуальности всех 4 аккаунтов каждые 20 минут.
+6. 📦 **Защита и бэкап чатов (Backup & Restore)**:
+   - Локальное сохранение и восстановление базы диалогов SQLite.
+7. 🔒 **100% Zero-Leak**:
+   - Все ключи и токены хранятся исключительно локально в Keychain macOS."
 
 TMP_PAYLOAD="/tmp/github_release_payload.json"
 
@@ -101,15 +99,17 @@ if [ -z "$RELEASE_ID" ] || [ "$RELEASE_ID" = "null" ]; then
     node -e '
         const fs = require("fs");
         const body = process.argv[1];
+        const tag = process.argv[3];
+        const name = process.argv[4];
         fs.writeFileSync(process.argv[2], JSON.stringify({
-            tag_name: "v2.0.6",
+            tag_name: tag,
             target_commitish: "main",
-            name: "Antigravity Toolkit GUI v2.0.6 (macOS Edition)",
+            name: name,
             body: body,
             draft: false,
             prerelease: false
         }));
-    ' "$BODY_TEXT" "$TMP_PAYLOAD"
+    ' "$BODY_TEXT" "$TMP_PAYLOAD" "$TAG" "$NAME"
 
     CREATE_RESP=$("${CURL_CMD[@]}" -s -X POST \
         -H "Authorization: token $TOKEN" \
@@ -134,11 +134,12 @@ else
     node -e '
         const fs = require("fs");
         const body = process.argv[1];
+        const name = process.argv[3];
         fs.writeFileSync(process.argv[2], JSON.stringify({
-            name: "Antigravity Toolkit GUI v2.0.6 (macOS Edition)",
+            name: name,
             body: body
         }));
-    ' "$BODY_TEXT" "$TMP_PAYLOAD"
+    ' "$BODY_TEXT" "$TMP_PAYLOAD" "$NAME"
 
     "${CURL_CMD[@]}" -s -X PATCH \
         -H "Authorization: token $TOKEN" \
