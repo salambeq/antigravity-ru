@@ -8,6 +8,7 @@ import shutil
 
 def patch_language_server(app_res, script_dir, preserve_or_apply_unlock=True):
     bin_name = "language_server.exe" if os.name == "nt" else "language_server"
+    dest_bin = os.path.join(app_res, "bin", bin_name)
     orig_bin = os.path.join(app_res, "bin", bin_name + ".orig")
     import tempfile
     target_bin = os.path.join(tempfile.gettempdir(), f"antigravity_ls_patched_{os.getpid()}" + (".exe" if os.name == "nt" else ""))

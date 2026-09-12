@@ -389,6 +389,7 @@ ipcMain.handle('run-action', async (event, action) => {
     unlock: ['--unlock'],
     restore: ['--restore'],
     diagnostics: ['--diagnostics'],
+    patch_multiaccount: ['--patch-multiaccount'],
   };
   const args = map[action] || ['--all'];
   return streamPythonCommand(args, event);

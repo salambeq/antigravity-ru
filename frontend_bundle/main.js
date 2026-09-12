@@ -9367,20 +9367,38 @@ var AccountSlotsSwitcher=()=>{
   var handleSwitch=async slotNum=>{
     try{
       setSwitchingSlot(slotNum);
-      setStatusMsg("Переключение аккаунта...");
+      setStatusMsg("Переключение на Слот #"+slotNum+"... Перезапуск сервера...");
       if(typeof window!=="undefined"&&window.antigravityAccounts?.switchSlot){
         var res=await window.antigravityAccounts.switchSlot(slotNum);
         if(res&&res.success){
-          setStatusMsg("Успешно! Перезагрузка...");
+          setStatusMsg("Успешно переключено! Сервер перезапускается...");
           setTimeout(()=>{
-            if(window.antigravityAccounts?.reloadWindow){
-              window.antigravityAccounts.reloadWindow();
-            }else{
-              window.location.reload();
-            }
-          },1200);
+            try{window.location.reload()}catch(e){}
+          },4000);
         }else{
           setStatusMsg(res?.error||"Ошибка переключения");
+          setSwitchingSlot(null);
+        }
+      }
+    }catch(err){
+      setStatusMsg("Ошибка: "+(err?.message||String(err)));
+      setSwitchingSlot(null);
+    }
+  };
+
+  var handlePrepareSlot=async slotNum=>{
+    try{
+      setSwitchingSlot(slotNum);
+      setStatusMsg("Подготовка слота #"+slotNum+" для входа...");
+      if(typeof window!=="undefined"&&window.antigravityAccounts?.prepareAdd){
+        var res=await window.antigravityAccounts.prepareAdd(slotNum);
+        if(res&&res.success){
+          setStatusMsg("Готово! Войдите в Google в окне аккаунта...");
+          setTimeout(()=>{
+            try{window.location.reload()}catch(e){}
+          },3500);
+        }else{
+          setStatusMsg(res?.error||"Ошибка подготовки слота");
           setSwitchingSlot(null);
         }
       }
@@ -9399,14 +9417,10 @@ var AccountSlotsSwitcher=()=>{
       if(typeof window!=="undefined"&&window.antigravityAccounts?.prepareAdd){
         var res=await window.antigravityAccounts.prepareAdd(nextSlot);
         if(res&&res.success){
-          setStatusMsg("Готово! Перезагрузка для входа...");
+          setStatusMsg("Готово! Войдите в Google в окне аккаунта...");
           setTimeout(()=>{
-            if(window.antigravityAccounts?.reloadWindow){
-              window.antigravityAccounts.reloadWindow();
-            }else{
-              window.location.reload();
-            }
-          },1000);
+            try{window.location.reload()}catch(e){}
+          },3500);
         }else{
           setStatusMsg(res?.error||"Ошибка создания слота");
           setSwitchingSlot(null);
@@ -9421,16 +9435,13 @@ var AccountSlotsSwitcher=()=>{
   var handleCancelAdd=async()=>{
     try{
       setSwitchingSlot(998);
-      setStatusMsg("Восстановление сессии...");
+      setStatusMsg("Восстановление сохранённой сессии...");
       if(typeof window!=="undefined"&&window.antigravityAccounts?.cancelAdd){
         await window.antigravityAccounts.cancelAdd();
+        setStatusMsg("Сессия восстановлена! Перезагрузка...");
         setTimeout(()=>{
-          if(window.antigravityAccounts?.reloadWindow){
-            window.antigravityAccounts.reloadWindow();
-          }else{
-            window.location.reload();
-          }
-        },1000);
+          try{window.location.reload()}catch(e){}
+        },2000);
       }
     }catch(err){
       setStatusMsg("Ошибка: "+(err?.message||String(err)));
@@ -9451,25 +9462,27 @@ var AccountSlotsSwitcher=()=>{
   return z.createElement(O0,null,
     hasPending&&z.createElement(CR,{
       label:z.createElement("span",{className:"text-amber-500 font-medium text-xs"},"⚠️ Режим добавления нового аккаунта"),
-      description:"Предыдущая сессия в безопасности. Войдите в Google или отмените добавление.",
+      description:"Предыдущая сессия в безопасности (Zero-Revocation). Войдите в Google выше или отмените добавление.",
       rightElement:z.createElement(Yz,{
         variant:"secondary",
         size:"sm",
         disabled:switchingSlot!==null,
         onClick:handleCancelAdd
-      },switchingSlot===998?"Восстановление...":"Отменить добавление")
+      },switchingSlot===998?"Восстановление...":"Отменить")
     }),
     slots.map(s=>{
       var isActive=Boolean(s.is_active);
       var isThisSwitching=switchingSlot===s.slot;
+      var needsAuth=Boolean(s.needs_auth||s.is_revoked||!s.email||s.email.includes("требуется вход"));
       return z.createElement(CR,{
         key:`slot-${s.slot}`,
         label:z.createElement("div",{className:"flex items-center gap-2"},
           z.createElement("span",{className:"font-semibold text-sm"},`Слот ${s.slot}`),
           isActive&&z.createElement("span",{className:"text-[10px] font-medium bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-1.5 py-0.5 rounded-full"},"Активен"),
+          !isActive&&needsAuth&&z.createElement("span",{className:"text-[10px] font-medium bg-amber-500/20 text-amber-400 border border-amber-500/30 px-1.5 py-0.5 rounded-full"},"Требуется вход"),
           s.name&&z.createElement("span",{className:"text-xs text-muted-foreground"},`(${s.name})`)
         ),
-        description:s.email,
+        description:needsAuth?(s.email&&!s.email.includes("требуется вход")?`${s.email} (требуется вход)`:"Сессия не привязана"):s.email,
         rightElement:isActive?
           z.createElement(Yz,{
             variant:"secondary",
@@ -9477,6 +9490,13 @@ var AccountSlotsSwitcher=()=>{
             disabled:!0,
             className:"opacity-60 cursor-default"
           },"Текущий"):
+          needsAuth?
+          z.createElement(Yz,{
+            variant:"primary",
+            size:"sm",
+            disabled:switchingSlot!==null,
+            onClick:()=>handlePrepareSlot(s.slot)
+          },isThisSwitching?"Подготовка...":"Войти / Привязать"):
           z.createElement(Yz,{
             variant:"secondary",
             size:"sm",

@@ -220,12 +220,14 @@ def patch_asar_dir(dist_dir):
                         if (!isNaN(num)) {
                             try {
                                 const sData = JSON.parse(fs_accounts.readFileSync(path_accounts.join(slotsDir, f), 'utf8'));
+                                const needsAuth = Boolean(sData.needs_auth || sData.is_revoked || !sData.raw_payload || (metaSlots[num] && metaSlots[num].needs_auth));
                                 slotsList.push({
                                     slot: num,
                                     email: sData.email || metaSlots[num]?.email || `Слот #${num}`,
                                     name: sData.name || metaSlots[num]?.name || '',
                                     is_active: (num === activeSlot),
-                                    is_revoked: Boolean(sData.is_revoked)
+                                    is_revoked: Boolean(sData.is_revoked),
+                                    needs_auth: needsAuth
                                 });
                             } catch {}
                         }
@@ -369,6 +371,31 @@ def patch_asar_dir(dist_dir):
             return { success: false, error: String(err) };
         }
     });
+
+    electron_1.ipcMain.handle('accounts:delete-slot', async (_event, targetSlot) => {
+        try {
+            const slotNum = parseInt(targetSlot, 10);
+            let curMeta = { active_slot: 1, slots: {} };
+            if (fs_accounts.existsSync(metaPath)) {
+                try { curMeta = JSON.parse(fs_accounts.readFileSync(metaPath, 'utf8')); } catch {}
+            }
+            if (curMeta.active_slot === slotNum) {
+                return { success: false, error: 'Нельзя удалить активный слот' };
+            }
+            const slotFile = path_accounts.join(slotsDir, `slot_${slotNum}.json`);
+            if (fs_accounts.existsSync(slotFile)) {
+                try { fs_accounts.unlinkSync(slotFile); } catch {}
+            }
+            if (curMeta.slots && curMeta.slots[String(slotNum)]) {
+                delete curMeta.slots[String(slotNum)];
+                fs_accounts.writeFileSync(metaPath, JSON.stringify(curMeta, null, 2), 'utf8');
+                fs_accounts.writeFileSync(altMetaPath, JSON.stringify(curMeta, null, 2), 'utf8');
+            }
+            return { success: true, slot: slotNum };
+        } catch (err) {
+            return { success: false, error: String(err) };
+        }
+    });
 }
 """
             last_brace_idx = ipc_code.rfind('}')
@@ -390,6 +417,7 @@ const accountsAPI = {
     switchSlot: (slotNum) => electron_1.ipcRenderer.invoke('accounts:switch-slot', slotNum),
     prepareAdd: (slotNum) => electron_1.ipcRenderer.invoke('accounts:prepare-add', slotNum),
     cancelAdd: () => electron_1.ipcRenderer.invoke('accounts:cancel-add'),
+    deleteSlot: (slotNum) => electron_1.ipcRenderer.invoke('accounts:delete-slot', slotNum),
     reloadWindow: () => window.location.reload(),
 };
 electron_1.contextBridge.exposeInMainWorld('antigravityAccounts', accountsAPI);

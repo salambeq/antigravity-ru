@@ -1065,10 +1065,16 @@
                   <span>Очистить слот <span id="lbl-selected-slot-4">#1</span></span>
                 </button>
               </div>
-              <button id="btn-refresh-all-slots" class="w-full py-2 px-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.07] text-slate-300 hover:text-white text-xs font-medium flex items-center justify-center gap-1.5 transition-all active:scale-98" title="Принудительно обновить активность и квоты всех 4 слотов">
-                <span class="material-symbols-outlined text-[15px] text-cyan-400">published_with_changes</span>
-                <span>Обновить активность всех слотов (Keep-Alive)</span>
-              </button>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <button id="btn-refresh-all-slots" class="w-full py-2.5 px-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.07] text-slate-300 hover:text-white text-xs font-medium flex items-center justify-center gap-1.5 transition-all active:scale-98" title="Принудительно обновить активность и квоты всех 4 слотов">
+                  <span class="material-symbols-outlined text-[15px] text-cyan-400">published_with_changes</span>
+                  <span>Обновить активность слотов (Keep-Alive)</span>
+                </button>
+                <button id="btn-patch-multiaccount" class="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-emerald-500/15 via-teal-500/15 to-blue-500/15 hover:from-emerald-500/25 hover:via-teal-500/25 hover:to-blue-500/25 border border-emerald-500/40 text-emerald-300 hover:text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-all active:scale-98 shadow-sm" title="Внедрить переключатель аккаунтов прямо в настройки Antigravity (после авто-обновлений приложения)">
+                  <span class="material-symbols-outlined text-[15px] text-emerald-400">bolt</span>
+                  <span>Внедрить переключатель в Antigravity</span>
+                </button>
+              </div>
             </div>
           </section>
         </div>
@@ -2715,6 +2721,18 @@
             setBusy(false);
             await refreshStatus();
           }
+        });
+      }
+
+      // Patch Multi-account Switcher into Antigravity
+      const btnPatchMultiaccount = document.getElementById('btn-patch-multiaccount');
+      if (btnPatchMultiaccount) {
+        btnPatchMultiaccount.addEventListener('click', () => {
+          executeActionWithWarning(
+            'patch_multiaccount',
+            '⚡ Внедрить переключатель в Antigravity',
+            'Будет пересобран app.asar (с IPC-мостом) и обновлен language_server. В окне Настройки -> Аккаунт появится встроенный переключатель слотов с защитой сессий Zero-Revocation.'
+          );
         });
       }
 

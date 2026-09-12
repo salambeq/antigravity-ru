@@ -12,6 +12,7 @@ def patch_app_asar(app_res, script_dir):
     """
     orig_asar = os.path.join(app_res, "app.asar.orig")
     dest_asar = os.path.join(app_res, "app.asar")
+    unpacked_dir = os.path.join(app_res, "app.asar.unpacked")
     ru_asar_cache = os.path.join(script_dir, "app.asar.ru")
     if not os.path.exists(ru_asar_cache) and getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
         ru_asar_cache = os.path.join(sys._MEIPASS, "app.asar.ru")

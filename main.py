@@ -485,6 +485,96 @@ def action_localize_ui(targets, interactive=True):
         pause()
 
 
+def action_patch_multiaccount(targets=None, interactive=True):
+    """
+    Внедряет встроенный переключатель аккаунтов прямо в UI настроек Antigravity (Zero-Revocation).
+    Пересобирает app.asar (с IPC-обработчиками) и language_server (с AccountSlotsSwitcher UI).
+    """
+    if interactive:
+        clear_screen()
+        print_banner()
+        step("⚡ ВНЕДРЕНИЕ МУЛЬТИАККАУНТИНГА В ИНТЕРФЕЙС ANTIGRAVITY")
+        print()
+        warn("⚠️  ВНИМАНИЕ: Будут пропатчены и установлены app.asar и language_server.")
+        warn("   Рекомендуется закрыть Antigravity перед началом операции.")
+        if not confirmed("   Вы уверены, что хотите продолжить?"):
+            cancel("Операция отменена пользователем.")
+            pause()
+            return False
+
+    info("Поиск ресурсов Antigravity...")
+    manager_path = None
+    if targets and isinstance(targets, dict):
+        manager_path = targets.get("manager")
+
+    from patcher.localization import get_resources_path
+    res_path = get_resources_path(manager_path)
+    if not res_path or not os.path.isdir(res_path):
+        err(f"Каталог ресурсов Antigravity не найден: {res_path}")
+        if interactive:
+            pause()
+        return False
+
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    base_dir = sys._MEIPASS if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS") else script_dir
+
+    # 1. Патч ядра language_server с компонентом AccountSlotsSwitcher
+    info("[1/3] Сборка и внедрение UI-переключателя слотов в language_server...")
+    try:
+        from patcher.patcher_binary_worker import patch_language_server
+        patch_language_server(res_path, base_dir)
+        ok("UI-компонент переключателя успешно интегрирован в language_server!")
+    except Exception as e:
+        err(f"Ошибка при патче language_server: {e}")
+        if interactive:
+            pause()
+        return False
+
+    # 2. Патч app.asar с IPC-обработчиками и bridge window.antigravityAccounts
+    info("[2/3] Сборка и внедрение IPC-моста в app.asar...")
+    try:
+        from patcher.patcher_asar_worker import patch_app_asar
+        patch_app_asar(res_path, base_dir)
+        ok("IPC-обработчики мультиаккаунтинга успешно внедрены в app.asar!")
+    except Exception as e:
+        err(f"Ошибка при патче app.asar: {e}")
+        if interactive:
+            pause()
+        return False
+
+    # 3. Инициализация и сохранение копий
+    info("[3/3] Настройка защищённого хранилища ~/.gemini/accounts (Zero-Revocation)...")
+    try:
+        ru_asar_dest = os.path.join(script_dir, "app.asar.ru")
+        if os.path.exists(os.path.join(res_path, "app.asar")):
+            shutil.copyfile(os.path.join(res_path, "app.asar"), ru_asar_dest)
+        bin_name = "language_server.exe" if os.name == "nt" else "language_server"
+        target_bin = os.path.join(res_path, "bin", bin_name)
+        if os.path.exists(target_bin):
+            shutil.copyfile(target_bin, os.path.join(script_dir, "language_server.ru"))
+
+        from patcher.accounts.manager import AccountManager
+        ac_mgr = AccountManager()
+        ac_mgr._ensure_dirs()
+        cur_acc = ac_mgr.get_current_account_info()
+        meta = ac_mgr._load_metadata()
+        if cur_acc.get("authenticated") and not meta.get("active_slot"):
+            ac_mgr.save_current_account(1)
+            ok(f"Текущая сессия ({cur_acc.get('email', 'Google')}) сохранена в Слот #1!")
+        else:
+            ac_mgr.sync_keychain_to_active_slot()
+    except Exception as e:
+        warn(f"Предупреждение при настройке каталога аккаунтов: {e}")
+
+    print()
+    ok("🎉 МУЛЬТИАККАУНТИНГ УСПЕШНО ИНТЕГРИРОВАН В ANTIGRAVITY!")
+    hint("Откройте Настройки (Settings) -> Аккаунт (Account) в Antigravity для управления слотами.")
+    hint("Если приложение было открыто, перезапустите его (Cmd+Q и откройте снова).")
+    if interactive:
+        pause()
+    return True
+
+
 def action_unlock_all(targets, interactive=True):
     """Снятие региональных ограничений со всех найденных компонентов."""
     clear_screen()
@@ -700,6 +790,7 @@ def action_custom_menu(targets):
         print_menu_divider()
         print_menu_row("7", "Патч VS Code Extension", "Патч extension.js + agy", COLOR_GREEN)
         print_menu_row("8", "Откат VS Code Extension", "Восстановление расширения", COLOR_YELLOW)
+        print_menu_row("9", "Внедрить мультиаккаунтинг", "Патч UI и ядра Antigravity для смены аккаунтов", COLOR_GREEN)
         print()
         print_menu_row("0", "Вернуться в главное меню", "", COLOR_RED)
         print()
@@ -756,6 +847,8 @@ def action_custom_menu(targets):
             else:
                 warn("Расширение VS Code не найдено.")
             pause()
+        elif c == "9":
+            action_patch_multiaccount(targets=targets, interactive=True)
 
 
 def action_accounts_menu(targets=None):
@@ -791,6 +884,7 @@ def action_accounts_menu(targets=None):
         print_menu_row("4", "📋 Список всех слотов", "Просмотр сохранённых аккаунтов и метаданных", COLOR_CYAN)
         print_menu_row("5", "⚡ Запустить авто-ротатор", "Авто-смена аккаунта в реальном времени при ошибках квот", COLOR_GREEN)
         print_menu_row("6", "❌ Удалить слот", "Удалить сохранённый профиль аккаунта", COLOR_YELLOW)
+        print_menu_row("7", "⚡ Внедрить переключатель в Antigravity", "Патч приложения для переключения аккаунтов прямо в UI", COLOR_GREEN)
         print()
         print_menu_row("0", "Вернуться в главное меню", "", COLOR_RED)
         print()
@@ -888,6 +982,8 @@ def action_accounts_menu(targets=None):
             except ValueError:
                 err("Номер слота должен быть числом.")
             pause()
+        elif c == "7":
+            action_patch_multiaccount(targets=targets, interactive=True)
 
 
 def action_backups_menu(targets=None):
@@ -1047,6 +1143,9 @@ def main():
             sys.exit(0)
         elif arg in ("--localize", "-l"):
             action_localize_ui(targets, interactive=False)
+            sys.exit(0)
+        elif arg in ("--patch-multiaccount", "--enable-multiaccount", "-pma"):
+            action_patch_multiaccount(targets, interactive=False)
             sys.exit(0)
         elif arg in ("--unlock", "-u"):
             action_unlock_all(targets, interactive=False)
