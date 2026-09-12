@@ -35,6 +35,14 @@ from patcher.constants import (
     COLOR_RESET,
     DOWNLOAD_URL,
     VERSION,
+    BASE_VERSION,
+    VERSION_FULL,
+    VERSION_SHORT,
+    GITHUB_REPO,
+    GITHUB_REPO_URL,
+    BUILD_REV,
+    BUILD_COMMIT,
+    IS_DIRTY,
 )
 from patcher.utils.console import (
     color,
@@ -197,6 +205,17 @@ def get_system_status_json():
         pass
 
     return {
+        "toolkit": {
+            "version": VERSION,
+            "base_version": BASE_VERSION,
+            "full_version": VERSION_FULL,
+            "short_version": VERSION_SHORT,
+            "build_rev": BUILD_REV,
+            "commit": BUILD_COMMIT,
+            "is_dirty": IS_DIRTY,
+            "github_repo": GITHUB_REPO,
+            "github_url": GITHUB_REPO_URL,
+        },
         "manager": {
             "path": mgr or "",
             "exists": bool(mgr and os.path.isfile(mgr)),
@@ -229,6 +248,7 @@ def get_system_status_json():
             "slots": slots_dict,
             "quota": quota_dict,
             "all_quotas": all_quotas_dict,
+            "wizard_in_progress": bool(os.path.isfile(getattr(ac_mgr, "wizard_path", ""))),
         },
         "backups": backups_data,
     }
@@ -237,6 +257,12 @@ def get_system_status_json():
 def print_status_dashboard(targets):
     """Отображает красивый статус всех компонентов."""
     print_menu_section("ДИАГНОСТИКА И СТАТУС КОМПОНЕНТОВ")
+
+    # 0. Статус самого Toolkit
+    print(f"  {color('● Antigravity Toolkit RU (Центр управления):', COLOR_BOLD, COLOR_WHITE)}")
+    _kv("Версия утилиты:", VERSION_FULL, COLOR_GREEN)
+    _kv("GitHub репозиторий:", GITHUB_REPO_URL, COLOR_CYAN)
+    print()
 
     # 1. Antigravity 2.0 (Manager)
     mgr = targets["manager"]
@@ -583,6 +609,13 @@ def action_diagnostics(targets, interactive=True):
     clear_screen()
     print_banner()
     step("🔍 ПОДРОБНАЯ ДИАГНОСТИКА СИСТЕМЫ И ПРОВЕРКА ЦЕЛОСТНОСТИ")
+    print()
+
+    # Сведения о Toolkit
+    print(f"  {color('● Antigravity Toolkit RU:', COLOR_BOLD, COLOR_WHITE)}")
+    _kv("Версия утилиты:", VERSION_FULL, COLOR_GREEN)
+    _kv("Репозиторий GitHub:", GITHUB_REPO_URL, COLOR_CYAN)
+    _kv("Безопасность:", "100% Локально (Zero Exfiltration Guarantee)", COLOR_GREEN)
     print()
 
     # Проверка Python и модулей
@@ -1012,6 +1045,25 @@ def main():
             am = AccountManager()
             print(json.dumps(am.get_all_slots_quota_summary(), ensure_ascii=False, indent=2))
             sys.exit(0)
+        elif arg in ("--wizard-start", "-ws") and len(sys.argv) > 2:
+            try:
+                slot_idx = int(sys.argv[2])
+                mgr = AccountManager()
+                success, msg = mgr.prepare_slot_wizard(slot_idx)
+                print(json.dumps({"success": success, "message": msg, "target_slot": slot_idx}, ensure_ascii=False))
+            except ValueError:
+                print(json.dumps({"success": False, "message": "Номер слота должен быть числом."}, ensure_ascii=False))
+            sys.exit(0)
+        elif arg in ("--wizard-status", "-wst"):
+            mgr = AccountManager()
+            status = mgr.check_wizard_status()
+            print(json.dumps(status, ensure_ascii=False))
+            sys.exit(0)
+        elif arg in ("--wizard-cancel", "-wc"):
+            mgr = AccountManager()
+            success, msg = mgr.cancel_wizard()
+            print(json.dumps({"success": success, "message": msg}, ensure_ascii=False))
+            sys.exit(0)
         elif arg in ("--json-status", "--status-json"):
             print(json.dumps(get_system_status_json(), ensure_ascii=False, indent=2))
             sys.exit(0)
@@ -1038,7 +1090,7 @@ def main():
             print_menu_row("10", "📦 Резервная копия чатов", "Архивация и восстановление диалогов (чтобы чаты не пропадали)", COLOR_CYAN)
             print()
             print_menu_row("0", "Выход", "Завершить работу с утилитой", COLOR_RED)
-            print_menu_footer("Совет: все изменения обратимы — пункт [5] возвращает оригинальные файлы.")
+            print_menu_footer(f"Репозиторий: {GITHUB_REPO_URL} • Откат изменений: [5]")
 
             choice = input(color("\n  Выберите действие > ", COLOR_CYAN, COLOR_BOLD)).strip()
             if choice == "0":

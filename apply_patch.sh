@@ -22,7 +22,12 @@ else
     fi
 fi
 
+# ==============================================================================
+# Antigravity 2.0 Auto-Patcher
+# Официальный репозиторий: https://github.com/salambeq/antigravity-ru
+# ==============================================================================
 echo "=== Antigravity 2.0 Auto-Patcher ==="
+echo "Официальный репозиторий: https://github.com/salambeq/antigravity-ru"
 echo "Целевой каталог ресурсов: $APP_DIR"
 
 if [ ! -d "$APP_DIR" ]; then

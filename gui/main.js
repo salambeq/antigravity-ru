@@ -413,6 +413,56 @@ ipcMain.handle('save-account', async (event, slot) => {
   return res;
 });
 
+// IPC: Slot Wizard handlers
+ipcMain.handle('wizard-start', async (_event, slot) => {
+  return new Promise((resolve) => {
+    execFile(PYTHON_BIN, [MAIN_PY, '--wizard-start', String(slot)], { cwd: ROOT_DIR, env: DEFAULT_ENV, timeout: 20000 }, (err, stdout) => {
+      if (err) {
+        resolve({ success: false, message: err.message });
+        return;
+      }
+      try {
+        resolve(JSON.parse(stdout));
+      } catch (parseErr) {
+        resolve({ success: false, message: stdout });
+      }
+    });
+  });
+});
+
+ipcMain.handle('wizard-status', async () => {
+  return new Promise((resolve) => {
+    execFile(PYTHON_BIN, [MAIN_PY, '--wizard-status'], { cwd: ROOT_DIR, env: DEFAULT_ENV, timeout: 10000 }, (err, stdout) => {
+      if (err) {
+        resolve({ in_progress: false, error: err.message });
+        return;
+      }
+      try {
+        resolve(JSON.parse(stdout));
+      } catch (parseErr) {
+        resolve({ in_progress: false, error: parseErr.message });
+      }
+    });
+  });
+});
+
+ipcMain.handle('wizard-cancel', async () => {
+  return new Promise((resolve) => {
+    execFile(PYTHON_BIN, [MAIN_PY, '--wizard-cancel'], { cwd: ROOT_DIR, env: DEFAULT_ENV, timeout: 20000 }, (err, stdout) => {
+      syncAllSlotsBackground();
+      if (err) {
+        resolve({ success: false, message: err.message });
+        return;
+      }
+      try {
+        resolve(JSON.parse(stdout));
+      } catch (parseErr) {
+        resolve({ success: true, message: stdout });
+      }
+    });
+  });
+});
+
 // IPC: Auto-rotate toggle
 ipcMain.handle('toggle-auto-rotate', async (event, enable) => {
   if (enable) {

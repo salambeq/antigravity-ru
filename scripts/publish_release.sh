@@ -8,8 +8,9 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
 cd "$DIR"
 
 REPO="salambeq/antigravity-ru"
-TAG="v2.0.6"
-NAME="Antigravity Toolkit GUI v2.0.6 (macOS Edition)"
+APP_VER=$(node -p "require('./package.json').version" 2>/dev/null || python3 -c "import json; print(json.load(open('version.json'))['version'])")
+TAG="v${APP_VER}"
+NAME="Antigravity Toolkit GUI v${APP_VER} (macOS Edition)"
 
 ARCH="$(uname -m)"
 DMG_PATH="dist/Antigravity-Toolkit-GUI-macOS-${ARCH}.dmg"

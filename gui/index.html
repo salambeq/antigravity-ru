@@ -224,7 +224,7 @@
           <span>Antigravity</span>
           <span class="text-slate-400 font-normal">Toolkit</span>
         </div>
-        <span class="px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 font-sans font-medium text-[10px] border border-blue-500/25">v2.0 RU</span>
+        <span id="toolkit-version-badge" class="px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 font-sans font-medium text-[10px] border border-blue-500/25" title="Antigravity Toolkit RU">v2.0.7 RU</span>
       </div>
       <span class="text-white/20 text-xs hidden lg:inline">•</span>
       <span class="text-xs text-slate-400 font-normal hidden lg:inline">Центр управления и локализации Antigravity 2.0</span>
@@ -256,7 +256,7 @@
         <span class="material-symbols-outlined text-[16px]">sync</span>
       </button>
 
-      <button id="githubBtn" title="Репозиторий GitHub" class="w-7 h-7 rounded-lg btn-outline-glass flex items-center justify-center text-slate-400 hover:text-white transition-all active:scale-95">
+      <button id="githubBtn" title="Официальный репозиторий GitHub (salambeq/antigravity-ru)" class="w-7 h-7 rounded-lg btn-outline-glass flex items-center justify-center text-slate-400 hover:text-white transition-all active:scale-95">
         <span class="material-symbols-outlined text-[16px]">code</span>
       </button>
     </div>
@@ -350,6 +350,14 @@
             <span class="text-slate-300 font-medium">Локальное ядро</span>
           </span>
           <span id="sb-rotator-status" class="text-slate-500">Ротация: ВЫКЛ</span>
+        </div>
+
+        <div class="flex items-center justify-between text-[10px] text-slate-500 px-1 pt-1.5 border-t border-white/[0.04]">
+          <span id="sb-toolkit-ver" class="font-mono text-slate-400">v2.0.7</span>
+          <button id="sb-github-btn" class="hover:text-blue-400 text-slate-400 transition-colors flex items-center gap-1" title="Открыть репозиторий на GitHub">
+            <span>GitHub</span>
+            <span class="material-symbols-outlined text-[11px]">open_in_new</span>
+          </button>
         </div>
       </div>
     </aside>
@@ -872,6 +880,23 @@
               </div>
             </div>
 
+            <!-- Golden Rule Alert Banner -->
+            <div class="p-3.5 rounded-xl bg-gradient-to-r from-amber-500/15 via-blue-500/10 to-indigo-500/10 border border-amber-500/30 flex items-start gap-3 text-xs shadow-lg">
+              <div class="w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shrink-0 mt-0.5">
+                <span class="material-symbols-outlined text-[18px]">lightbulb</span>
+              </div>
+              <div class="flex flex-col gap-1 min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="font-bold text-white text-xs">Золотое правило переключения аккаунтов</span>
+                  <span class="px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-semibold text-[9.5px]">Защита токенов 24/7</span>
+                </div>
+                <p class="text-slate-300 text-[11px] leading-relaxed">
+                  <span class="text-amber-300 font-semibold">Не нажимайте «Выйти» (Sign Out) в меню самой Antigravity</span> — Google аннулирует токен авторизации на своих серверах!
+                  Для смены аккаунта просто выбирайте нужный слот здесь или в трее — Тулкит мгновенно подменяет сессию без выхода и потери токенов.
+                </p>
+              </div>
+            </div>
+
             <!-- Active Account Info with Real Email, Name & Avatar -->
             <div class="p-3.5 rounded-xl bg-black/40 border border-white/[0.06] text-xs flex items-center justify-between">
               <div class="flex items-center gap-3 overflow-hidden min-w-0">
@@ -892,79 +917,115 @@
               </span>
             </div>
 
-            <!-- Slots Grid (2x2 with clear Email, Name & Live Quotas) -->
+            <!-- Slots Grid (2x2 with clear Email, Name, Live Quotas & Quick Actions) -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <button data-slot="1" class="slot-card p-3 rounded-xl bg-black/30 border border-white/[0.07] hover:border-blue-500/40 text-left flex flex-col gap-1.5 transition-all active:scale-95 cursor-pointer">
-                <div class="flex justify-between items-center">
-                  <div class="flex items-center gap-1.5">
-                    <span class="slot-status-dot w-2 h-2 rounded-full bg-slate-600" id="slot-dot-1"></span>
-                    <span class="text-[10px] text-blue-400 font-bold tracking-wider">СЛОТ #1</span>
+              <div data-slot="1" class="slot-card p-3 rounded-xl bg-black/30 border border-white/[0.07] hover:border-blue-500/40 text-left flex flex-col justify-between gap-2 transition-all cursor-pointer">
+                <div class="flex flex-col gap-1.5">
+                  <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-1.5">
+                      <span class="slot-status-dot w-2 h-2 rounded-full bg-slate-600" id="slot-dot-1"></span>
+                      <span class="text-[10px] text-blue-400 font-bold tracking-wider">СЛОТ #1</span>
+                    </div>
+                    <span id="slot-badge-1" class="text-[9px] px-1.5 py-0.2 rounded bg-white/5 text-slate-400">Свободен</span>
                   </div>
-                  <span id="slot-badge-1" class="text-[9px] px-1.5 py-0.2 rounded bg-white/5 text-slate-400">Свободен</span>
+                  <div class="flex flex-col min-w-0">
+                    <span class="text-[11px] text-white font-medium truncate" id="slot-name-1">Слот #1</span>
+                    <span class="text-[10px] text-slate-400 truncate font-mono" id="slot-email-1">—</span>
+                    <div class="text-[9.5px] text-cyan-400 font-mono mt-0.5 truncate hidden" id="slot-quota-1"></div>
+                  </div>
                 </div>
-                <div class="flex flex-col min-w-0">
-                  <span class="text-[11px] text-white font-medium truncate" id="slot-name-1">Слот #1</span>
-                  <span class="text-[10px] text-slate-400 truncate font-mono" id="slot-email-1">—</span>
-                  <div class="text-[9.5px] text-cyan-400 font-mono mt-0.5 truncate hidden" id="slot-quota-1"></div>
+                <div class="flex items-center justify-between pt-1.5 border-t border-white/[0.05]">
+                  <span class="text-[10px] text-slate-400 truncate" id="slot-action-label-1">Свободен</span>
+                  <button type="button" class="btn-slot-quick-action px-2 py-0.5 rounded-lg text-[10px] font-semibold bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 transition-colors" id="slot-btn-action-1" data-slot="1">
+                    Выбрать
+                  </button>
                 </div>
-              </button>
+              </div>
 
-              <button data-slot="2" class="slot-card p-3 rounded-xl bg-black/30 border border-white/[0.07] hover:border-blue-500/40 text-left flex flex-col gap-1.5 transition-all active:scale-95 cursor-pointer">
-                <div class="flex justify-between items-center">
-                  <div class="flex items-center gap-1.5">
-                    <span class="slot-status-dot w-2 h-2 rounded-full bg-slate-600" id="slot-dot-2"></span>
-                    <span class="text-[10px] text-blue-400 font-bold tracking-wider">СЛОТ #2</span>
+              <div data-slot="2" class="slot-card p-3 rounded-xl bg-black/30 border border-white/[0.07] hover:border-blue-500/40 text-left flex flex-col justify-between gap-2 transition-all cursor-pointer">
+                <div class="flex flex-col gap-1.5">
+                  <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-1.5">
+                      <span class="slot-status-dot w-2 h-2 rounded-full bg-slate-600" id="slot-dot-2"></span>
+                      <span class="text-[10px] text-blue-400 font-bold tracking-wider">СЛОТ #2</span>
+                    </div>
+                    <span id="slot-badge-2" class="text-[9px] px-1.5 py-0.2 rounded bg-white/5 text-slate-400">Свободен</span>
                   </div>
-                  <span id="slot-badge-2" class="text-[9px] px-1.5 py-0.2 rounded bg-white/5 text-slate-400">Свободен</span>
+                  <div class="flex flex-col min-w-0">
+                    <span class="text-[11px] text-white font-medium truncate" id="slot-name-2">Слот #2</span>
+                    <span class="text-[10px] text-slate-400 truncate font-mono" id="slot-email-2">—</span>
+                    <div class="text-[9.5px] text-cyan-400 font-mono mt-0.5 truncate hidden" id="slot-quota-2"></div>
+                  </div>
                 </div>
-                <div class="flex flex-col min-w-0">
-                  <span class="text-[11px] text-white font-medium truncate" id="slot-name-2">Слот #2</span>
-                  <span class="text-[10px] text-slate-400 truncate font-mono" id="slot-email-2">—</span>
-                  <div class="text-[9.5px] text-cyan-400 font-mono mt-0.5 truncate hidden" id="slot-quota-2"></div>
+                <div class="flex items-center justify-between pt-1.5 border-t border-white/[0.05]">
+                  <span class="text-[10px] text-slate-400 truncate" id="slot-action-label-2">Свободен</span>
+                  <button type="button" class="btn-slot-quick-action px-2 py-0.5 rounded-lg text-[10px] font-semibold bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 transition-colors" id="slot-btn-action-2" data-slot="2">
+                    Выбрать
+                  </button>
                 </div>
-              </button>
+              </div>
 
-              <button data-slot="3" class="slot-card p-3 rounded-xl bg-black/30 border border-white/[0.07] hover:border-blue-500/40 text-left flex flex-col gap-1.5 transition-all active:scale-95 cursor-pointer">
-                <div class="flex justify-between items-center">
-                  <div class="flex items-center gap-1.5">
-                    <span class="slot-status-dot w-2 h-2 rounded-full bg-slate-600" id="slot-dot-3"></span>
-                    <span class="text-[10px] text-blue-400 font-bold tracking-wider">СЛОТ #3</span>
+              <div data-slot="3" class="slot-card p-3 rounded-xl bg-black/30 border border-white/[0.07] hover:border-blue-500/40 text-left flex flex-col justify-between gap-2 transition-all cursor-pointer">
+                <div class="flex flex-col gap-1.5">
+                  <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-1.5">
+                      <span class="slot-status-dot w-2 h-2 rounded-full bg-slate-600" id="slot-dot-3"></span>
+                      <span class="text-[10px] text-blue-400 font-bold tracking-wider">СЛОТ #3</span>
+                    </div>
+                    <span id="slot-badge-3" class="text-[9px] px-1.5 py-0.2 rounded bg-white/5 text-slate-400">Свободен</span>
                   </div>
-                  <span id="slot-badge-3" class="text-[9px] px-1.5 py-0.2 rounded bg-white/5 text-slate-400">Свободен</span>
+                  <div class="flex flex-col min-w-0">
+                    <span class="text-[11px] text-white font-medium truncate" id="slot-name-3">Слот #3</span>
+                    <span class="text-[10px] text-slate-400 truncate font-mono" id="slot-email-3">—</span>
+                    <div class="text-[9.5px] text-cyan-400 font-mono mt-0.5 truncate hidden" id="slot-quota-3"></div>
+                  </div>
                 </div>
-                <div class="flex flex-col min-w-0">
-                  <span class="text-[11px] text-white font-medium truncate" id="slot-name-3">Слот #3</span>
-                  <span class="text-[10px] text-slate-400 truncate font-mono" id="slot-email-3">—</span>
-                  <div class="text-[9.5px] text-cyan-400 font-mono mt-0.5 truncate hidden" id="slot-quota-3"></div>
+                <div class="flex items-center justify-between pt-1.5 border-t border-white/[0.05]">
+                  <span class="text-[10px] text-slate-400 truncate" id="slot-action-label-3">Свободен</span>
+                  <button type="button" class="btn-slot-quick-action px-2 py-0.5 rounded-lg text-[10px] font-semibold bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 transition-colors" id="slot-btn-action-3" data-slot="3">
+                    Выбрать
+                  </button>
                 </div>
-              </button>
+              </div>
 
-              <button data-slot="4" class="slot-card p-3 rounded-xl bg-black/30 border border-white/[0.07] hover:border-blue-500/40 text-left flex flex-col gap-1.5 transition-all active:scale-95 cursor-pointer">
-                <div class="flex justify-between items-center">
-                  <div class="flex items-center gap-1.5">
-                    <span class="slot-status-dot w-2 h-2 rounded-full bg-slate-600" id="slot-dot-4"></span>
-                    <span class="text-[10px] text-blue-400 font-bold tracking-wider">СЛОТ #4</span>
+              <div data-slot="4" class="slot-card p-3 rounded-xl bg-black/30 border border-white/[0.07] hover:border-blue-500/40 text-left flex flex-col justify-between gap-2 transition-all cursor-pointer">
+                <div class="flex flex-col gap-1.5">
+                  <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-1.5">
+                      <span class="slot-status-dot w-2 h-2 rounded-full bg-slate-600" id="slot-dot-4"></span>
+                      <span class="text-[10px] text-blue-400 font-bold tracking-wider">СЛОТ #4</span>
+                    </div>
+                    <span id="slot-badge-4" class="text-[9px] px-1.5 py-0.2 rounded bg-white/5 text-slate-400">Свободен</span>
                   </div>
-                  <span id="slot-badge-4" class="text-[9px] px-1.5 py-0.2 rounded bg-white/5 text-slate-400">Свободен</span>
+                  <div class="flex flex-col min-w-0">
+                    <span class="text-[11px] text-white font-medium truncate" id="slot-name-4">Слот #4</span>
+                    <span class="text-[10px] text-slate-400 truncate font-mono" id="slot-email-4">—</span>
+                    <div class="text-[9.5px] text-cyan-400 font-mono mt-0.5 truncate hidden" id="slot-quota-4"></div>
+                  </div>
                 </div>
-                <div class="flex flex-col min-w-0">
-                  <span class="text-[11px] text-white font-medium truncate" id="slot-name-4">Слот #4</span>
-                  <span class="text-[10px] text-slate-400 truncate font-mono" id="slot-email-4">—</span>
-                  <div class="text-[9.5px] text-cyan-400 font-mono mt-0.5 truncate hidden" id="slot-quota-4"></div>
+                <div class="flex items-center justify-between pt-1.5 border-t border-white/[0.05]">
+                  <span class="text-[10px] text-slate-400 truncate" id="slot-action-label-4">Свободен</span>
+                  <button type="button" class="btn-slot-quick-action px-2 py-0.5 rounded-lg text-[10px] font-semibold bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 transition-colors" id="slot-btn-action-4" data-slot="4">
+                    Выбрать
+                  </button>
                 </div>
-              </button>
+              </div>
             </div>
 
             <!-- Account Actions -->
             <div class="flex flex-col gap-2.5 pt-2 border-t border-white/[0.07]">
-              <div class="grid grid-cols-2 gap-2.5">
-                <button id="btn-save-slot" class="btn-outline-glass hover:text-blue-400 py-2.5 px-3 rounded-xl text-xs font-medium text-center flex items-center justify-center gap-1.5 active:scale-95">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                <button id="btn-save-slot" class="btn-outline-glass hover:text-blue-400 py-2.5 px-3 rounded-xl text-xs font-medium text-center flex items-center justify-center gap-1.5 active:scale-95" title="Сохранить текущую активную в Antigravity сессию в выбранный слот">
                   <span class="material-symbols-outlined text-[15px] text-blue-400">save</span>
                   <span>Сохранить в слот <span id="lbl-selected-slot-1">#1</span></span>
                 </button>
-                <button id="btn-switch-slot" class="btn-gemini py-2.5 px-3 rounded-xl text-xs font-semibold text-white text-center flex items-center justify-center gap-1.5 active:scale-95">
+                <button id="btn-switch-slot" class="btn-gemini py-2.5 px-3 rounded-xl text-xs font-semibold text-white text-center flex items-center justify-center gap-1.5 active:scale-95" title="Активировать выбранный слот в Antigravity">
                   <span class="material-symbols-outlined text-[15px]">sync_alt</span>
                   <span>Включить слот <span id="lbl-selected-slot-2">#1</span></span>
+                </button>
+                <button id="btn-wizard-slot" class="btn-outline-glass hover:text-cyan-300 hover:border-cyan-500/40 py-2.5 px-3 rounded-xl text-xs font-semibold text-white text-center flex items-center justify-center gap-1.5 active:scale-95 shadow-sm" title="Запустить пошаговый мастер привязки нового аккаунта к этому слоту">
+                  <span class="material-symbols-outlined text-[16px] text-cyan-400">auto_fix_high</span>
+                  <span>Привязать аккаунт <span id="lbl-selected-slot-3">#1</span></span>
                 </button>
               </div>
               <button id="btn-refresh-all-slots" class="w-full py-2 px-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.07] text-slate-300 hover:text-white text-xs font-medium flex items-center justify-center gap-1.5 transition-all active:scale-98" title="Принудительно обновить активность и квоты всех 4 слотов">
@@ -1199,12 +1260,12 @@
             <div class="flex items-start gap-2">
               <span class="text-slate-600">[00:00:00]</span>
               <span class="text-blue-400 font-medium">[SYSTEM]</span>
-              <span class="text-slate-200">Инициализация интерфейса Antigravity Toolkit 2.0 RU...</span>
+              <span class="text-slate-200">Antigravity Toolkit RU • Репозиторий: github.com/salambeq/antigravity-ru</span>
             </div>
             <div class="flex items-start gap-2">
               <span class="text-slate-600">[00:00:01]</span>
-              <span class="text-emerald-400 font-medium">[READY]</span>
-              <span class="text-emerald-400">Интерфейс готов. Защита чатов и Keep-Alive активны. Режим: 100% офлайн.</span>
+              <span class="text-emerald-400 font-medium">[SECURITY]</span>
+              <span class="text-emerald-400">Политика целостности и Zero-Leak: 100% локально, все токены изолированы на ПК.</span>
             </div>
           </div>
           <!-- Cursor line -->
@@ -1288,6 +1349,71 @@
         <button id="modalCreateNewBackupBtn" class="btn-gemini px-4 py-2 rounded-xl text-xs font-semibold text-white flex items-center gap-1.5 shadow-sm active:scale-95">
           <span class="material-symbols-outlined text-[16px]">add</span>
           <span>Создать свежую копию</span>
+        </button>
+      </div>
+    </div>
+
+  <!-- ==================== ACCOUNT SETUP WIZARD MODAL ==================== -->
+  <div id="wizardModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/85 backdrop-blur-md p-4 select-none">
+    <div class="relative w-full max-w-lg rounded-3xl glass-panel border border-white/10 shadow-2xl p-6 flex flex-col gap-5 animate-in fade-in zoom-in-95 duration-150 overflow-hidden">
+      <!-- Glow effect -->
+      <div class="absolute -top-12 -right-12 w-40 h-40 bg-blue-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+      <!-- Header -->
+      <div class="flex items-center justify-between border-b border-white/[0.08] pb-3.5">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-blue-500/15 border border-blue-500/30 flex items-center justify-center text-blue-400">
+            <span class="material-symbols-outlined text-[22px]">person_add</span>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white tracking-tight">Мастер привязки Google-аккаунта</h3>
+            <span class="text-xs text-cyan-400 font-medium" id="wizardSlotLabel">Слот #1 • Безопасный вход</span>
+          </div>
+        </div>
+        <button id="closeWizardBtn" class="p-2 rounded-xl btn-outline-glass text-slate-400 hover:text-white transition-colors">
+          <span class="material-symbols-outlined text-[18px]">close</span>
+        </button>
+      </div>
+
+      <!-- Step Cards -->
+      <div class="flex flex-col gap-3 text-xs">
+        <div class="p-3 rounded-xl bg-black/40 border border-white/[0.06] flex items-start gap-3">
+          <span class="w-6 h-6 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0">1</span>
+          <div class="flex flex-col gap-0.5">
+            <span class="text-white font-semibold">Текущая сессия сохранена</span>
+            <span class="text-slate-400 text-[11px]">Тулкит надёжно зафиксировал текущие активные токены, чтобы ничего не потерялось.</span>
+          </div>
+        </div>
+
+        <div class="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-start gap-3">
+          <span class="w-6 h-6 rounded-full bg-blue-500/20 border border-blue-500/30 text-blue-400 flex items-center justify-center font-bold text-xs shrink-0">2</span>
+          <div class="flex flex-col gap-0.5">
+            <span class="text-white font-semibold">Войдите в Google в окне Antigravity</span>
+            <span class="text-slate-300 text-[11px]">Перейдите в окно Antigravity, нажмите кнопку входа Google и выберите нужный аккаунт.</span>
+          </div>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-black/50 border border-white/[0.08] flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="relative flex items-center justify-center w-7 h-7">
+              <span class="w-3.5 h-3.5 rounded-full bg-cyan-400 animate-ping absolute opacity-75"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 relative"></span>
+            </div>
+            <div class="flex flex-col">
+              <span class="text-white font-semibold text-xs" id="wizardStatusText">Ожидание входа в Antigravity...</span>
+              <span class="text-slate-400 text-[10.5px] font-mono" id="wizardElapsedText">Прошло: 0 сек.</span>
+            </div>
+          </div>
+          <span class="px-2 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/25 text-cyan-300 text-[10px] font-mono animate-pulse">АВТО-ЗАХВАТ</span>
+        </div>
+      </div>
+
+      <!-- Action Footer -->
+      <div class="flex items-center justify-between border-t border-white/[0.08] pt-3.5 text-xs">
+        <span class="text-slate-400 text-[11px]">Отмена вернёт вашу прежнюю сессию</span>
+        <button id="btnWizardCancel" class="btn-outline-glass px-4 py-2 rounded-xl text-xs font-medium text-slate-300 hover:text-white transition-colors active:scale-95 flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-[15px]">undo</span>
+          <span>Отмена и возврат</span>
         </button>
       </div>
     </div>
@@ -1481,6 +1607,19 @@
             appendLog('WARN', 'text-amber-400', `Предупреждение статуса: ${status.error}`);
           }
 
+          // 0. Toolkit Information & Dynamic Version
+          const toolkit = status.toolkit || {};
+          const toolkitBadge = document.getElementById('toolkit-version-badge');
+          if (toolkitBadge && (toolkit.short_version || toolkit.version)) {
+            toolkitBadge.textContent = `v${toolkit.short_version || toolkit.version} RU`;
+            toolkitBadge.title = toolkit.full_version || `Версия ${toolkit.version}`;
+          }
+          const sbToolkitVer = document.getElementById('sb-toolkit-ver');
+          if (sbToolkitVer && (toolkit.short_version || toolkit.version)) {
+            sbToolkitVer.textContent = `v${toolkit.short_version || toolkit.version}`;
+            sbToolkitVer.title = toolkit.full_version || toolkit.version;
+          }
+
           // 1. Antigravity Core
           const mgr = status.manager || {};
           const mgrBadge = document.getElementById('badge-mgr');
@@ -1643,7 +1782,7 @@
             if (dashAccSummary) dashAccSummary.textContent = 'Не авторизован';
           }
 
-          // Update 4 slot buttons (2x2 grid with live quotas)
+          // Update 4 slot cards (2x2 grid with live quotas & quick actions)
           for (let i = 1; i <= 4; i++) {
             const slotData = slots[String(i)] || slots[i];
             const emailEl = document.getElementById(`slot-email-${i}`);
@@ -1651,8 +1790,10 @@
             const dotEl = document.getElementById(`slot-dot-${i}`);
             const badgeEl = document.getElementById(`slot-badge-${i}`);
             const quotaEl = document.getElementById(`slot-quota-${i}`);
+            const actLabelEl = document.getElementById(`slot-action-label-${i}`);
+            const actBtnEl = document.getElementById(`slot-btn-action-${i}`);
 
-            if (slotData) {
+            if (slotData && (slotData.email || slotData.name)) {
               const email = slotData.email || 'Google Account';
               const name = slotData.name || `Слот #${i}`;
               if (emailEl) {
@@ -1663,18 +1804,48 @@
                 nameEl.textContent = name;
                 nameEl.title = name;
               }
+
+              const isRevoked = Boolean(slotData.is_revoked);
               const isActive = Boolean(slotData.is_active || cur.slot === i);
-              if (isActive) {
+
+              if (isRevoked) {
+                if (dotEl) dotEl.className = 'slot-status-dot w-2 h-2 rounded-full bg-rose-500 animate-pulse';
+                if (badgeEl) {
+                  badgeEl.textContent = 'Отозван';
+                  badgeEl.className = 'text-[9px] px-1.5 py-0.2 rounded bg-rose-500/20 text-rose-300 font-semibold';
+                }
+                if (actLabelEl) actLabelEl.textContent = '⚠️ Сессия аннулирована';
+                if (actBtnEl) {
+                  actBtnEl.textContent = '🔄 Войти заново';
+                  actBtnEl.className = 'btn-slot-quick-action px-2 py-0.5 rounded-lg text-[10px] font-semibold bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 transition-colors cursor-pointer';
+                  actBtnEl.onclick = (e) => { e.stopPropagation(); openWizard(i); };
+                }
+              } else if (isActive) {
                 if (dotEl) dotEl.className = 'slot-status-dot w-2 h-2 rounded-full bg-emerald-400 glowing-dot text-emerald-400';
                 if (badgeEl) {
                   badgeEl.textContent = 'Активен';
                   badgeEl.className = 'text-[9px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-400 font-semibold';
+                }
+                if (actLabelEl) actLabelEl.textContent = 'Текущий активный';
+                if (actBtnEl) {
+                  actBtnEl.textContent = '✓ В работе';
+                  actBtnEl.className = 'btn-slot-quick-action px-2 py-0.5 rounded-lg text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 pointer-events-none';
+                  actBtnEl.onclick = null;
                 }
               } else {
                 if (dotEl) dotEl.className = 'slot-status-dot w-2 h-2 rounded-full bg-blue-400';
                 if (badgeEl) {
                   badgeEl.textContent = 'Готов';
                   badgeEl.className = 'text-[9px] px-1.5 py-0.2 rounded bg-blue-500/20 text-blue-300 font-medium';
+                }
+                if (actLabelEl) actLabelEl.textContent = 'В резерве';
+                if (actBtnEl) {
+                  actBtnEl.textContent = 'Включить';
+                  actBtnEl.className = 'btn-slot-quick-action px-2 py-0.5 rounded-lg text-[10px] font-semibold bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/30 transition-colors cursor-pointer';
+                  actBtnEl.onclick = async (e) => {
+                    e.stopPropagation();
+                    if (!isBusy) await handleSlotAction('switch', i);
+                  };
                 }
               }
 
@@ -1712,6 +1883,12 @@
               if (quotaEl) {
                 quotaEl.textContent = '';
                 quotaEl.classList.add('hidden');
+              }
+              if (actLabelEl) actLabelEl.textContent = 'Свободный слот';
+              if (actBtnEl) {
+                actBtnEl.textContent = '➕ Привязать';
+                actBtnEl.className = 'btn-slot-quick-action px-2 py-0.5 rounded-lg text-[10px] font-semibold bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/30 transition-colors cursor-pointer';
+                actBtnEl.onclick = (e) => { e.stopPropagation(); openWizard(i); };
               }
             }
           }
@@ -2033,8 +2210,38 @@
         });
         const l1 = document.getElementById('lbl-selected-slot-1');
         const l2 = document.getElementById('lbl-selected-slot-2');
+        const l3 = document.getElementById('lbl-selected-slot-3');
         if (l1) l1.textContent = `#${slotNum}`;
         if (l2) l2.textContent = `#${slotNum}`;
+        if (l3) l3.textContent = `#${slotNum}`;
+      }
+
+      async function handleSlotAction(action, slotNum) {
+        if (isBusy) return;
+        if (action === 'switch') {
+          const { confirmed } = await requestConfirmation(
+            `Переключение на Слот #${slotNum}`,
+            `Antigravity переключится на профиль Google из Слота #${slotNum}. Служба language_server будет мягко перезапущена.`,
+            false
+          );
+          if (!confirmed) return;
+
+          setBusy(true, `Переключение на Слот #${slotNum}...`);
+          appendLog('PROCESS', 'text-primary', `Переключение токена на Слот #${slotNum}...`);
+          try {
+            const res = await window.api.switchAccount(slotNum);
+            if (res.success) {
+              appendLog('OK', 'text-emerald-400', `Система переключена на Слот #${slotNum}!`);
+            } else {
+              appendLog('ERR', 'text-error', `Не удалось переключить аккаунт.`);
+            }
+          } catch (e) {
+            appendLog('ERR', 'text-error', `Ошибка: ${e.message}`);
+          } finally {
+            setBusy(false);
+            await refreshStatus();
+          }
+        }
       }
 
       document.querySelectorAll('.slot-card').forEach(card => {
@@ -2197,6 +2404,120 @@
           await refreshStatus();
         }
       });
+
+      // Wizard Account to Slot
+      const btnWizardSlot = document.getElementById('btn-wizard-slot');
+      if (btnWizardSlot) {
+        btnWizardSlot.addEventListener('click', () => {
+          openWizard(currentSelectedSlot);
+        });
+      }
+
+      // ==================== ACCOUNT SETUP WIZARD CONTROLLER ====================
+      let wizardPollInterval = null;
+      let wizardTargetSlot = null;
+
+      async function openWizard(slotNum) {
+        if (isBusy) return;
+        const target = slotNum || currentSelectedSlot || 1;
+        wizardTargetSlot = target;
+
+        const labelEl = document.getElementById('wizardSlotLabel');
+        if (labelEl) labelEl.textContent = `Слот #${target} • Безопасный вход`;
+
+        const statusEl = document.getElementById('wizardStatusText');
+        if (statusEl) statusEl.textContent = 'Инициализация мастера...';
+
+        const elapsedEl = document.getElementById('wizardElapsedText');
+        if (elapsedEl) elapsedEl.textContent = 'Прошло: 0 сек.';
+
+        const modal = document.getElementById('wizardModal');
+        if (modal) modal.classList.remove('hidden');
+
+        try {
+          if (window.api && window.api.wizardStart) {
+            appendLog('PROCESS', 'text-cyan-400', `Запуск мастера привязки аккаунта к Слоту #${target}...`);
+            const startRes = await window.api.wizardStart(target);
+            if (!startRes.success) {
+              appendLog('ERR', 'text-error', `Ошибка запуска мастера: ${startRes.message}`);
+              closeWizard();
+              return;
+            }
+            appendLog('OK', 'text-emerald-400', `Antigravity подготовлена к входу. Ожидание авторизации...`);
+            if (statusEl) statusEl.textContent = 'Войдите в Google в окне Antigravity...';
+            startWizardPolling();
+          }
+        } catch (e) {
+          appendLog('ERR', 'text-error', `Сбой мастера: ${e.message}`);
+          closeWizard();
+        }
+      }
+
+      function closeWizard() {
+        if (wizardPollInterval) {
+          clearInterval(wizardPollInterval);
+          wizardPollInterval = null;
+        }
+        wizardTargetSlot = null;
+        const modal = document.getElementById('wizardModal');
+        if (modal) modal.classList.add('hidden');
+      }
+
+      async function cancelWizard() {
+        if (wizardPollInterval) {
+          clearInterval(wizardPollInterval);
+          wizardPollInterval = null;
+        }
+        appendLog('INFO', 'text-outline', 'Отмена мастера... Восстановление прежней сессии...');
+        try {
+          if (window.api && window.api.wizardCancel) {
+            await window.api.wizardCancel();
+            appendLog('OK', 'text-emerald-400', 'Прежняя сессия успешно восстановлена.');
+          }
+        } catch (e) {
+          appendLog('WARN', 'text-yellow-400', `Предупреждение при отмене мастера: ${e.message}`);
+        } finally {
+          closeWizard();
+          await refreshStatus();
+        }
+      }
+
+      function startWizardPolling() {
+        if (wizardPollInterval) clearInterval(wizardPollInterval);
+
+        wizardPollInterval = setInterval(async () => {
+          try {
+            if (!window.api || !window.api.wizardStatus) return;
+            const st = await window.api.wizardStatus();
+
+            const statusEl = document.getElementById('wizardStatusText');
+            const elapsedEl = document.getElementById('wizardElapsedText');
+
+            if (st.completed) {
+              clearInterval(wizardPollInterval);
+              wizardPollInterval = null;
+              if (statusEl) statusEl.textContent = `Успешно! ${st.email || 'Аккаунт привязан'}`;
+              appendLog('OK', 'text-emerald-400', `🎉 ${st.message || 'Аккаунт успешно сохранен в слот!'}`);
+              setTimeout(async () => {
+                closeWizard();
+                await refreshStatus();
+              }, 1200);
+            } else if (st.in_progress) {
+              if (elapsedEl) elapsedEl.textContent = `Прошло: ${st.elapsed || 0} сек.`;
+            } else if (st.error) {
+              appendLog('ERR', 'text-error', `Ошибка проверки мастера: ${st.error}`);
+            }
+          } catch (e) {
+            // ignore poll errors
+          }
+        }, 1500);
+      }
+
+      const closeWizBtn = document.getElementById('closeWizardBtn');
+      if (closeWizBtn) closeWizBtn.addEventListener('click', cancelWizard);
+
+      const cancelWizBtn = document.getElementById('btnWizardCancel');
+      if (cancelWizBtn) cancelWizBtn.addEventListener('click', cancelWizard);
 
       // Refresh All Slots (Keep-Alive OAuth Refresh)
       const btnRefreshAll = document.getElementById('btn-refresh-all-slots');
@@ -2514,12 +2835,15 @@
         refreshStatus();
       });
 
-      // External GitHub link
-      document.getElementById('githubBtn').addEventListener('click', () => {
+      // External GitHub link handlers
+      const openGitHub = () => {
         if (window.api && window.api.openExternal) {
           window.api.openExternal('https://github.com/salambeq/antigravity-ru');
         }
-      });
+      };
+      document.getElementById('githubBtn').addEventListener('click', openGitHub);
+      const sbGhBtn = document.getElementById('sb-github-btn');
+      if (sbGhBtn) sbGhBtn.addEventListener('click', openGitHub);
 
       // Initial status load
       refreshStatus();

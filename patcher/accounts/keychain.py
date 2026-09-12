@@ -154,6 +154,56 @@ def write_token_raw(raw_value: str) -> bool:
     return False
 
 
+def delete_current_token_raw() -> bool:
+    """
+    Безопасно удаляет текущий токен из связки ключей без отправки сетевого запроса на отзыв (revoke).
+    Используется мастером авторизации для подготовки входа в новый аккаунт.
+    """
+    if sys.platform == "darwin":
+        try:
+            res = subprocess.run(
+                ["security", "delete-generic-password", "-s", SERVICE_NAME, "-a", ACCOUNT_NAME],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            return res.returncode == 0 or "could not be found" in res.stderr.lower()
+        except Exception:
+            return False
+    elif sys.platform.startswith("linux"):
+        try:
+            res = subprocess.run(
+                ["secret-tool", "clear", "service", SERVICE_NAME, "account", ACCOUNT_NAME],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            return res.returncode == 0
+        except Exception:
+            return False
+    elif os.name == "nt":
+        ps_script = f"""
+        [void][Windows.Security.Credentials.PasswordVault,Windows.Security.Credentials,ContentType=WindowsRuntime]
+        $vault = New-Object Windows.Security.Credentials.PasswordVault
+        try {{
+            $cred = $vault.Retrieve('{SERVICE_NAME}', '{ACCOUNT_NAME}')
+            if ($cred) {{ $vault.Remove($cred) }}
+            Write-Output "OK"
+        }} catch {{}}
+        """
+        try:
+            res = subprocess.run(
+                ["powershell", "-NoProfile", "-Command", ps_script],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            return res.returncode == 0
+        except Exception:
+            return False
+    return False
+
+
 OAUTH_CLIENT_ID = "1071006060591-tmhssin2h21lcre235vtolojh4g403ep.apps.googleusercontent.com"
 OAUTH_CLIENT_SECRET = "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"
 
@@ -184,6 +234,7 @@ def refresh_google_oauth_token(refresh_token: str) -> dict:
     """
     Автоматически обновляет устаревший access_token через официальный эндпоинт Google OAuth,
     используя credentials Antigravity. Предотвращает разлогинивание аккаунтов.
+    Если Google сообщает об ошибке invalid_grant (токен отозван/сброшен), возвращает флаг revoked=True.
     """
     if not refresh_token:
         return {}
@@ -216,6 +267,18 @@ def refresh_google_oauth_token(refresh_token: str) -> dict:
                 expiry_dt = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(seconds=expires_in)
                 res["expiry"] = expiry_dt.isoformat()
                 return res
+    except urllib.error.HTTPError as e:
+        try:
+            err_body = e.read().decode("utf-8")
+            err_json = json.loads(err_body)
+            if err_json.get("error") == "invalid_grant":
+                return {
+                    "error": "invalid_grant",
+                    "error_description": err_json.get("error_description", "Токен был отозван или сброшен сервером Google"),
+                    "revoked": True,
+                }
+        except Exception:
+            pass
     except Exception:
         pass
 

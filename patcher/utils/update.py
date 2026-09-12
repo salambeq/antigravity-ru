@@ -2,13 +2,21 @@ import json
 import sys
 import webbrowser
 
-from patcher.constants import VERSION, COLOR_CYAN, COLOR_GREEN, COLOR_YELLOW, COLOR_RED, COLOR_BOLD, COLOR_UNDERLINE
+from patcher.constants import (
+    VERSION,
+    COLOR_CYAN,
+    COLOR_GREEN,
+    COLOR_YELLOW,
+    COLOR_RED,
+    COLOR_BOLD,
+    COLOR_UNDERLINE,
+    GITHUB_REPO,
+    GITHUB_REPO_URL,
+)
 from patcher.utils.console import color, link, info, ok, warn, err, hint, _frame_border, _frame_row
 
-
-GITHUB_REPO = "AvenCores/open-antigravity-patcher"
-RELEASES_URL = f"https://github.com/{GITHUB_REPO}/releases"
-ISSUES_URL = f"https://github.com/{GITHUB_REPO}/issues"
+RELEASES_URL = f"{GITHUB_REPO_URL}/releases"
+ISSUES_URL = f"{GITHUB_REPO_URL}/issues"
 API_URL = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"
 GOIDA_VPN_URL = "https://github.com/AvenCores/goida-vpn-configs"
 

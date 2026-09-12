@@ -1,4 +1,7 @@
+# ==============================================================================
 # Restore Original Antigravity Files (Windows PowerShell)
+# Официальный репозиторий: https://github.com/salambeq/antigravity-ru
+# ==============================================================================
 $ErrorActionPreference = "Stop"
 
 function Get-AntigravityResources {
@@ -17,6 +20,7 @@ function Get-AntigravityResources {
 
 $AppRes = Get-AntigravityResources
 Write-Host "Восстановление оригинальных файлов Antigravity..." -ForegroundColor Cyan
+Write-Host "Официальный репозиторий: https://github.com/salambeq/antigravity-ru" -ForegroundColor Yellow
 
 $OrigAsar = Join-Path $AppRes "app.asar.orig"
 $OrigBin = Join-Path $AppRes "bin\language_server.exe.orig"

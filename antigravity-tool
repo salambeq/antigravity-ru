@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
-# Antigravity Toolkit Launcher for macOS and Linux
+# ==============================================================================
+# Antigravity Toolkit — Launcher for macOS & Linux
+# Официальный репозиторий: https://github.com/salambeq/antigravity-ru
+# ==============================================================================
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

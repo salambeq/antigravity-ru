@@ -18,6 +18,7 @@ import datetime
 from patcher.accounts.keychain import (
     read_current_token_raw,
     write_token_raw,
+    delete_current_token_raw,
     decode_token_payload,
     encode_token_payload,
     fetch_google_account_info,
@@ -34,6 +35,7 @@ class AccountManager:
         self.accounts_dir = accounts_dir
         self.slots_dir = os.path.join(self.accounts_dir, "slots")
         self.meta_path = os.path.join(self.accounts_dir, "metadata.json")
+        self.wizard_path = os.path.join(self.accounts_dir, "pending_wizard.json")
         self._ensure_dirs()
 
     def _ensure_dirs(self):
@@ -159,7 +161,18 @@ class AccountManager:
             updated = False
             if needs_refresh and refresh_token:
                 refreshed = refresh_google_oauth_token(refresh_token)
-                if refreshed.get("access_token"):
+                if refreshed.get("revoked"):
+                    slot_data["is_revoked"] = True
+                    slot_data["revoked_at"] = int(time.time())
+                    slot_data["error"] = refreshed.get("error_description", "Токен отозван или сессия завершена")
+                    with open(slot_path, "w", encoding="utf-8") as f:
+                        json.dump(slot_data, f, indent=2, ensure_ascii=False)
+                    meta = self._load_metadata()
+                    if str(slot_num) in meta.get("slots", {}):
+                        meta["slots"][str(slot_num)]["is_revoked"] = True
+                        self._save_metadata(meta)
+                    return False
+                elif refreshed.get("access_token"):
                     tok["access_token"] = refreshed["access_token"]
                     if refreshed.get("expiry"):
                         tok["expiry"] = refreshed["expiry"]
@@ -169,6 +182,7 @@ class AccountManager:
                     raw = encode_token_payload(payload)
                     slot_data["raw_payload"] = raw
                     slot_data["saved_at"] = int(time.time())
+                    slot_data["is_revoked"] = False
                     updated = True
 
             # Извлечение реального email/имени если они не заполнены
@@ -189,6 +203,7 @@ class AccountManager:
                     "email": slot_data["email"],
                     "name": slot_data.get("name", ""),
                     "saved_at": slot_data["saved_at"],
+                    "is_revoked": False,
                 }
                 self._save_metadata(meta)
 
@@ -289,6 +304,7 @@ class AccountManager:
             "picture": cur.get("picture") or "",
             "saved_at": int(time.time()),
             "raw_payload": cur["raw"],
+            "is_revoked": False,
         }
 
         try:
@@ -304,6 +320,7 @@ class AccountManager:
                 "email": slot_data["email"],
                 "name": slot_data["name"],
                 "saved_at": slot_data["saved_at"],
+                "is_revoked": False,
             }
             meta["active_slot"] = slot_num
             self._save_metadata(meta)
@@ -340,6 +357,7 @@ class AccountManager:
                             "picture": data.get("picture", ""),
                             "saved_at": data.get("saved_at", 0),
                             "is_active": (slot_num == meta.get("active_slot")),
+                            "is_revoked": bool(data.get("is_revoked")),
                         }
                     except Exception:
                         pass
@@ -538,3 +556,165 @@ class AccountManager:
             return True
         except Exception:
             return False
+
+    def prepare_slot_wizard(self, target_slot: int) -> tuple[bool, str]:
+        """
+        Запускает Мастер привязки аккаунта к указанному слоту.
+        1. Безопасно синхронизирует текущую активную сессию в её слот (Zero-Leak).
+        2. Сохраняет снимок активного токена для возможности отмены.
+        3. Удаляет токен из Keychain БЕЗ отправки сетевого запроса на отзыв (revoke).
+        4. Мягко перезапускает language_server и выводит Antigravity на передний план.
+        """
+        if target_slot < 1:
+            return False, "Номер слота должен быть положительным числом (1..4)."
+
+        # 1. Синхронизируем текущий активный аккаунт в его слот
+        self.sync_keychain_to_active_slot()
+
+        meta = self._load_metadata()
+        active_slot = meta.get("active_slot")
+        prev_raw = read_current_token_raw()
+
+        # 2. Сохраняем состояние мастера
+        wizard_state = {
+            "target_slot": target_slot,
+            "previous_active_slot": active_slot,
+            "previous_token_raw": prev_raw,
+            "started_at": int(time.time()),
+        }
+        try:
+            with open(self.wizard_path, "w", encoding="utf-8") as f:
+                json.dump(wizard_state, f, indent=2, ensure_ascii=False)
+            try:
+                os.chmod(self.wizard_path, 0o600)
+            except OSError:
+                pass
+        except Exception as e:
+            return False, f"Не удалось инициализировать мастер: {e}"
+
+        # 3. Безопасно очищаем Keychain локально
+        delete_current_token_raw()
+
+        # 4. Перезапускаем language_server, чтобы Antigravity перешла в состояние ожидания логина
+        self.restart_language_server()
+
+        # 5. Фокусируем окно Antigravity на macOS
+        if sys.platform == "darwin":
+            try:
+                subprocess.run(["open", "-a", "Antigravity"], check=False, capture_output=True)
+            except Exception:
+                pass
+
+        return True, f"Слот #{target_slot} подготовлен! Перейдите в Antigravity и нажмите «Войти через Google»."
+
+    def check_wizard_status(self) -> dict:
+        """
+        Опрашивает статус мастера привязки слота.
+        Если обнаружен новый вошедший Google-аккаунт, автоматически фиксирует его в слоте.
+        """
+        if not os.path.isfile(self.wizard_path):
+            return {"in_progress": False, "message": "Мастер не запущен."}
+
+        try:
+            with open(self.wizard_path, "r", encoding="utf-8") as f:
+                state = json.load(f)
+        except Exception:
+            return {"in_progress": False, "error": "Поврежден файл мастера"}
+
+        target_slot = state.get("target_slot", 1)
+        prev_raw = state.get("previous_token_raw", "")
+        started_at = state.get("started_at", int(time.time()))
+
+        cur_raw = read_current_token_raw()
+        if cur_raw and cur_raw != prev_raw:
+            payload = decode_token_payload(cur_raw)
+            tok = payload.get("token", {}) if isinstance(payload, dict) else {}
+            access_token = tok.get("access_token", "")
+            id_token = tok.get("id_token", "") or (payload.get("id_token", "") if isinstance(payload, dict) else "")
+
+            if access_token:
+                uinfo = fetch_google_account_info(access_token, id_token=id_token, allow_network=True)
+                email = uinfo.get("email") or f"account_{target_slot}@google"
+                name = uinfo.get("name") or ""
+                picture = uinfo.get("picture") or ""
+
+                slot_data = {
+                    "slot": target_slot,
+                    "email": email,
+                    "name": name,
+                    "picture": picture,
+                    "saved_at": int(time.time()),
+                    "raw_payload": cur_raw,
+                    "is_revoked": False,
+                }
+                slot_path = self.get_slot_path(target_slot)
+                with open(slot_path, "w", encoding="utf-8") as f:
+                    json.dump(slot_data, f, indent=2, ensure_ascii=False)
+                try:
+                    os.chmod(slot_path, 0o600)
+                except OSError:
+                    pass
+
+                meta = self._load_metadata()
+                meta["slots"][str(target_slot)] = {
+                    "email": email,
+                    "name": name,
+                    "saved_at": slot_data["saved_at"],
+                    "is_revoked": False,
+                }
+                meta["active_slot"] = target_slot
+                self._save_metadata(meta)
+
+                try:
+                    os.remove(self.wizard_path)
+                except OSError:
+                    pass
+
+                return {
+                    "in_progress": False,
+                    "completed": True,
+                    "target_slot": target_slot,
+                    "email": email,
+                    "name": name,
+                    "message": f"Аккаунт {email} успешно привязан к Слоту #{target_slot}!",
+                }
+
+        return {
+            "in_progress": True,
+            "completed": False,
+            "target_slot": target_slot,
+            "elapsed": int(time.time()) - started_at,
+        }
+
+    def cancel_wizard(self) -> tuple[bool, str]:
+        """
+        Отменяет работу мастера и восстанавливает предыдущий активный аккаунт.
+        """
+        if not os.path.isfile(self.wizard_path):
+            return True, "Мастер не был запущен."
+
+        try:
+            with open(self.wizard_path, "r", encoding="utf-8") as f:
+                state = json.load(f)
+        except Exception:
+            state = {}
+
+        prev_raw = state.get("previous_token_raw", "")
+        prev_active_slot = state.get("previous_active_slot")
+
+        if prev_raw:
+            write_token_raw(prev_raw)
+
+        if prev_active_slot:
+            meta = self._load_metadata()
+            meta["active_slot"] = prev_active_slot
+            self._save_metadata(meta)
+
+        self.restart_language_server()
+
+        try:
+            os.remove(self.wizard_path)
+        except OSError:
+            pass
+
+        return True, "Мастер подключения отменён. Предыдущий аккаунт восстановлен."

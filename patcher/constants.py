@@ -1,4 +1,16 @@
-VERSION = "1.3.6"
+from patcher.version import (
+    VERSION,
+    BASE_VERSION,
+    VERSION_FULL,
+    VERSION_SHORT,
+    GITHUB_REPO,
+    GITHUB_REPO_URL,
+    BUILD_REV,
+    BUILD_COMMIT,
+    IS_DIRTY,
+    resolve_version_info,
+)
+
 MIN_AG_VERSION = "2.5.5"
 MIN_ANTIGRAVITY_VERSION = "2.9.1"
 DOWNLOAD_URL = "https://antigravity.google/download"

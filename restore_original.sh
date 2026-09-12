@@ -20,7 +20,12 @@ else
     fi
 fi
 
+# ==============================================================================
+# Antigravity — Restore Original Files
+# Официальный репозиторий: https://github.com/salambeq/antigravity-ru
+# ==============================================================================
 echo "Восстановление оригинальных файлов Antigravity..."
+echo "Официальный репозиторий: https://github.com/salambeq/antigravity-ru"
 echo "Каталог ресурсов: $APP_DIR"
 
 if [ -f "$APP_DIR/app.asar.orig" ]; then

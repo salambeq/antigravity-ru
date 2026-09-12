@@ -1,4 +1,7 @@
+# ==============================================================================
 # Language Switcher for Antigravity 2.0 (Windows PowerShell)
+# Официальный репозиторий: https://github.com/salambeq/antigravity-ru
+# ==============================================================================
 param (
     [Parameter(Mandatory=$true)]
     [ValidateSet("ru", "en")]

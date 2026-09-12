@@ -1,4 +1,7 @@
+# ==============================================================================
 # Antigravity 2.0 Auto-Patcher for Windows (PowerShell)
+# Официальный репозиторий: https://github.com/salambeq/antigravity-ru
+# ==============================================================================
 $ErrorActionPreference = "Stop"
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -19,6 +22,7 @@ function Get-AntigravityResources {
 
 $AppRes = Get-AntigravityResources
 Write-Host "=== Antigravity 2.0 Auto-Patcher (Windows) ===" -ForegroundColor Cyan
+Write-Host "Официальный репозиторий: https://github.com/salambeq/antigravity-ru" -ForegroundColor Yellow
 Write-Host "Resources: $AppRes"
 
 # 1. Backup

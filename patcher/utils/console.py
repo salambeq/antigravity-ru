@@ -3,7 +3,7 @@ import sys
 import ctypes
 import re
 from patcher.constants import (
-    VERSION, COLOR_RESET, COLOR_CYAN, COLOR_GREEN, COLOR_YELLOW, COLOR_RED,
+    VERSION, VERSION_SHORT, VERSION_FULL, COLOR_RESET, COLOR_CYAN, COLOR_GREEN, COLOR_YELLOW, COLOR_RED,
     COLOR_BOLD, COLOR_DIM, COLOR_GRAY, COLOR_WHITE, COLOR_UNDERLINE,
 )
 
@@ -74,7 +74,7 @@ def clear_screen():
 # Layout constants shared by banner, menu dividers, and summary panels.
 # BANNER_INNER_WIDTH is the visible width inside a framed box.
 # MENU_WIDTH is the matching outer menu width, including the frame columns.
-BANNER_INNER_WIDTH = 47
+BANNER_INNER_WIDTH = 54
 MENU_WIDTH = BANNER_INNER_WIDTH + 2
 
 
@@ -113,22 +113,20 @@ def _frame_row(left, right="", accent=COLOR_CYAN):
 
 
 def print_banner():
-    title_left = color("Open AG Patcher", COLOR_BOLD)
-    title_right = color(f"v{VERSION}", COLOR_GREEN, COLOR_BOLD)
+    title_left = color("Antigravity Toolkit RU", COLOR_BOLD)
+    title_right = color(f"v{VERSION_SHORT}", COLOR_GREEN, COLOR_BOLD)
 
-    label_col = 12  # ширина колонки подписей (Telegram/YouTube) для ровной сетки
-    telegram = color("Telegram".ljust(label_col), COLOR_YELLOW) + link("https://t.me/avencoresyt", "t.me/avencoresyt", COLOR_DIM, COLOR_UNDERLINE)
-    youtube = color("YouTube".ljust(label_col), COLOR_YELLOW) + link("https://youtube.com/@avencores", "youtube.com/@avencores", COLOR_DIM, COLOR_UNDERLINE)
-
+    sub1 = color("Снятие ограничений • Русская локализация", COLOR_CYAN)
+    sub2 = color("100% Локально • Без телеметрии • Zero-Leak", COLOR_GREEN)
+    gh_link = color("GitHub: ", COLOR_YELLOW) + link("https://github.com/salambeq/antigravity-ru", "github.com/salambeq/antigravity-ru", COLOR_CYAN, COLOR_UNDERLINE)
 
     print()
     print(f"  {_frame_border('╔', '═', '╗')}")
     print(f"  {_frame_row(title_left, title_right)}")
-    print(f"  {_frame_row(color('Region bypass for Antigravity', COLOR_CYAN))}")
-    print(f"  {_frame_row(color('Clean • No keys • No telemetry', COLOR_GREEN))}")
+    print(f"  {_frame_row(sub1)}")
+    print(f"  {_frame_row(sub2)}")
     print(f"  {_frame_border('╟', '─', '╢')}")
-    print(f"  {_frame_row(telegram)}")
-    print(f"  {_frame_row(youtube)}")
+    print(f"  {_frame_row(gh_link)}")
     print(f"  {_frame_border('╚', '═', '╝')}")
 
     print()
