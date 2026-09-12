@@ -77,6 +77,7 @@ from patcher.localization import (
     get_resources_path,
 )
 from patcher.accounts import AccountManager, QuotaRotator
+from patcher.backup import BackupManager
 
 
 def _kv(label, value_text, value_color):
@@ -158,6 +159,16 @@ def get_system_status_json():
     except Exception:
         pass
 
+    backups_data = {"chat_count": 0, "list": []}
+    try:
+        bm = BackupManager()
+        backups_data = {
+            "chat_count": bm.get_conversation_count(),
+            "list": bm.list_backups(),
+        }
+    except Exception:
+        pass
+
     return {
         "manager": {
             "path": mgr or "",
@@ -189,6 +200,7 @@ def get_system_status_json():
             "current": cur_acc,
             "slots": slots_dict,
         },
+        "backups": backups_data,
     }
 
 
@@ -301,6 +313,14 @@ def action_all_in_one(targets, interactive=True):
     step("⚡ ЗАПУСК КОМПЛЕКСНОЙ УСТАНОВКИ «ВСЁ В ОДИН КЛИК»")
     print()
 
+    if interactive:
+        warn("⚠️  ВНИМАНИЕ: Перед началом операций рекомендуется закрыть Antigravity.")
+        warn("   Все оригинальные файлы будут защищены резервными копиями.")
+        if not confirmed("   Вы уверены, что хотите продолжить?"):
+            cancel("Операция отменена пользователем.")
+            pause()
+            return
+
     mgr = targets["manager"]
     if not mgr or not os.path.isfile(mgr):
         err("Antigravity 2.0 не найден. Проверьте установку программы.")
@@ -369,6 +389,14 @@ def action_localize_ui(targets, interactive=True):
     step("🇷🇺 УСТАНОВКА РУССКОЙ ЛОКАЛИЗАЦИИ ИНТЕРФЕЙСА")
     print()
 
+    if interactive:
+        warn("⚠️  ВНИМАНИЕ: Будет пересобран app.asar и обновлен language_server.")
+        warn("   Рекомендуется закрыть Antigravity перед началом.")
+        if not confirmed("   Вы уверены, что хотите продолжить?"):
+            cancel("Операция отменена пользователем.")
+            pause()
+            return
+
     mgr = targets["manager"]
     if not mgr or not os.path.isfile(mgr):
         err("Antigravity 2.0 не найден.")
@@ -390,6 +418,14 @@ def action_unlock_all(targets, interactive=True):
     print_banner()
     step("🔓 СНЯТИЕ РЕГИОНАЛЬНЫХ ОГРАНИЧЕНИЙ (REGION UNLOCK)")
     print()
+
+    if interactive:
+        warn("⚠️  ВНИМАНИЕ: Будут сняты региональные ограничения (патч бинарных файлов и скриптов).")
+        warn("   Рекомендуется закрыть Antigravity перед началом.")
+        if not confirmed("   Вы уверены, что хотите продолжить?"):
+            cancel("Операция отменена пользователем.")
+            pause()
+            return
 
     # Antigravity 2.0
     if targets["manager"] and os.path.isfile(targets["manager"]):
@@ -769,6 +805,89 @@ def action_accounts_menu(targets=None):
             pause()
 
 
+def action_backups_menu(targets=None):
+    """Интерактивное управление резервными копиями чатов и данных Antigravity."""
+    bm = BackupManager()
+    while True:
+        clear_screen()
+        print_banner()
+        print_menu_section("РЕЗЕРВНОЕ КОПИРОВАНИЕ И ВОССТАНОВЛЕНИЕ ДАННЫХ")
+        print()
+
+        chat_count = bm.get_conversation_count()
+        print(f"  ● Состояние хранилища Antigravity:")
+        _kv("Обнаружено диалогов:", f"{chat_count} шт.", COLOR_GREEN if chat_count > 0 else COLOR_YELLOW)
+        _kv("Каталог бэкапов:", bm.backup_dir, COLOR_CYAN)
+        print()
+
+        backups = bm.list_backups()
+        if backups:
+            print(f"  {color('● Доступные резервные копии:', COLOR_BOLD, COLOR_WHITE)}")
+            for idx, b in enumerate(backups[:8], 1):
+                note_str = f" — {b['note']}" if b.get("note") else ""
+                print(f"    [{idx}] {b['filename']} ({b['size_formatted']}, диалогов: {b['chat_count']}, дата: {b['created_at_iso']}){note_str}")
+        else:
+            print(f"  {color('● Доступные резервные копии:', COLOR_BOLD, COLOR_WHITE)}")
+            print("    (Резервных копий пока нет)")
+        print()
+
+        print_menu_section("ДЕЙСТВИЯ С РЕЗЕРВНЫМИ КОПИЯМИ")
+        print_menu_row("1", "Создать копию чатов", "Архивация диалогов, сессий, настроек и аккаунтов", COLOR_GREEN)
+        print_menu_row("2", "Создать полную копию", "Включая логи и артефакты мозга (brain)", COLOR_CYAN)
+        print_menu_row("3", "Восстановить из копии", "Восстановить чаты из выбранного архива", COLOR_YELLOW)
+        print_menu_row("4", "Удалить старую копию", "Удалить архив из списка", COLOR_RED)
+        print()
+        print_menu_row("0", "Вернуться в главное меню", "", COLOR_RED)
+        print()
+
+        choice = input(color("  Выберите вариант > ", COLOR_CYAN, COLOR_BOLD)).strip()
+        if choice == "0":
+            break
+        elif choice == "1":
+            bm.create_backup(backup_type="chats", note="Ручной бэкап чатов")
+            pause()
+        elif choice == "2":
+            warn("Полная копия может занять больше времени и места на диске.")
+            if prompt_yn("Продолжить создание полной копии?", default=True):
+                bm.create_backup(backup_type="full", note="Полный бэкап")
+            pause()
+        elif choice == "3":
+            if not backups:
+                warn("Нет доступных резервных копий.")
+                pause()
+                continue
+            idx_str = input(color("  Введите номер копии для восстановления (1..N) > ", COLOR_CYAN)).strip()
+            try:
+                sel_idx = int(idx_str) - 1
+                if 0 <= sel_idx < len(backups):
+                    sel_b = backups[sel_idx]
+                    warn(f"ВНИМАНИЕ: Восстановление перезапишет текущие диалоги копией от {sel_b['created_at_iso']}.")
+                    if prompt_yn("Вы уверены, что хотите восстановить?", default=False):
+                        bm.restore_backup(sel_b["path"])
+                else:
+                    err("Неверный номер.")
+            except ValueError:
+                err("Введите число.")
+            pause()
+        elif choice == "4":
+            if not backups:
+                warn("Нет резервных копий для удаления.")
+                pause()
+                continue
+            idx_str = input(color("  Введите номер копии для удаления (1..N) > ", COLOR_RED)).strip()
+            try:
+                sel_idx = int(idx_str) - 1
+                if 0 <= sel_idx < len(backups):
+                    sel_b = backups[sel_idx]
+                    if prompt_yn(f"Удалить {sel_b['filename']}?", default=False):
+                        bm.delete_backup(sel_b["path"])
+                else:
+                    err("Неверный номер.")
+            except ValueError:
+                err("Введите число.")
+            pause()
+
+
 def main():
     # Обработка неинтерактивных флагов командной строки
     if len(sys.argv) > 1:
@@ -829,6 +948,28 @@ def main():
             rotator = QuotaRotator()
             rotator.start_watch()
             sys.exit(0)
+        elif arg in ("--backup-create", "-bc"):
+            btype = sys.argv[2] if len(sys.argv) > 2 else "chats"
+            bm = BackupManager()
+            success, msg, manifest = bm.create_backup(backup_type=btype)
+            sys.exit(0 if success else 1)
+        elif arg in ("--backup-list", "-bl"):
+            bm = BackupManager()
+            blist = bm.list_backups()
+            print(f"Резервных копий: {len(blist)}")
+            for b in blist:
+                print(f"  • {b['filename']} ({b['size_formatted']}, диалогов: {b['chat_count']}, дата: {b['created_at_iso']})")
+            sys.exit(0)
+        elif arg in ("--backup-restore", "-br") and len(sys.argv) > 2:
+            target_f = sys.argv[2]
+            bm = BackupManager()
+            success, msg = bm.restore_backup(target_f)
+            sys.exit(0 if success else 1)
+        elif arg in ("--backup-delete", "-bd") and len(sys.argv) > 2:
+            target_f = sys.argv[2]
+            bm = BackupManager()
+            success, msg = bm.delete_backup(target_f)
+            sys.exit(0 if success else 1)
         elif arg in ("--json-status", "--status-json"):
             print(json.dumps(get_system_status_json(), ensure_ascii=False, indent=2))
             sys.exit(0)
@@ -852,6 +993,7 @@ def main():
             print_menu_row("7", "🎯 Выборочные патчи", "Индивидуальное управление компонентами (IDE, CLI и т.д.)", COLOR_CYAN)
             print_menu_row("8", "🔍 Подробная диагностика", "Проверка подписей, прав, контрольных сумм и модулей", COLOR_CYAN)
             print_menu_row("9", "🔄 Мультиаккаунт и авто-ротация", "Смена 4-х Google-аккаунтов и авто-переключение при исчерпании квот", COLOR_GREEN)
+            print_menu_row("10", "📦 Резервная копия чатов", "Архивация и восстановление диалогов (чтобы чаты не пропадали)", COLOR_CYAN)
             print()
             print_menu_row("0", "Выход", "Завершить работу с утилитой", COLOR_RED)
             print_menu_footer("Совет: все изменения обратимы — пункт [5] возвращает оригинальные файлы.")
@@ -881,6 +1023,8 @@ def main():
                 action_diagnostics(targets)
             elif choice == "9":
                 action_accounts_menu(targets)
+            elif choice == "10":
+                action_backups_menu(targets)
 
         except KeyboardInterrupt:
             print("\n\n  Прервано пользователем. Выход.\n")

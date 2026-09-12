@@ -214,3 +214,21 @@ ipcMain.handle('toggle-auto-rotate', async (event, enable) => {
 ipcMain.handle('get-auto-rotate-status', () => {
   return { running: Boolean(autoRotateProcess) };
 });
+
+// IPC: Backup and Restore
+ipcMain.handle('backup-create', async (event, type = 'chats') => {
+  return streamPythonCommand(['--backup-create', type], event);
+});
+
+ipcMain.handle('backup-restore', async (event, file) => {
+  return streamPythonCommand(['--backup-restore', file], event);
+});
+
+ipcMain.handle('backup-delete', async (_event, file) => {
+  return new Promise((resolve) => {
+    execFile(PYTHON_BIN, [MAIN_PY, '--backup-delete', file], { cwd: ROOT_DIR }, (err, stdout) => {
+      resolve({ success: !err, message: stdout });
+    });
+  });
+});
+

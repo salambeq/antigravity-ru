@@ -8,6 +8,9 @@ contextBridge.exposeInMainWorld('api', {
   saveAccount: (slot) => ipcRenderer.invoke('save-account', slot),
   toggleAutoRotate: (enable) => ipcRenderer.invoke('toggle-auto-rotate', enable),
   getAutoRotateStatus: () => ipcRenderer.invoke('get-auto-rotate-status'),
+  createBackup: (type) => ipcRenderer.invoke('backup-create', type),
+  restoreBackup: (file) => ipcRenderer.invoke('backup-restore', file),
+  deleteBackup: (file) => ipcRenderer.invoke('backup-delete', file),
   onLog: (callback) => {
     const handler = (_event, data) => callback(data);
     ipcRenderer.on('log-chunk', handler);

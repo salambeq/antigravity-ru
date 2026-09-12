@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="dark" lang="ru">
+<html class="dark h-full" lang="ru">
 <head>
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
@@ -47,6 +47,11 @@
     }
   </script>
   <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
     .material-symbols-outlined {
       font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
       display: inline-block;
@@ -78,19 +83,24 @@
       box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
       filter: brightness(1.1);
     }
+    .custom-scroll {
+      overflow-y: auto !important;
+      scrollbar-width: thin;
+      scrollbar-color: #3e484f #0b0e15;
+    }
     .custom-scroll::-webkit-scrollbar {
-      width: 5px;
-      height: 5px;
+      width: 7px;
+      height: 7px;
     }
     .custom-scroll::-webkit-scrollbar-track {
       background: #0b0e15;
     }
     .custom-scroll::-webkit-scrollbar-thumb {
-      background: #272a31;
-      border-radius: 3px;
+      background: #3e484f;
+      border-radius: 4px;
     }
     .custom-scroll::-webkit-scrollbar-thumb:hover {
-      background: #3e484f;
+      background: #64748b;
     }
     .slot-card {
       transition: all 0.2s ease;
@@ -103,10 +113,10 @@
   </style>
 </head>
 
-<body class="bg-background text-on-surface select-none antialiased min-h-screen overflow-hidden font-sans flex flex-col">
+<body class="bg-background text-on-surface antialiased h-full overflow-hidden font-sans flex flex-col">
 
   <!-- ==================== TOP COMMAND / TITLE BAR (MACOS DRAGGABLE) ==================== -->
-  <header class="h-12 bg-surface-container-low/95 backdrop-blur-md border-b border-outline-variant flex items-center justify-between px-4 z-40 drag-region">
+  <header class="h-12 flex-shrink-0 bg-surface-container-low/95 backdrop-blur-md border-b border-outline-variant flex items-center justify-between px-4 z-40 drag-region">
     <!-- Left spacing for macOS traffic lights (80px) -->
     <div class="flex items-center gap-3 pl-16">
       <div class="flex items-center gap-2">
@@ -115,7 +125,7 @@
         <span class="px-1.5 py-0.2 rounded bg-surface-container text-primary font-mono text-[10px] border border-primary/30">v2.0 RU</span>
       </div>
       <span class="text-outline text-xs hidden md:inline">|</span>
-      <span class="text-xs text-on-surface-variant hidden md:inline">Центр управления, локализации и квот</span>
+      <span class="text-xs text-on-surface-variant hidden md:inline">Центр управления, локализации и защиты чатов</span>
     </div>
 
     <!-- Status Badges in Header -->
@@ -146,10 +156,10 @@
   </header>
 
   <!-- ==================== MAIN BODY LAYOUT ==================== -->
-  <div class="flex flex-1 overflow-hidden">
+  <div class="flex flex-1 min-h-0 h-[calc(100vh-3rem)] overflow-hidden">
 
     <!-- ==================== LEFT NAVIGATION SIDEBAR ==================== -->
-    <aside class="w-60 flex flex-col justify-between bg-surface-container-lowest border-r border-outline-variant p-3 overflow-y-auto custom-scroll">
+    <aside class="w-60 h-full flex-shrink-0 flex flex-col justify-between bg-surface-container-lowest border-r border-outline-variant p-3 overflow-y-auto custom-scroll">
       <div class="flex flex-col gap-1">
         <div class="text-[10px] font-mono uppercase tracking-wider text-outline px-2.5 py-1">Быстрые действия</div>
 
@@ -173,7 +183,12 @@
           <span>🌐 Переключить язык</span>
         </button>
 
-        <div class="text-[10px] font-mono uppercase tracking-wider text-outline px-2.5 pt-3 pb-1">Аккаунты и квоты</div>
+        <div class="text-[10px] font-mono uppercase tracking-wider text-outline px-2.5 pt-3 pb-1">Данные и чаты</div>
+
+        <button id="nav-backup" class="nav-item flex items-center gap-2.5 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface text-xs font-medium transition-colors">
+          <span class="material-symbols-outlined text-[17px] text-cyan-400">archive</span>
+          <span>📦 Бэкап чатов</span>
+        </button>
 
         <button id="nav-accounts" class="nav-item flex items-center gap-2.5 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface text-xs font-medium transition-colors">
           <span class="material-symbols-outlined text-[17px] text-tertiary">group</span>
@@ -194,7 +209,7 @@
 
         <button id="nav-restore" class="nav-item flex items-center gap-2.5 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface text-xs font-medium transition-colors">
           <span class="material-symbols-outlined text-[17px]">history</span>
-          <span>⏪ Восстановление</span>
+          <span>⏪ Восстановление файлов</span>
         </button>
       </div>
 
@@ -220,14 +235,14 @@
       </div>
     </aside>
 
-    <!-- ==================== MAIN SCROLLABLE CONTENT ==================== -->
-    <main class="flex-1 flex flex-col overflow-y-auto custom-scroll p-5 gap-5 bg-background relative">
+    <!-- ==================== MAIN SCROLLABLE CONTENT (100% WORKING SCROLL) ==================== -->
+    <main id="mainScrollArea" class="flex-1 h-full min-h-0 overflow-y-auto custom-scroll p-5 gap-5 bg-background relative flex flex-col">
       
       <!-- Atmospheric Glow -->
       <div class="absolute -top-32 left-1/3 w-[600px] h-[300px] bg-gradient-to-r from-primary/10 via-secondary/10 to-transparent blur-[120px] pointer-events-none"></div>
 
       <!-- ================= 1. HERO COMPREHENSIVE CARD ================= -->
-      <section class="relative overflow-hidden rounded-xl border border-outline-variant p-5 bg-gradient-to-br from-[#121622] via-[#0f1422] to-[#151226] border-glow-cyan">
+      <section class="relative overflow-hidden rounded-xl border border-outline-variant p-5 bg-gradient-to-br from-[#121622] via-[#0f1422] to-[#151226] border-glow-cyan flex-shrink-0">
         <div class="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-primary to-transparent opacity-80"></div>
         
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5 relative z-10">
@@ -237,7 +252,7 @@
                 ⚡ Пайплайн автонастройки
               </span>
               <span class="px-2 py-0.5 rounded bg-tertiary/10 border border-tertiary/30 text-tertiary font-mono text-[11px]">
-                Antigravity 2.0 + IDE + CLI + Квоты
+                Antigravity 2.0 + IDE + Квоты + Бэкап
               </span>
             </div>
 
@@ -246,7 +261,7 @@
             </h1>
 
             <p class="text-xs text-on-surface-variant leading-relaxed">
-              Автоматическое снятие региональных ограничений (bypass eligibility & auth), полный перевод интерфейса и ядра на русский язык, установка правил разработки и подготовка системы к непрерывной работе.
+              Автоматическое снятие региональных ограничений (bypass eligibility & auth), полный перевод интерфейса и ядра на русский язык, защита истории чатов и подготовка системы к бесперебойной работе.
             </p>
 
             <div class="flex flex-wrap items-center gap-4 pt-1">
@@ -259,8 +274,8 @@
                 <span>Локализация: <strong id="hero-stat-lang" class="text-tertiary font-medium">100% RU</strong></span>
               </div>
               <div class="flex items-center gap-2 text-xs font-mono">
-                <span class="w-2 h-2 rounded-full bg-secondary"></span>
-                <span>Аккаунты: <strong id="hero-stat-acc" class="text-secondary font-medium">4 слота готовы</strong></span>
+                <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+                <span>Чаты: <strong id="hero-stat-chats" class="text-cyan-300 font-medium">Защищены</strong></span>
               </div>
             </div>
           </div>
@@ -279,8 +294,56 @@
         </div>
       </section>
 
-      <!-- ================= 2. BENTO CARDS GRID ================= -->
-      <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- ================= 2. BACKUP & CHATS PROTECTION CARD ================= -->
+      <section id="section-backups" class="rounded-xl bg-surface-container-low border border-cyan-500/30 p-4.5 flex flex-col gap-3 shadow-lg flex-shrink-0">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-outline-variant pb-3">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+              <span class="material-symbols-outlined text-[22px]">archive</span>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h3 class="text-sm font-bold text-on-surface">Резервное копирование чатов и истории</h3>
+                <span id="badge-chat-count" class="px-2 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 font-mono text-[11px]">
+                  102 диалога
+                </span>
+              </div>
+              <span class="text-xs text-on-surface-variant">Сохранение баз данных SQLite, сессий и токенов во избежание потери переписок</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button id="btn-create-backup-quick" class="btn-gradient px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-sm active:scale-95">
+              <span class="material-symbols-outlined text-[16px]">save</span>
+              <span>Создать бэкап сейчас</span>
+            </button>
+            <button id="btn-show-backups-list" class="bg-surface-container hover:bg-surface-container-high border border-outline-variant hover:border-primary/40 px-3.5 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 text-on-surface active:scale-95">
+              <span class="material-symbols-outlined text-[16px] text-tertiary">history</span>
+              <span>Список копий</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1">
+          <div class="p-2.5 rounded-lg bg-surface-container-lowest border border-outline-variant text-xs flex flex-col gap-1">
+            <span class="text-[11px] text-outline font-mono">АКТИВНЫХ ДИАЛОГОВ:</span>
+            <span id="lbl-backup-chats-stat" class="text-sm font-bold text-cyan-300">102 диалога обнаружено</span>
+          </div>
+
+          <div class="p-2.5 rounded-lg bg-surface-container-lowest border border-outline-variant text-xs flex flex-col gap-1">
+            <span class="text-[11px] text-outline font-mono">ПОСЛЕДНЯЯ КОПИЯ:</span>
+            <span id="lbl-last-backup-name" class="text-xs font-medium text-on-surface truncate">Загрузка списка...</span>
+          </div>
+
+          <div class="p-2.5 rounded-lg bg-surface-container-lowest border border-outline-variant text-xs flex flex-col gap-1">
+            <span class="text-[11px] text-outline font-mono">КАТАЛОГ ХРАНИЛИЩА:</span>
+            <span class="text-xs font-mono text-on-surface truncate">~/.gemini/backups</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 3. BENTO CARDS GRID ================= -->
+      <section class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-shrink-0">
 
         <!-- CARD 1: Antigravity 2.0 (App) -->
         <div class="rounded-xl bg-surface-container-low border border-outline-variant p-4 flex flex-col justify-between">
@@ -493,7 +556,7 @@
 
       </section>
 
-      <!-- ================= 3. TERMINAL CONSOLE PANEL ================= -->
+      <!-- ================= 4. TERMINAL CONSOLE PANEL ================= -->
       <section class="rounded-xl border border-outline-variant bg-surface-container-lowest overflow-hidden shadow-2xl flex flex-col flex-shrink-0">
         <!-- Terminal Header -->
         <div class="flex items-center justify-between px-4 py-2 bg-surface-container-low border-b border-outline-variant">
@@ -530,7 +593,7 @@
           <div class="flex items-start gap-2">
             <span class="text-outline">[00:00:01]</span>
             <span class="text-tertiary font-medium">[READY]</span>
-            <span class="text-tertiary">Интерфейс готов к выполнению команд.</span>
+            <span class="text-tertiary">Интерфейс готов. Функция защиты и резервного копирования чатов активна.</span>
           </div>
           <!-- Cursor line -->
           <div id="term-cursor-line" class="flex items-center gap-2 pt-1 text-on-surface">
@@ -543,16 +606,105 @@
     </main>
   </div>
 
+  <!-- ==================== WARNING & CONFIRMATION MODAL ==================== -->
+  <div id="confirmModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div class="relative w-full max-w-lg rounded-2xl bg-surface-container-low border border-outline-variant shadow-2xl p-6 flex flex-col gap-4 border-glow-cyan animate-in fade-in zoom-in duration-150">
+      <div class="flex items-start gap-3.5">
+        <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+          <span class="material-symbols-outlined text-[24px]">warning</span>
+        </div>
+        <div class="flex flex-col">
+          <h3 class="text-base font-bold text-on-surface" id="confirmModalTitle">Подтверждение операции</h3>
+          <span class="text-[11px] text-amber-400 font-mono" id="confirmModalSubtitle">Antigravity Security Guard</span>
+        </div>
+      </div>
+
+      <div class="p-3.5 rounded-xl bg-surface-container-lowest border border-outline-variant/60 text-xs text-on-surface-variant leading-relaxed space-y-2">
+        <p id="confirmModalMessage" class="text-on-surface font-medium">
+          Будет выполнено действие над компонентами Antigravity.
+        </p>
+        <p class="text-[11px] text-amber-300/90 flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-[15px]">info</span>
+          <span>Рекомендуется закрыть приложение Antigravity перед началом операции.</span>
+        </p>
+      </div>
+
+      <!-- Auto-backup checkbox before action -->
+      <label class="flex items-center gap-2.5 text-xs text-on-surface cursor-pointer select-none bg-surface-container-lowest p-2.5 rounded-lg border border-outline-variant/40">
+        <input type="checkbox" id="confirmModalBackupCheck" checked class="w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary bg-surface-container" />
+        <span class="text-xs">Автоматически создать резервную копию чатов перед запуском</span>
+      </label>
+
+      <div class="flex items-center justify-end gap-3 pt-2">
+        <button id="confirmModalCancelBtn" class="px-4 py-2 rounded-xl bg-surface-container hover:bg-surface-container-high border border-outline-variant text-xs font-medium text-on-surface transition-colors active:scale-95">
+          Отмена
+        </button>
+        <button id="confirmModalProceedBtn" class="btn-gradient px-5 py-2 rounded-xl text-xs font-semibold text-on-surface shadow-md active:scale-95 flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-[16px]">check_circle</span>
+          <span id="confirmModalBtnText">Подтвердить и продолжить</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== BACKUPS LIST & RESTORE MODAL ==================== -->
+  <div id="backupsListModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div class="relative w-full max-w-2xl rounded-2xl bg-surface-container-low border border-outline-variant shadow-2xl p-6 flex flex-col gap-4 border-glow-cyan max-h-[85vh]">
+      <div class="flex items-center justify-between border-b border-outline-variant pb-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+            <span class="material-symbols-outlined text-[24px]">history</span>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-on-surface">Резервные копии чатов и данных</h3>
+            <span class="text-xs text-on-surface-variant font-mono">Каталог: ~/.gemini/backups</span>
+          </div>
+        </div>
+
+        <button id="closeBackupsModalBtn" class="p-1.5 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-on-surface">
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+
+      <!-- Backups List Container -->
+      <div id="modalBackupsContainer" class="flex-1 overflow-y-auto custom-scroll space-y-2 pr-1 min-h-[220px] max-h-[380px]">
+        <div class="text-xs text-on-surface-variant text-center py-8">Загрузка списка копий...</div>
+      </div>
+
+      <div class="flex items-center justify-between border-t border-outline-variant pt-3 text-xs">
+        <span class="text-outline">Восстановление заменяет текущие чаты файлами из архива.</span>
+        <button id="modalCreateNewBackupBtn" class="btn-gradient px-4 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 shadow-sm active:scale-95">
+          <span class="material-symbols-outlined text-[15px]">add</span>
+          <span>Создать свежую копию</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- ==================== FRONTEND CONTROLLER ==================== -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       let currentSelectedSlot = 1;
       let isBusy = false;
       let isRotatorRunning = false;
+      let cachedBackupsList = [];
 
       const terminal = document.getElementById('terminalScreen');
       const cursorLine = document.getElementById('term-cursor-line');
       const termStatusText = document.getElementById('term-status-text');
+
+      // Modals
+      const confirmModal = document.getElementById('confirmModal');
+      const confirmModalTitle = document.getElementById('confirmModalTitle');
+      const confirmModalMessage = document.getElementById('confirmModalMessage');
+      const confirmModalBackupCheck = document.getElementById('confirmModalBackupCheck');
+      const confirmModalCancelBtn = document.getElementById('confirmModalCancelBtn');
+      const confirmModalProceedBtn = document.getElementById('confirmModalProceedBtn');
+
+      const backupsListModal = document.getElementById('backupsListModal');
+      const modalBackupsContainer = document.getElementById('modalBackupsContainer');
+      const closeBackupsModalBtn = document.getElementById('closeBackupsModalBtn');
+      const modalCreateNewBackupBtn = document.getElementById('modalCreateNewBackupBtn');
 
       function appendLog(level, levelColorClass, text) {
         const now = new Date();
@@ -570,7 +722,7 @@
 
       function setBusy(busy, statusText = '') {
         isBusy = busy;
-        const buttons = document.querySelectorAll('button:not(#copyLogsBtn):not(#clearLogsBtn):not(#refreshBtn):not(#githubBtn)');
+        const buttons = document.querySelectorAll('button:not(#copyLogsBtn):not(#clearLogsBtn):not(#refreshBtn):not(#githubBtn):not(#confirmModalCancelBtn):not(#closeBackupsModalBtn)');
         buttons.forEach(b => {
           if (busy) {
             b.classList.add('opacity-60', 'pointer-events-none');
@@ -600,15 +752,90 @@
             if (data.isError || line.toLowerCase().includes('ошибка') || line.toLowerCase().includes('error')) {
               level = 'ERR';
               color = 'text-error';
-            } else if (line.includes('✅') || line.includes('успешно') || line.includes('готово') || line.includes('РАЗБЛОКИРОВАН')) {
+            } else if (line.includes('✅') || line.includes('успешно') || line.includes('готово') || line.includes('РАЗБЛОКИРОВАН') || line.includes('[+]')) {
               level = 'OK';
               color = 'text-tertiary';
-            } else if (line.includes('⚡') || line.includes('ЗАПУСК')) {
+            } else if (line.includes('⚡') || line.includes('ЗАПУСК') || line.includes('[*]')) {
               level = 'STEP';
               color = 'text-secondary';
             }
             appendLog(level, color, line);
           }
+        });
+      }
+
+      // Confirmation Modal Promise wrapper
+      function requestConfirmation(title, message, showBackupCheck = true) {
+        return new Promise((resolve) => {
+          confirmModalTitle.textContent = title;
+          confirmModalMessage.textContent = message;
+          confirmModalBackupCheck.parentElement.style.display = showBackupCheck ? 'flex' : 'none';
+          confirmModal.classList.remove('hidden');
+
+          const onCancel = () => {
+            cleanup();
+            confirmModal.classList.add('hidden');
+            resolve({ confirmed: false, createBackup: false });
+          };
+
+          const onProceed = () => {
+            const doBackup = showBackupCheck && confirmModalBackupCheck.checked;
+            cleanup();
+            confirmModal.classList.add('hidden');
+            resolve({ confirmed: true, createBackup: doBackup });
+          };
+
+          function cleanup() {
+            confirmModalCancelBtn.removeEventListener('click', onCancel);
+            confirmModalProceedBtn.removeEventListener('click', onProceed);
+          }
+
+          confirmModalCancelBtn.addEventListener('click', onCancel);
+          confirmModalProceedBtn.addEventListener('click', onProceed);
+        });
+      }
+
+      // Render backups in modal
+      function renderBackupsList(backups) {
+        cachedBackupsList = backups || [];
+        modalBackupsContainer.innerHTML = '';
+        if (!cachedBackupsList.length) {
+          modalBackupsContainer.innerHTML = '<div class="text-xs text-on-surface-variant text-center py-8">Резервных копий пока нет. Создайте первую копию кнопкой выше.</div>';
+          return;
+        }
+
+        cachedBackupsList.forEach((b) => {
+          const item = document.createElement('div');
+          item.className = 'p-3 rounded-xl bg-surface-container-lowest border border-outline-variant hover:border-cyan-500/40 transition-colors flex items-center justify-between gap-3';
+          item.innerHTML = `
+            <div class="flex items-center gap-3 overflow-hidden">
+              <span class="material-symbols-outlined text-cyan-400 text-[22px] shrink-0">inventory_2</span>
+              <div class="flex flex-col overflow-hidden">
+                <span class="text-xs font-semibold text-on-surface truncate">${b.filename}</span>
+                <div class="flex items-center gap-2 text-[11px] text-outline font-mono">
+                  <span>${b.size_formatted}</span>
+                  <span>•</span>
+                  <span class="text-cyan-300">${b.chat_count} диалогов</span>
+                  <span>•</span>
+                  <span>${b.created_at_iso}</span>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+              <button data-restore="${b.filename}" class="btn-restore-item px-3 py-1 rounded-lg bg-surface-container hover:bg-surface-container-high border border-outline-variant text-cyan-300 hover:text-cyan-200 text-xs font-medium active:scale-95 transition-colors">
+                Восстановить
+              </button>
+            </div>
+          `;
+          modalBackupsContainer.appendChild(item);
+        });
+
+        modalBackupsContainer.querySelectorAll('.btn-restore-item').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const fname = btn.getAttribute('data-restore');
+            backupsListModal.classList.add('hidden');
+            await triggerRestore(fname);
+          });
         });
       }
 
@@ -772,6 +999,23 @@
             }
           }
 
+          // 5. Backups & Chats
+          const backups = status.backups || {};
+          const chatCount = backups.chat_count || 0;
+          const backupList = backups.list || [];
+
+          document.getElementById('badge-chat-count').textContent = `${chatCount} диалогов`;
+          document.getElementById('lbl-backup-chats-stat').textContent = `${chatCount} диалогов обнаружено`;
+          document.getElementById('hero-stat-chats').textContent = `${chatCount} чатов`;
+
+          if (backupList.length > 0) {
+            const latest = backupList[0];
+            document.getElementById('lbl-last-backup-name').textContent = `${latest.filename} (${latest.size_formatted})`;
+          } else {
+            document.getElementById('lbl-last-backup-name').textContent = 'Резервных копий пока нет';
+          }
+          cachedBackupsList = backupList;
+
           // Check Auto-Rotator process
           if (window.api && window.api.getAutoRotateStatus) {
             const rot = await window.api.getAutoRotateStatus();
@@ -825,10 +1069,30 @@
       });
       selectSlot(1);
 
-      // Actions runner wrapper
-      async function executeAction(actionName, label) {
+      // Actions runner wrapper WITH WARNING CONFIRMATION & AUTO-BACKUP
+      async function executeActionWithWarning(actionName, label, warnMsg) {
         if (isBusy) return;
+
+        const defaultMsg = warnMsg || `Будет выполнена операция «${label}». Рекомендуется закрыть приложение Antigravity перед началом работы.`;
+        const { confirmed, createBackup } = await requestConfirmation(label, defaultMsg, true);
+        if (!confirmed) {
+          appendLog('INFO', 'text-outline', `Операция «${label}» отменена пользователем.`);
+          return;
+        }
+
         setBusy(true, `Выполняется: ${label}...`);
+
+        // If user opted to auto-backup chats first
+        if (createBackup && window.api && window.api.createBackup) {
+          appendLog('PROCESS', 'text-cyan-400', 'Создание защитной резервной копии чатов перед операцией...');
+          try {
+            await window.api.createBackup('chats');
+            appendLog('OK', 'text-tertiary', 'Защитная резервная копия успешно создана!');
+          } catch (bErr) {
+            appendLog('WARN', 'text-yellow-400', `Не удалось создать бэкап: ${bErr.message}`);
+          }
+        }
+
         appendLog('PROCESS', 'text-primary', `Запуск: ${label}...`);
         try {
           const res = await window.api.runAction(actionName);
@@ -845,30 +1109,65 @@
         }
       }
 
-      // Button Listeners
-      document.getElementById('btn-hero-all').addEventListener('click', () => executeAction('all', '⚡ Всё в один клик'));
-      document.getElementById('nav-all').addEventListener('click', () => executeAction('all', '⚡ Всё в один клик'));
-      document.getElementById('nav-localize').addEventListener('click', () => executeAction('localize', '🇷🇺 Локализация интерфейса'));
-      document.getElementById('btn-mgr-localize').addEventListener('click', () => executeAction('localize', '🇷🇺 Локализация интерфейса'));
-      document.getElementById('nav-unlock').addEventListener('click', () => executeAction('unlock', '🔓 Снять ограничения'));
-      document.getElementById('btn-mgr-unlock').addEventListener('click', () => executeAction('unlock', '🔓 Снять ограничения'));
-      document.getElementById('btn-ide-patch').addEventListener('click', () => executeAction('unlock', '🔓 Разблокировать Antigravity IDE'));
-      document.getElementById('btn-unlock-tools').addEventListener('click', () => executeAction('unlock', '🔓 Разблокировать CLI & VS Code'));
-      document.getElementById('btn-hero-diag').addEventListener('click', () => executeAction('diagnostics', '🔍 Диагностика системы'));
-      document.getElementById('nav-diagnostics').addEventListener('click', () => executeAction('diagnostics', '🔍 Диагностика системы'));
-      document.getElementById('nav-restore').addEventListener('click', () => executeAction('restore', '⏪ Восстановление оригинальных файлов'));
+      // Button Listeners with Warnings
+      document.getElementById('btn-hero-all').addEventListener('click', () => {
+        executeActionWithWarning('all', '⚡ Всё в один клик', 'Будет выполнено снятие региональных ограничений со всех компонентов, полная русская локализация и установка правил разработки.');
+      });
+      document.getElementById('nav-all').addEventListener('click', () => {
+        executeActionWithWarning('all', '⚡ Всё в один клик', 'Будет выполнено снятие региональных ограничений со всех компонентов, полная русская локализация и установка правил разработки.');
+      });
 
-      // Switch language RU <-> EN
+      document.getElementById('nav-localize').addEventListener('click', () => {
+        executeActionWithWarning('localize', '🇷🇺 Локализация интерфейса', 'Будет пересобран app.asar и обновлен language_server с русским переводом.');
+      });
+      document.getElementById('btn-mgr-localize').addEventListener('click', () => {
+        executeActionWithWarning('localize', '🇷🇺 Локализация интерфейса', 'Будет пересобран app.asar и обновлен language_server с русским переводом.');
+      });
+
+      document.getElementById('nav-unlock').addEventListener('click', () => {
+        executeActionWithWarning('unlock', '🔓 Снять ограничения', 'Будут применены патчи снятия региональных блокировок Antigravity 2.0, IDE и CLI.');
+      });
+      document.getElementById('btn-mgr-unlock').addEventListener('click', () => {
+        executeActionWithWarning('unlock', '🔓 Снять ограничения', 'Будут применены патчи снятия региональных блокировок Antigravity 2.0.');
+      });
+      document.getElementById('btn-ide-patch').addEventListener('click', () => {
+        executeActionWithWarning('unlock', '🔓 Разблокировать Antigravity IDE', 'Будет снят региональный блок с Antigravity IDE (isGoogleInternal = true).');
+      });
+      document.getElementById('btn-unlock-tools').addEventListener('click', () => {
+        executeActionWithWarning('unlock', '🔓 Разблокировать CLI & VS Code', 'Будет снят региональный блок с утилиты agy и расширения VS Code.');
+      });
+
+      document.getElementById('btn-hero-diag').addEventListener('click', () => {
+        executeActionWithWarning('diagnostics', '🔍 Диагностика системы', 'Будет проведена полная проверка подписей, контрольных сумм и путей.');
+      });
+      document.getElementById('nav-diagnostics').addEventListener('click', () => {
+        executeActionWithWarning('diagnostics', '🔍 Диагностика системы', 'Будет проведена полная проверка подписей, контрольных сумм и путей.');
+      });
+
+      document.getElementById('nav-restore').addEventListener('click', () => {
+        executeActionWithWarning('restore', '⏪ Восстановление оригинальных файлов', 'Все файлы будут возвращены к исходному заводскому состоянию из созданных резервных копий .orig.');
+      });
+
+      // Switch language RU <-> EN with Warning
       async function toggleLanguage() {
         if (isBusy) return;
+        const currentText = document.getElementById('badge-lang-text').textContent;
+        const targetLang = currentText.includes('RU') ? 'en' : 'ru';
+        const targetName = targetLang === 'ru' ? 'РУССКИЙ' : 'АНГЛИЙСКИЙ (Оригинал)';
+
+        const { confirmed } = await requestConfirmation(
+          '🌐 Переключение языка интерфейса',
+          `Вы собираетесь переключить язык интерфейса Antigravity на ${targetName}. Приложение будет обновлено за 1 секунду.`,
+          false
+        );
+        if (!confirmed) return;
+
         setBusy(true, 'Переключение языка интерфейса...');
-        appendLog('PROCESS', 'text-primary', 'Переключение языка...');
+        appendLog('PROCESS', 'text-primary', `Переключение языка на ${targetName}...`);
         try {
-          const currentText = document.getElementById('badge-lang-text').textContent;
-          const targetLang = currentText.includes('RU') ? 'en' : 'ru';
           const res = await window.api.switchLanguage(targetLang);
           if (res.success) {
-            appendLog('OK', 'text-tertiary', `Язык переключен на ${targetLang.toUpperCase()}!`);
+            appendLog('OK', 'text-tertiary', `Язык переключен на ${targetName}!`);
           } else {
             appendLog('ERR', 'text-error', `Не удалось переключить язык.`);
           }
@@ -886,6 +1185,13 @@
       // Save Current Account to Slot
       document.getElementById('btn-save-slot').addEventListener('click', async () => {
         if (isBusy) return;
+        const { confirmed } = await requestConfirmation(
+          `Сохранить аккаунт в Слот #${currentSelectedSlot}`,
+          `Токен текущего авторизованного Google-аккаунта будет сохранён в Слот #${currentSelectedSlot}.`,
+          false
+        );
+        if (!confirmed) return;
+
         setBusy(true, `Сохранение активного токена в Слот #${currentSelectedSlot}...`);
         appendLog('PROCESS', 'text-primary', `Сохранение аккаунта в Слот #${currentSelectedSlot}...`);
         try {
@@ -906,6 +1212,13 @@
       // Switch Account to Slot
       document.getElementById('btn-switch-slot').addEventListener('click', async () => {
         if (isBusy) return;
+        const { confirmed } = await requestConfirmation(
+          `Переключение на Слот #${currentSelectedSlot}`,
+          `Antigravity переключится на профиль Google из Слота #${currentSelectedSlot}. Служба language_server будет мягко перезапущена.`,
+          false
+        );
+        if (!confirmed) return;
+
         setBusy(true, `Переключение на Слот #${currentSelectedSlot}...`);
         appendLog('PROCESS', 'text-primary', `Переключение токена на Слот #${currentSelectedSlot}...`);
         try {
@@ -920,6 +1233,78 @@
         } finally {
           setBusy(false);
           await refreshStatus();
+        }
+      });
+
+      // Backup Creation Trigger
+      async function triggerBackupCreation(btype = 'chats') {
+        if (isBusy) return;
+        setBusy(true, 'Создание резервной копии чатов...');
+        appendLog('PROCESS', 'text-cyan-400', 'Архивация диалогов, сессий и настроек Antigravity...');
+        try {
+          const res = await window.api.createBackup(btype);
+          if (res.success) {
+            appendLog('OK', 'text-tertiary', 'Резервная копия чатов успешно сохранена в ~/.gemini/backups!');
+          } else {
+            appendLog('ERR', 'text-error', 'Не удалось создать резервную копию.');
+          }
+        } catch (e) {
+          appendLog('ERR', 'text-error', `Ошибка: ${e.message}`);
+        } finally {
+          setBusy(false);
+          await refreshStatus();
+        }
+      }
+
+      // Restore Trigger with Warning
+      async function triggerRestore(filename) {
+        if (isBusy) return;
+        const { confirmed } = await requestConfirmation(
+          'Восстановление диалогов из резервной копии',
+          `ВНИМАНИЕ: Восстановление из ${filename} заменит текущие чаты и настройки Antigravity данными из архива. Все открытые диалоги будут восстановлены на момент создания этой копии. Продолжить?`,
+          false
+        );
+        if (!confirmed) return;
+
+        setBusy(true, 'Восстановление диалогов...');
+        appendLog('PROCESS', 'text-cyan-400', `Распаковка резервной копии ${filename}...`);
+        try {
+          const res = await window.api.restoreBackup(filename);
+          if (res.success) {
+            appendLog('OK', 'text-tertiary', `Диалоги успешно восстановлены! Пожалуйста, перезапустите Antigravity.`);
+          } else {
+            appendLog('ERR', 'text-error', 'Не удалось восстановить диалоги.');
+          }
+        } catch (e) {
+          appendLog('ERR', 'text-error', `Ошибка: ${e.message}`);
+        } finally {
+          setBusy(false);
+          await refreshStatus();
+        }
+      }
+
+      document.getElementById('btn-create-backup-quick').addEventListener('click', () => triggerBackupCreation('chats'));
+      document.getElementById('modalCreateNewBackupBtn').addEventListener('click', () => {
+        backupsListModal.classList.add('hidden');
+        triggerBackupCreation('chats');
+      });
+
+      // Backups modal open/close
+      document.getElementById('btn-show-backups-list').addEventListener('click', () => {
+        renderBackupsList(cachedBackupsList);
+        backupsListModal.classList.remove('hidden');
+      });
+      document.getElementById('closeBackupsModalBtn').addEventListener('click', () => {
+        backupsListModal.classList.add('hidden');
+      });
+
+      // Sidebar nav item for backup: scroll smoothly to backup section
+      document.getElementById('nav-backup').addEventListener('click', () => {
+        const sec = document.getElementById('section-backups');
+        if (sec) {
+          sec.scrollIntoView({ behavior: 'smooth' });
+          sec.classList.add('border-cyan-400');
+          setTimeout(() => sec.classList.remove('border-cyan-400'), 1500);
         }
       });
 
