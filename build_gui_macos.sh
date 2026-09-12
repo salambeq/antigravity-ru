@@ -52,7 +52,6 @@ npx @electron/packager . "Antigravity Toolkit GUI" \
     --ignore="^/build($|/)" \
     --ignore="^/extracted_asar($|/)" \
     --ignore="^/app\\.asar\\.unpacked($|/)" \
-    --ignore="^/frontend_bundle($|/)" \
     --ignore="^/language_server.*" \
     --ignore="^/.*\\.pyc$" \
     --ignore="^/__pycache__($|/)"
