@@ -86,7 +86,11 @@ BODY_TEXT='## 🇷🇺 Antigravity Toolkit GUI v2.0.6 (macOS)
    - На карточке каждого из 4 слотов в реальном времени выводятся остатки 5-часового и недельного лимитов (`⚡ 5ч: X% • 📅 нед: Y%`).
 4. 📦 **Защита и бэкап чатов (Backup & Restore)**:
    - Полное сохранение истории диалогов, сессий и конфигураций SQLite (100+ диалогов) локально на диске.
-5. 🔒 **100% Zero-Leak & Офлайн**:
+5. 🎨 **Переосмысленный модульный интерфейс (Tabs & Drawer)**:
+   - Исправлена верстка и устранены любые перекрытия блоков.
+   - Удобная навигация по вкладкам (Панель, Квоты, Аккаунты, Компоненты, Резервные копии).
+   - Выдвижная консоль операций (Drawer Terminal) с авто-раскрытием при фоновых процессах.
+6. 🔒 **100% Zero-Leak & Офлайн**:
    - Все токены и персональные данные хранятся исключительно локально в Keychain macOS.'
 
 TMP_PAYLOAD="/tmp/github_release_payload.json"
@@ -130,7 +134,7 @@ else
         const fs = require("fs");
         const body = process.argv[1];
         fs.writeFileSync(process.argv[2], JSON.stringify({
-            name: "Antigravity Toolkit GUI v2.0.5 (macOS Edition)",
+            name: "Antigravity Toolkit GUI v2.0.6 (macOS Edition)",
             body: body
         }));
     ' "$BODY_TEXT" "$TMP_PAYLOAD"

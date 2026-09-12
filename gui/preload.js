@@ -16,6 +16,11 @@ contextBridge.exposeInMainWorld('api', {
     ipcRenderer.on('all-slots-quota-updated', handler);
     return () => ipcRenderer.removeListener('all-slots-quota-updated', handler);
   },
+  onAccountSwitched: (callback) => {
+    const handler = (_event, data) => callback(data);
+    ipcRenderer.on('account-switched-external', handler);
+    return () => ipcRenderer.removeListener('account-switched-external', handler);
+  },
   createBackup: (type) => ipcRenderer.invoke('backup-create', type),
   restoreBackup: (file) => ipcRenderer.invoke('backup-restore', file),
   deleteBackup: (file) => ipcRenderer.invoke('backup-delete', file),
