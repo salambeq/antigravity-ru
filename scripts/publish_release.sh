@@ -161,13 +161,24 @@ upload_asset() {
     echo "✅ Файл $name успешно загружен ($asset_state)!"
 }
 
-# Удаляем старые ассеты если были с такими именами
+# Очищаем старые ассеты перед загрузкой новых
 echo "🔍 Проверка и очистка старых ассетов..."
-ASSETS=$("${CURL_CMD[@]}" -s -H "Authorization: token $TOKEN" -H "User-Agent: AntigravityToolkit" "https://api.github.com/repos/$REPO/releases/$RELEASE_ID/assets")
-for asset_id in $(echo "$ASSETS" | grep -o '"id": [0-9]*' | awk '{print $2}'); do
-    echo "  - Удаление устаревшего ассета ID $asset_id..."
-    "${CURL_CMD[@]}" -s -X DELETE -H "Authorization: token $TOKEN" -H "User-Agent: AntigravityToolkit" "https://api.github.com/repos/$REPO/releases/assets/$asset_id" > /dev/null || true
-done
+node -e '
+    const cp = require("child_process");
+    const token = process.argv[1];
+    const proxy = process.argv[2];
+    const releaseId = process.argv[3];
+    const repo = process.argv[4];
+    const proxyArg = proxy ? `-x ${proxy}` : "";
+    try {
+        const out = cp.execSync(`curl --http1.1 -s ${proxyArg} -H "Authorization: token ${token}" -H "User-Agent: AntigravityToolkit" "https://api.github.com/repos/${repo}/releases/${releaseId}/assets"`).toString();
+        const assets = JSON.parse(out);
+        for (const a of assets) {
+            console.log(`  - Удаление устаревшего ассета ${a.name} (ID: ${a.id})...`);
+            cp.execSync(`curl --http1.1 -s ${proxyArg} -X DELETE -H "Authorization: token ${token}" -H "User-Agent: AntigravityToolkit" "https://api.github.com/repos/${repo}/releases/assets/${a.id}"`);
+        }
+    } catch(e) {}
+' "$TOKEN" "${PROXY_HOST:+http://${PROXY_HOST}:${PROXY_PORT}}" "$RELEASE_ID" "$REPO"
 
 upload_asset "$DMG_PATH" "Antigravity-Toolkit-GUI-macOS-arm64.dmg" "application/octet-stream"
 upload_asset "$ZIP_PATH" "Antigravity-Toolkit-GUI-macOS-arm64.zip" "application/zip"

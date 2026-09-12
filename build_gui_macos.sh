@@ -41,6 +41,7 @@ npx @electron/packager . "Antigravity Toolkit GUI" \
     --prune=true \
     --app-bundle-id="com.antigravity.toolkit.gui" \
     --app-category-type="public.app-category.developer-tools" \
+    --icon="gui/icon" \
     --ignore="^/dist($|/)" \
     --ignore="^/\\.git($|/)" \
     --ignore="^/\\.venv($|/)" \
@@ -66,6 +67,9 @@ codesign --force --deep --sign - "$APP_PATH"
 echo "📋 Копирование в удобный путь dist/Antigravity Toolkit GUI.app..."
 rm -rf "dist/Antigravity Toolkit GUI.app"
 cp -R "$APP_PATH" "dist/Antigravity Toolkit GUI.app"
+if [ -f "gui/icon.icns" ]; then
+    cp "gui/icon.icns" "dist/Antigravity Toolkit GUI.app/Contents/Resources/electron.icns" 2>/dev/null || true
+fi
 codesign --force --deep --sign - "dist/Antigravity Toolkit GUI.app"
 
 echo "✅ Проверка цифровой подписи..."
