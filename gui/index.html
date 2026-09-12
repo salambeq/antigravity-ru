@@ -6,10 +6,10 @@
   <title>Antigravity Toolkit 2.0 RU</title>
   <!-- Material Symbols Outlined -->
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-  <!-- Fonts -->
+  <!-- Fonts: Inter & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <script>
@@ -18,14 +18,14 @@
       theme: {
         extend: {
           colors: {
-            "surface-container-high": "#272a31",
-            "surface-container-lowest": "#0b0e15",
-            "surface-container-low": "#191c23",
-            "surface-container": "#1d2027",
-            "surface-dim": "#10131a",
-            "surface-bright": "#363941",
-            "background": "#0a0b0f",
-            "outline-variant": "#2a313d",
+            "surface-container-high": "#1c212c",
+            "surface-container-lowest": "#06080d",
+            "surface-container-low": "#0d111a",
+            "surface-container": "#131722",
+            "surface-dim": "#090c13",
+            "surface-bright": "#252b38",
+            "background": "#07090e",
+            "outline-variant": "rgba(255, 255, 255, 0.08)",
             "outline": "#4b5563",
             "primary": "#38bdf8",
             "primary-container": "#0284c7",
@@ -33,14 +33,14 @@
             "secondary-container": "#4338ca",
             "tertiary": "#34d399",
             "tertiary-container": "#059669",
-            "on-surface": "#f1f5f9",
+            "on-surface": "#f8fafc",
             "on-surface-variant": "#94a3b8",
             "error": "#f87171",
             "error-container": "#7f1d1d",
           },
           fontFamily: {
-            sans: ["Inter", "sans-serif"],
-            mono: ["JetBrains Mono", "monospace"],
+            sans: ["Inter", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
+            mono: ["JetBrains Mono", "SF Mono", "monospace"],
           }
         },
       },
@@ -51,6 +51,9 @@
       height: 100%;
       margin: 0;
       padding: 0;
+      background-color: #07090e;
+      color: #f8fafc;
+      -webkit-font-smoothing: antialiased;
     }
     .material-symbols-outlined {
       font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
@@ -64,51 +67,98 @@
     .no-drag {
       -webkit-app-region: no-drag;
     }
-    .border-glow-cyan {
-      box-shadow: 0 0 20px -3px rgba(56, 189, 248, 0.2), inset 0 0 12px -3px rgba(56, 189, 248, 0.1);
+    .obsidian-bg {
+      background: radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.08) 0%, transparent 50%),
+                  radial-gradient(circle at 100% 50%, rgba(99, 102, 241, 0.05) 0%, transparent 40%),
+                  #07090e;
+    }
+    .glass-panel {
+      background: rgba(13, 17, 26, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+    }
+    .glass-card {
+      background: rgba(16, 21, 32, 0.65);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glass-card:hover {
+      border-color: rgba(56, 189, 248, 0.35);
+      box-shadow: 0 10px 30px -10px rgba(56, 189, 248, 0.15);
+      transform: translateY(-1px);
     }
     .btn-gradient {
       background: linear-gradient(135deg, #38bdf8 0%, #6366f1 100%);
+      box-shadow: 0 4px 14px 0 rgba(56, 189, 248, 0.25);
       transition: all 0.2s ease;
     }
     .btn-gradient:hover {
-      box-shadow: 0 0 24px rgba(56, 189, 248, 0.45);
+      box-shadow: 0 6px 22px 0 rgba(56, 189, 248, 0.45);
       filter: brightness(1.1);
+      transform: translateY(-1px);
+    }
+    .btn-gradient:active {
+      transform: translateY(0);
+      filter: brightness(0.95);
     }
     .btn-gradient-green {
       background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      box-shadow: 0 4px 14px 0 rgba(16, 185, 129, 0.25);
       transition: all 0.2s ease;
     }
     .btn-gradient-green:hover {
-      box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+      box-shadow: 0 6px 20px 0 rgba(16, 185, 129, 0.4);
       filter: brightness(1.1);
+      transform: translateY(-1px);
+    }
+    .btn-gradient-green:active {
+      transform: translateY(0);
     }
     .custom-scroll {
       overflow-y: auto !important;
       scrollbar-width: thin;
-      scrollbar-color: #3e484f #0b0e15;
+      scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
     }
     .custom-scroll::-webkit-scrollbar {
-      width: 7px;
-      height: 7px;
+      width: 6px;
+      height: 6px;
     }
     .custom-scroll::-webkit-scrollbar-track {
-      background: #0b0e15;
+      background: transparent;
     }
     .custom-scroll::-webkit-scrollbar-thumb {
-      background: #3e484f;
-      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 9999px;
     }
     .custom-scroll::-webkit-scrollbar-thumb:hover {
-      background: #64748b;
+      background: rgba(56, 189, 248, 0.4);
     }
     .slot-card {
       transition: all 0.2s ease;
     }
     .slot-card.active-slot {
-      border-color: #38bdf8;
-      background: rgba(56, 189, 248, 0.08);
-      box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+      border-color: #38bdf8 !important;
+      background: rgba(56, 189, 248, 0.08) !important;
+      box-shadow: 0 0 16px -2px rgba(56, 189, 248, 0.3) !important;
+    }
+    .glowing-dot {
+      box-shadow: 0 0 8px currentColor;
+    }
+    .hero-glow-border {
+      position: relative;
+    }
+    .hero-glow-border::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent 0%, #38bdf8 50%, transparent 100%);
+      opacity: 0.8;
     }
   </style>
 </head>
@@ -164,76 +214,85 @@
   <div class="flex flex-1 min-h-0 h-[calc(100vh-3rem)] overflow-hidden">
 
     <!-- ==================== LEFT NAVIGATION SIDEBAR ==================== -->
-    <aside class="w-60 h-full flex-shrink-0 flex flex-col justify-between bg-surface-container-lowest border-r border-outline-variant p-3 overflow-y-auto custom-scroll">
-      <div class="flex flex-col gap-1">
-        <div class="text-[10px] font-mono uppercase tracking-wider text-outline px-2.5 py-1">Быстрые действия</div>
+    <aside class="w-64 h-full flex-shrink-0 flex flex-col justify-between glass-panel border-r border-outline-variant p-3.5 overflow-y-auto custom-scroll">
+      <div class="flex flex-col gap-1.5">
+        <div class="text-[10px] font-mono uppercase tracking-wider text-outline px-3 py-1 font-semibold flex items-center justify-between">
+          <span>Быстрые действия</span>
+          <span class="w-1.5 h-1.5 rounded-full bg-primary/60"></span>
+        </div>
 
-        <button id="nav-all" class="nav-item flex items-center gap-2.5 px-3 py-2 rounded-lg bg-surface-container-high text-primary border-l-2 border-primary text-xs font-medium transition-colors duration-150">
-          <span class="material-symbols-outlined text-[17px]">bolt</span>
+        <button id="nav-all" class="nav-item flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-primary/10 text-primary border-l-[3px] border-primary text-xs font-semibold shadow-sm transition-all duration-150 active:scale-98">
+          <span class="material-symbols-outlined text-[18px]">bolt</span>
           <span>⚡ Всё в один клик</span>
         </button>
 
-        <button id="nav-localize" class="nav-item flex items-center gap-2.5 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface text-xs font-medium transition-colors">
-          <span class="material-symbols-outlined text-[17px]">translate</span>
+        <button id="nav-localize" class="nav-item flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-on-surface-variant hover:bg-white/[0.04] hover:text-white text-xs font-medium transition-all active:scale-98">
+          <span class="material-symbols-outlined text-[18px] text-tertiary">translate</span>
           <span>🇷🇺 Локализация RU</span>
         </button>
 
-        <button id="nav-unlock" class="nav-item flex items-center gap-2.5 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface text-xs font-medium transition-colors">
-          <span class="material-symbols-outlined text-[17px]">lock_open</span>
+        <button id="nav-unlock" class="nav-item flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-on-surface-variant hover:bg-white/[0.04] hover:text-white text-xs font-medium transition-all active:scale-98">
+          <span class="material-symbols-outlined text-[18px] text-primary">lock_open</span>
           <span>🔓 Снять ограничения</span>
         </button>
 
-        <button id="nav-switch" class="nav-item flex items-center gap-2.5 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface text-xs font-medium transition-colors">
-          <span class="material-symbols-outlined text-[17px]">language</span>
+        <button id="nav-switch" class="nav-item flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-on-surface-variant hover:bg-white/[0.04] hover:text-white text-xs font-medium transition-all active:scale-98">
+          <span class="material-symbols-outlined text-[18px] text-secondary">language</span>
           <span>🌐 Переключить язык</span>
         </button>
 
-        <div class="text-[10px] font-mono uppercase tracking-wider text-outline px-2.5 pt-3 pb-1">Данные и чаты</div>
+        <div class="text-[10px] font-mono uppercase tracking-wider text-outline px-3 pt-3.5 pb-1 font-semibold flex items-center justify-between">
+          <span>Данные и чаты</span>
+          <span class="w-1.5 h-1.5 rounded-full bg-cyan-400/60"></span>
+        </div>
 
-        <button id="nav-backup" class="nav-item flex items-center gap-2.5 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface text-xs font-medium transition-colors">
-          <span class="material-symbols-outlined text-[17px] text-cyan-400">archive</span>
+        <button id="nav-backup" class="nav-item flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-on-surface-variant hover:bg-white/[0.04] hover:text-white text-xs font-medium transition-all active:scale-98">
+          <span class="material-symbols-outlined text-[18px] text-cyan-400">archive</span>
           <span>📦 Бэкап чатов</span>
         </button>
 
-        <button id="nav-accounts" class="nav-item flex items-center gap-2.5 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface text-xs font-medium transition-colors">
-          <span class="material-symbols-outlined text-[17px] text-tertiary">group</span>
+        <button id="nav-accounts" class="nav-item flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-on-surface-variant hover:bg-white/[0.04] hover:text-white text-xs font-medium transition-all active:scale-98">
+          <span class="material-symbols-outlined text-[18px] text-tertiary">group</span>
           <span>🔄 Мультиаккаунты</span>
         </button>
 
-        <button id="nav-rotator" class="nav-item flex items-center gap-2.5 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface text-xs font-medium transition-colors">
-          <span class="material-symbols-outlined text-[17px] text-secondary">autorenew</span>
+        <button id="nav-rotator" class="nav-item flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-on-surface-variant hover:bg-white/[0.04] hover:text-white text-xs font-medium transition-all active:scale-98">
+          <span class="material-symbols-outlined text-[18px] text-secondary">autorenew</span>
           <span>⚡ Авто-ротация квот</span>
         </button>
 
-        <div class="text-[10px] font-mono uppercase tracking-wider text-outline px-2.5 pt-3 pb-1">Служебное</div>
+        <div class="text-[10px] font-mono uppercase tracking-wider text-outline px-3 pt-3.5 pb-1 font-semibold flex items-center justify-between">
+          <span>Служебное</span>
+          <span class="w-1.5 h-1.5 rounded-full bg-amber-400/60"></span>
+        </div>
 
-        <button id="nav-diagnostics" class="nav-item flex items-center gap-2.5 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface text-xs font-medium transition-colors">
-          <span class="material-symbols-outlined text-[17px]">search</span>
+        <button id="nav-diagnostics" class="nav-item flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-on-surface-variant hover:bg-white/[0.04] hover:text-white text-xs font-medium transition-all active:scale-98">
+          <span class="material-symbols-outlined text-[18px]">search</span>
           <span>🔍 Диагностика</span>
         </button>
 
-        <button id="nav-restore" class="nav-item flex items-center gap-2.5 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface text-xs font-medium transition-colors">
-          <span class="material-symbols-outlined text-[17px]">history</span>
+        <button id="nav-restore" class="nav-item flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-on-surface-variant hover:bg-white/[0.04] hover:text-white text-xs font-medium transition-all active:scale-98">
+          <span class="material-symbols-outlined text-[18px]">history</span>
           <span>⏪ Восстановление файлов</span>
         </button>
       </div>
 
       <!-- Sidebar Footer Status -->
-      <div class="flex flex-col gap-2 pt-3 border-t border-outline-variant/60">
-        <div class="p-2.5 rounded bg-surface-container-low border border-outline-variant text-[11px] font-mono">
-          <div class="flex justify-between items-center text-on-surface-variant mb-1">
-            <span>Аккаунт:</span>
-            <span id="sb-account-slot" class="text-tertiary">#1</span>
+      <div class="flex flex-col gap-2.5 pt-3.5 border-t border-outline-variant">
+        <div class="p-3 rounded-2xl bg-surface-container-lowest/90 border border-outline-variant text-[11px] font-mono shadow-sm">
+          <div class="flex justify-between items-center text-on-surface-variant mb-1.5">
+            <span class="text-[10px] uppercase tracking-wider text-outline font-semibold">Аккаунт:</span>
+            <span id="sb-account-slot" class="text-tertiary font-bold px-1.5 py-0.2 rounded bg-tertiary/10 border border-tertiary/30">#1</span>
           </div>
-          <div id="sb-account-email" class="text-on-surface truncate font-sans text-xs">
+          <div id="sb-account-email" class="text-white truncate font-sans text-xs font-medium">
             Загрузка...
           </div>
         </div>
 
         <div class="flex items-center justify-between text-[11px] text-on-surface-variant px-1 font-mono">
-          <span class="flex items-center gap-1">
-            <span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
-            <span>Kernel: Local</span>
+          <span class="flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-tertiary glowing-dot text-tertiary"></span>
+            <span class="text-slate-300 font-medium">Kernel: Local</span>
           </span>
           <span id="sb-rotator-status" class="text-on-surface-variant">Ротация: ВЫКЛ</span>
         </div>
@@ -241,58 +300,81 @@
     </aside>
 
     <!-- ==================== MAIN SCROLLABLE CONTENT (100% WORKING SCROLL) ==================== -->
-    <main id="mainScrollArea" class="flex-1 h-full min-h-0 overflow-y-auto custom-scroll p-5 pb-16 gap-5 bg-background relative flex flex-col">
+    <main id="mainScrollArea" class="flex-1 h-full min-h-0 overflow-y-auto custom-scroll p-6 pb-20 gap-6 obsidian-bg relative flex flex-col">
       
       <!-- Atmospheric Glow -->
-      <div class="absolute -top-32 left-1/3 w-[600px] h-[300px] bg-gradient-to-r from-primary/10 via-secondary/10 to-transparent blur-[120px] pointer-events-none"></div>
+      <div class="absolute -top-32 left-1/4 w-[600px] h-[300px] bg-gradient-to-r from-primary/15 via-secondary/15 to-transparent blur-[140px] pointer-events-none"></div>
 
       <!-- ================= 1. HERO COMPREHENSIVE CARD ================= -->
-      <section class="relative overflow-hidden rounded-xl border border-outline-variant p-5 bg-gradient-to-br from-[#121622] via-[#0f1422] to-[#151226] border-glow-cyan flex-shrink-0">
-        <div class="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-primary to-transparent opacity-80"></div>
-        
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5 relative z-10">
-          <div class="flex flex-col gap-2 max-w-2xl">
-            <div class="flex items-center gap-2">
-              <span class="px-2 py-0.5 rounded bg-primary/10 border border-primary/30 text-primary font-mono text-[11px]">
+      <section class="glass-card hero-glow-border rounded-2xl p-6 relative overflow-hidden shadow-2xl flex-shrink-0">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+          <div class="flex flex-col gap-3 max-w-2xl">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 border border-primary/25 text-primary font-mono text-[11px]">
+                <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
                 ⚡ Пайплайн автонастройки
               </span>
-              <span class="px-2 py-0.5 rounded bg-tertiary/10 border border-tertiary/30 text-tertiary font-mono text-[11px]">
-                Antigravity 2.0 + IDE + Квоты + Бэкап
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary/10 border border-secondary/25 text-secondary font-mono text-[11px]">
+                Antigravity 2.0 • Obsidian Edition
+              </span>
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 font-mono text-[11px]">
+                <span class="material-symbols-outlined text-[13px]">shield_lock</span>
+                100% Локально
               </span>
             </div>
 
-            <h1 class="text-xl font-bold text-on-surface tracking-tight">
-              Комплексная настройка в один клик
+            <h1 class="text-2xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
+              Комплексная настройка Antigravity
+              <span class="px-2 py-0.5 rounded-md bg-primary/10 border border-primary/30 text-primary font-mono text-xs font-semibold">v2.0 RU</span>
             </h1>
 
             <p class="text-xs text-on-surface-variant leading-relaxed">
-              Автоматическое снятие региональных ограничений (bypass eligibility & auth), полный перевод интерфейса и ядра на русский язык, защита истории чатов и подготовка системы к бесперебойной работе.
+              Автоматическое снятие региональных ограничений (bypass eligibility & auth), полный перевод интерфейса и ядра на русский язык, защита истории диалогов и управление квотами токенов.
             </p>
 
-            <div class="flex flex-wrap items-center gap-4 pt-1">
-              <div class="flex items-center gap-2 text-xs font-mono">
-                <span class="w-2 h-2 rounded-full bg-primary"></span>
-                <span>Ядро: <strong id="hero-stat-core" class="text-primary font-medium">Проверка...</strong></span>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-2">
+              <div class="p-2.5 rounded-xl bg-surface-container-lowest/80 border border-outline-variant flex items-center gap-2.5">
+                <span class="w-2 h-2 rounded-full bg-primary glowing-dot text-primary"></span>
+                <div class="flex flex-col">
+                  <span class="text-[10px] text-outline font-mono uppercase">Ядро:</span>
+                  <span id="hero-stat-core" class="text-xs font-mono font-bold text-primary truncate">Проверка...</span>
+                </div>
               </div>
-              <div class="flex items-center gap-2 text-xs font-mono">
-                <span class="w-2 h-2 rounded-full bg-tertiary"></span>
-                <span>Локализация: <strong id="hero-stat-lang" class="text-tertiary font-medium">100% RU</strong></span>
+
+              <div class="p-2.5 rounded-xl bg-surface-container-lowest/80 border border-outline-variant flex items-center gap-2.5">
+                <span class="w-2 h-2 rounded-full bg-tertiary glowing-dot text-tertiary"></span>
+                <div class="flex flex-col">
+                  <span class="text-[10px] text-outline font-mono uppercase">Язык:</span>
+                  <span id="hero-stat-lang" class="text-xs font-mono font-bold text-tertiary">100% RU</span>
+                </div>
               </div>
-              <div class="flex items-center gap-2 text-xs font-mono">
-                <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
-                <span>Чаты: <strong id="hero-stat-chats" class="text-cyan-300 font-medium">Защищены</strong></span>
+
+              <div class="p-2.5 rounded-xl bg-surface-container-lowest/80 border border-outline-variant flex items-center gap-2.5">
+                <span class="w-2 h-2 rounded-full bg-cyan-400 glowing-dot text-cyan-400"></span>
+                <div class="flex flex-col">
+                  <span class="text-[10px] text-outline font-mono uppercase">Чаты:</span>
+                  <span id="hero-stat-chats" class="text-xs font-mono font-bold text-cyan-300">Защищены</span>
+                </div>
+              </div>
+
+              <div class="p-2.5 rounded-xl bg-surface-container-lowest/80 border border-outline-variant flex items-center gap-2.5">
+                <span class="w-2 h-2 rounded-full bg-secondary glowing-dot text-secondary"></span>
+                <div class="flex flex-col">
+                  <span class="text-[10px] text-outline font-mono uppercase">Слоты квот:</span>
+                  <span class="text-xs font-mono font-bold text-secondary">4 Слота</span>
+                </div>
               </div>
             </div>
           </div>
 
           <!-- Hero Action Buttons -->
-          <div class="flex flex-col gap-2.5 min-w-[260px]">
-            <button id="btn-hero-all" class="btn-gradient px-4 py-2.5 rounded-xl text-on-surface font-semibold text-sm flex items-center justify-center gap-2 shadow-[0_4px_20px_rgba(56,189,248,0.25)] active:scale-98">
-              <span class="material-symbols-outlined text-[18px]">bolt</span>
+          <div class="flex flex-col gap-3 min-w-[280px]">
+            <button id="btn-hero-all" class="btn-gradient px-5 py-3 rounded-xl text-white font-semibold text-sm flex items-center justify-center gap-2.5 shadow-[0_4px_20px_rgba(56,189,248,0.3)] active:scale-95">
+              <span class="material-symbols-outlined text-[20px]">bolt</span>
               <span>⚡ Всё в один клик</span>
             </button>
-            <button id="btn-hero-diag" class="px-4 py-2 rounded-xl bg-surface-container hover:bg-surface-container-high border border-outline-variant hover:border-primary/40 text-on-surface text-xs font-medium flex items-center justify-center gap-2 transition-all active:scale-98">
-              <span class="material-symbols-outlined text-[16px] text-on-surface-variant">search</span>
+            <button id="btn-hero-diag" class="glass-card px-5 py-2.5 rounded-xl text-on-surface text-xs font-medium flex items-center justify-center gap-2 hover:text-primary transition-all active:scale-95">
+              <span class="material-symbols-outlined text-[17px] text-on-surface-variant">search</span>
               <span>Запустить диагностику системы</span>
             </button>
           </div>
@@ -300,260 +382,260 @@
       </section>
 
       <!-- ================= 2. BACKUP & CHATS PROTECTION CARD ================= -->
-      <section id="section-backups" class="rounded-xl bg-surface-container-low border border-cyan-500/30 p-4.5 flex flex-col gap-3 shadow-lg flex-shrink-0">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-outline-variant pb-3">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
-              <span class="material-symbols-outlined text-[22px]">archive</span>
+      <section id="section-backups" class="glass-card rounded-2xl p-5 border border-cyan-500/25 flex flex-col gap-3.5 shadow-xl flex-shrink-0">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-outline-variant pb-3.5">
+          <div class="flex items-center gap-3.5">
+            <div class="w-11 h-11 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.15)]">
+              <span class="material-symbols-outlined text-[24px]">archive</span>
             </div>
             <div>
               <div class="flex items-center gap-2">
-                <h3 class="text-sm font-bold text-on-surface">Резервное копирование чатов и истории</h3>
-                <span id="badge-chat-count" class="px-2 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 font-mono text-[11px]">
+                <h3 class="text-sm font-bold text-white tracking-tight">Резервное копирование чатов и истории</h3>
+                <span id="badge-chat-count" class="px-2.5 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 font-mono text-[11px] font-semibold">
                   102 диалога
                 </span>
               </div>
-              <span class="text-xs text-on-surface-variant">Сохранение баз данных SQLite, сессий и токенов во избежание потери переписок</span>
+              <span class="text-xs text-on-surface-variant">Сохранение баз данных SQLite, сессий и токенов во избежание потери переписок при апдейтах</span>
             </div>
           </div>
 
-          <div class="flex items-center gap-2">
-            <button id="btn-create-backup-quick" class="btn-gradient px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-sm active:scale-95">
-              <span class="material-symbols-outlined text-[16px]">save</span>
+          <div class="flex items-center gap-2.5">
+            <button id="btn-create-backup-quick" class="btn-gradient px-4 py-2 rounded-xl text-xs font-semibold text-white flex items-center gap-1.5 shadow-sm active:scale-95">
+              <span class="material-symbols-outlined text-[17px]">save</span>
               <span>Создать бэкап сейчас</span>
             </button>
-            <button id="btn-show-backups-list" class="bg-surface-container hover:bg-surface-container-high border border-outline-variant hover:border-primary/40 px-3.5 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 text-on-surface active:scale-95">
-              <span class="material-symbols-outlined text-[16px] text-tertiary">history</span>
+            <button id="btn-show-backups-list" class="glass-card px-4 py-2 rounded-xl text-xs font-medium flex items-center gap-1.5 text-on-surface hover:text-cyan-300 active:scale-95">
+              <span class="material-symbols-outlined text-[17px] text-cyan-400">history</span>
               <span>Список копий</span>
             </button>
           </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1">
-          <div class="p-2.5 rounded-lg bg-surface-container-lowest border border-outline-variant text-xs flex flex-col gap-1">
-            <span class="text-[11px] text-outline font-mono">АКТИВНЫХ ДИАЛОГОВ:</span>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div class="p-3 rounded-xl bg-surface-container-lowest/80 border border-outline-variant text-xs flex flex-col gap-1">
+            <span class="text-[10px] text-outline font-mono uppercase tracking-wider">АКТИВНЫХ ДИАЛОГОВ:</span>
             <span id="lbl-backup-chats-stat" class="text-sm font-bold text-cyan-300">102 диалога обнаружено</span>
           </div>
 
-          <div class="p-2.5 rounded-lg bg-surface-container-lowest border border-outline-variant text-xs flex flex-col gap-1">
-            <span class="text-[11px] text-outline font-mono">ПОСЛЕДНЯЯ КОПИЯ:</span>
+          <div class="p-3 rounded-xl bg-surface-container-lowest/80 border border-outline-variant text-xs flex flex-col gap-1">
+            <span class="text-[10px] text-outline font-mono uppercase tracking-wider">ПОСЛЕДНЯЯ КОПИЯ:</span>
             <span id="lbl-last-backup-name" class="text-xs font-medium text-on-surface truncate">Загрузка списка...</span>
           </div>
 
-          <div class="p-2.5 rounded-lg bg-surface-container-lowest border border-outline-variant text-xs flex flex-col gap-1">
-            <span class="text-[11px] text-outline font-mono">КАТАЛОГ ХРАНИЛИЩА:</span>
+          <div class="p-3 rounded-xl bg-surface-container-lowest/80 border border-outline-variant text-xs flex flex-col gap-1">
+            <span class="text-[10px] text-outline font-mono uppercase tracking-wider">КАТАЛОГ ХРАНИЛИЩА (LOCAL):</span>
             <span class="text-xs font-mono text-on-surface truncate">~/.gemini/backups</span>
           </div>
         </div>
       </section>
 
       <!-- ================= 3. BENTO CARDS GRID ================= -->
-      <section class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-shrink-0">
+      <section class="grid grid-cols-1 md:grid-cols-2 gap-5 flex-shrink-0">
 
         <!-- CARD 1: Antigravity 2.0 (App) -->
-        <div class="rounded-xl bg-surface-container-low border border-outline-variant p-4 flex flex-col justify-between">
-          <div class="flex flex-col gap-3">
+        <div class="glass-card rounded-2xl p-5 flex flex-col justify-between">
+          <div class="flex flex-col gap-3.5">
             <div class="flex items-start justify-between">
               <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-lg bg-surface-container-high border border-primary/30 flex items-center justify-center text-primary">
-                  <span class="material-symbols-outlined text-[20px]">rocket_launch</span>
+                <div class="w-10 h-10 rounded-xl bg-primary/10 border border-primary/25 flex items-center justify-center text-primary shadow-[0_0_12px_rgba(56,189,248,0.15)]">
+                  <span class="material-symbols-outlined text-[22px]">rocket_launch</span>
                 </div>
                 <div>
-                  <h3 class="text-sm font-semibold text-on-surface">Antigravity 2.0 (Десктоп)</h3>
+                  <h3 class="text-sm font-bold text-white tracking-tight">Antigravity 2.0 (Десктоп)</h3>
                   <span id="mgr-version-label" class="text-[11px] text-on-surface-variant font-mono">Версия 2.12.2</span>
                 </div>
               </div>
-              <span id="mgr-dot" class="w-2.5 h-2.5 rounded-full bg-tertiary shadow-[0_0_8px_#34d399]"></span>
+              <span id="mgr-dot" class="w-2.5 h-2.5 rounded-full bg-tertiary glowing-dot text-tertiary"></span>
             </div>
 
             <!-- Tags -->
-            <div class="flex flex-wrap gap-1.5">
-              <span id="tag-mgr-unlocked" class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-primary/10 border border-primary/30 text-primary text-[11px] font-mono">
-                <span class="material-symbols-outlined text-[11px]">lock_open</span> Разблокирован
+            <div class="flex flex-wrap gap-2">
+              <span id="tag-mgr-unlocked" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-primary/10 border border-primary/25 text-primary text-[11px] font-mono">
+                <span class="material-symbols-outlined text-[12px]">lock_open</span> Разблокирован
               </span>
-              <span id="tag-mgr-localized" class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-tertiary/10 border border-tertiary/30 text-tertiary text-[11px] font-mono">
+              <span id="tag-mgr-localized" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-tertiary/10 border border-tertiary/25 text-tertiary text-[11px] font-mono">
                 🇷🇺 Русский перевод
               </span>
             </div>
 
             <!-- Path info -->
-            <div class="p-2 rounded bg-surface-container-lowest border border-outline-variant font-mono text-[11px] text-on-surface-variant truncate">
+            <div class="p-2.5 rounded-xl bg-surface-container-lowest/90 border border-outline-variant font-mono text-[11px] text-on-surface-variant truncate">
               <span class="text-outline">PATH:</span>
-              <span id="mgr-path-label" class="text-on-surface ml-1">/Applications/Antigravity.app</span>
+              <span id="mgr-path-label" class="text-on-surface ml-1 font-medium">/Applications/Antigravity.app</span>
             </div>
           </div>
 
           <!-- Actions -->
-          <div class="grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-outline-variant">
-            <button id="btn-mgr-localize" class="btn-gradient-green py-1.5 px-2 rounded-lg text-xs font-medium text-center flex items-center justify-center gap-1 active:scale-95">
-              <span class="material-symbols-outlined text-[15px]">translate</span>
+          <div class="grid grid-cols-3 gap-2.5 mt-5 pt-3.5 border-t border-outline-variant">
+            <button id="btn-mgr-localize" class="btn-gradient-green py-2 px-2.5 rounded-xl text-xs font-semibold text-white text-center flex items-center justify-center gap-1.5 active:scale-95">
+              <span class="material-symbols-outlined text-[16px]">translate</span>
               <span>Локализация</span>
             </button>
-            <button id="btn-mgr-unlock" class="bg-surface-container hover:bg-surface-container-high border border-outline-variant hover:border-primary/40 py-1.5 px-2 rounded-lg text-xs font-medium text-center flex items-center justify-center gap-1 transition-colors active:scale-95">
-              <span class="material-symbols-outlined text-[15px] text-primary">lock_open</span>
+            <button id="btn-mgr-unlock" class="glass-card hover:text-primary py-2 px-2.5 rounded-xl text-xs font-medium text-center flex items-center justify-center gap-1.5 active:scale-95">
+              <span class="material-symbols-outlined text-[16px] text-primary">lock_open</span>
               <span>Unlock</span>
             </button>
-            <button id="btn-mgr-lang-switch" class="bg-surface-container hover:bg-surface-container-high border border-outline-variant hover:border-primary/40 py-1.5 px-2 rounded-lg text-xs font-medium text-center flex items-center justify-center gap-1 transition-colors active:scale-95">
-              <span class="material-symbols-outlined text-[15px] text-secondary">sync_alt</span>
+            <button id="btn-mgr-lang-switch" class="glass-card hover:text-secondary py-2 px-2.5 rounded-xl text-xs font-medium text-center flex items-center justify-center gap-1.5 active:scale-95">
+              <span class="material-symbols-outlined text-[16px] text-secondary">sync_alt</span>
               <span>RU / EN</span>
             </button>
           </div>
         </div>
 
         <!-- CARD 2: Multi-Account & Token Quota Manager -->
-        <div class="rounded-xl bg-surface-container-low border border-outline-variant p-4 flex flex-col justify-between">
-          <div class="flex flex-col gap-3">
+        <div class="glass-card rounded-2xl p-5 flex flex-col justify-between">
+          <div class="flex flex-col gap-3.5">
             <div class="flex items-start justify-between">
               <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-lg bg-surface-container-high border border-secondary/30 flex items-center justify-center text-secondary">
-                  <span class="material-symbols-outlined text-[20px]">manage_accounts</span>
+                <div class="w-10 h-10 rounded-xl bg-secondary/10 border border-secondary/25 flex items-center justify-center text-secondary shadow-[0_0_12px_rgba(129,140,248,0.15)]">
+                  <span class="material-symbols-outlined text-[22px]">manage_accounts</span>
                 </div>
                 <div>
-                  <h3 class="text-sm font-semibold text-on-surface">Мультиаккаунт и квоты</h3>
+                  <h3 class="text-sm font-bold text-white tracking-tight">Мультиаккаунт и квоты</h3>
                   <span class="text-[11px] text-on-surface-variant font-mono">Ротация 4-х слотов Google</span>
                 </div>
               </div>
-              <div class="flex items-center gap-1.5">
-                <span class="text-[11px] font-mono text-outline">Авто-ротация:</span>
-                <button id="btn-toggle-rotator" class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out bg-surface-container-high focus:outline-none">
+              <div class="flex items-center gap-2">
+                <span class="text-[11px] font-mono text-outline">Ротация:</span>
+                <button id="btn-toggle-rotator" class="relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out bg-surface-container-high focus:outline-none">
                   <span id="rotator-switch-thumb" class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-outline shadow ring-0 transition duration-200 ease-in-out translate-x-0"></span>
                 </button>
               </div>
             </div>
 
             <!-- Active Account Info -->
-            <div class="p-2.5 rounded bg-surface-container-lowest border border-outline-variant text-xs flex items-center justify-between">
-              <div class="flex items-center gap-2 overflow-hidden">
-                <span class="material-symbols-outlined text-tertiary text-[17px]">account_circle</span>
+            <div class="p-2.5 rounded-xl bg-surface-container-lowest/90 border border-outline-variant text-xs flex items-center justify-between">
+              <div class="flex items-center gap-2.5 overflow-hidden">
+                <span class="material-symbols-outlined text-tertiary text-[19px]">account_circle</span>
                 <div class="flex flex-col overflow-hidden">
-                  <span id="acc-active-email" class="font-medium text-on-surface truncate">Авторизован</span>
+                  <span id="acc-active-email" class="font-medium text-white truncate">Авторизован</span>
                   <span id="acc-active-name" class="text-[11px] text-on-surface-variant font-mono">Слот активен</span>
                 </div>
               </div>
-              <span id="acc-active-badge" class="px-2 py-0.5 rounded bg-tertiary/10 border border-tertiary/30 text-tertiary font-mono text-[10px]">
+              <span id="acc-active-badge" class="px-2.5 py-0.5 rounded-full bg-tertiary/10 border border-tertiary/30 text-tertiary font-mono text-[10px] font-semibold">
                 В работе
               </span>
             </div>
 
             <!-- Slots Grid (1..4) -->
             <div class="grid grid-cols-4 gap-2">
-              <button data-slot="1" class="slot-card p-2 rounded-lg bg-surface-container-lowest border border-outline-variant hover:border-primary/50 text-left flex flex-col gap-0.5 active:scale-95">
+              <button data-slot="1" class="slot-card p-2.5 rounded-xl bg-surface-container-lowest/90 border border-outline-variant hover:border-primary/50 text-left flex flex-col gap-1 active:scale-95">
                 <div class="flex justify-between items-center">
-                  <span class="font-mono text-[10px] text-primary font-semibold">СЛОТ #1</span>
-                  <span class="slot-status-dot w-1.5 h-1.5 rounded-full bg-outline" id="slot-dot-1"></span>
+                  <span class="font-mono text-[10px] text-primary font-bold">СЛОТ #1</span>
+                  <span class="slot-status-dot w-2 h-2 rounded-full bg-outline" id="slot-dot-1"></span>
                 </div>
-                <span class="text-[10px] text-on-surface truncate font-sans" id="slot-email-1">Свободен</span>
+                <span class="text-[10px] text-on-surface truncate font-sans font-medium" id="slot-email-1">Свободен</span>
               </button>
 
-              <button data-slot="2" class="slot-card p-2 rounded-lg bg-surface-container-lowest border border-outline-variant hover:border-primary/50 text-left flex flex-col gap-0.5 active:scale-95">
+              <button data-slot="2" class="slot-card p-2.5 rounded-xl bg-surface-container-lowest/90 border border-outline-variant hover:border-primary/50 text-left flex flex-col gap-1 active:scale-95">
                 <div class="flex justify-between items-center">
-                  <span class="font-mono text-[10px] text-primary font-semibold">СЛОТ #2</span>
-                  <span class="slot-status-dot w-1.5 h-1.5 rounded-full bg-outline" id="slot-dot-2"></span>
+                  <span class="font-mono text-[10px] text-primary font-bold">СЛОТ #2</span>
+                  <span class="slot-status-dot w-2 h-2 rounded-full bg-outline" id="slot-dot-2"></span>
                 </div>
-                <span class="text-[10px] text-on-surface truncate font-sans" id="slot-email-2">Свободен</span>
+                <span class="text-[10px] text-on-surface truncate font-sans font-medium" id="slot-email-2">Свободен</span>
               </button>
 
-              <button data-slot="3" class="slot-card p-2 rounded-lg bg-surface-container-lowest border border-outline-variant hover:border-primary/50 text-left flex flex-col gap-0.5 active:scale-95">
+              <button data-slot="3" class="slot-card p-2.5 rounded-xl bg-surface-container-lowest/90 border border-outline-variant hover:border-primary/50 text-left flex flex-col gap-1 active:scale-95">
                 <div class="flex justify-between items-center">
-                  <span class="font-mono text-[10px] text-primary font-semibold">СЛОТ #3</span>
-                  <span class="slot-status-dot w-1.5 h-1.5 rounded-full bg-outline" id="slot-dot-3"></span>
+                  <span class="font-mono text-[10px] text-primary font-bold">СЛОТ #3</span>
+                  <span class="slot-status-dot w-2 h-2 rounded-full bg-outline" id="slot-dot-3"></span>
                 </div>
-                <span class="text-[10px] text-on-surface truncate font-sans" id="slot-email-3">Свободен</span>
+                <span class="text-[10px] text-on-surface truncate font-sans font-medium" id="slot-email-3">Свободен</span>
               </button>
 
-              <button data-slot="4" class="slot-card p-2 rounded-lg bg-surface-container-lowest border border-outline-variant hover:border-primary/50 text-left flex flex-col gap-0.5 active:scale-95">
+              <button data-slot="4" class="slot-card p-2.5 rounded-xl bg-surface-container-lowest/90 border border-outline-variant hover:border-primary/50 text-left flex flex-col gap-1 active:scale-95">
                 <div class="flex justify-between items-center">
-                  <span class="font-mono text-[10px] text-primary font-semibold">СЛОТ #4</span>
-                  <span class="slot-status-dot w-1.5 h-1.5 rounded-full bg-outline" id="slot-dot-4"></span>
+                  <span class="font-mono text-[10px] text-primary font-bold">СЛОТ #4</span>
+                  <span class="slot-status-dot w-2 h-2 rounded-full bg-outline" id="slot-dot-4"></span>
                 </div>
-                <span class="text-[10px] text-on-surface truncate font-sans" id="slot-email-4">Свободен</span>
+                <span class="text-[10px] text-on-surface truncate font-sans font-medium" id="slot-email-4">Свободен</span>
               </button>
             </div>
           </div>
 
           <!-- Account Actions -->
-          <div class="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-outline-variant">
-            <button id="btn-save-slot" class="bg-surface-container hover:bg-surface-container-high border border-outline-variant hover:border-primary/40 py-1.5 px-2 rounded-lg text-xs font-medium text-center flex items-center justify-center gap-1 transition-colors active:scale-95">
-              <span class="material-symbols-outlined text-[15px] text-tertiary">save</span>
+          <div class="grid grid-cols-2 gap-2.5 mt-5 pt-3.5 border-t border-outline-variant">
+            <button id="btn-save-slot" class="glass-card hover:text-tertiary py-2 px-3 rounded-xl text-xs font-medium text-center flex items-center justify-center gap-1.5 active:scale-95">
+              <span class="material-symbols-outlined text-[16px] text-tertiary">save</span>
               <span>Сохранить в слот <span id="lbl-selected-slot-1">#1</span></span>
             </button>
-            <button id="btn-switch-slot" class="btn-gradient py-1.5 px-2 rounded-lg text-xs font-medium text-center flex items-center justify-center gap-1 shadow-sm active:scale-95">
-              <span class="material-symbols-outlined text-[15px]">sync_alt</span>
+            <button id="btn-switch-slot" class="btn-gradient py-2 px-3 rounded-xl text-xs font-semibold text-white text-center flex items-center justify-center gap-1.5 active:scale-95">
+              <span class="material-symbols-outlined text-[16px]">sync_alt</span>
               <span>Включить слот <span id="lbl-selected-slot-2">#1</span></span>
             </button>
           </div>
         </div>
 
         <!-- CARD 3: Antigravity IDE -->
-        <div class="rounded-xl bg-surface-container-low border border-outline-variant p-4 flex flex-col justify-between">
-          <div class="flex flex-col gap-3">
+        <div class="glass-card rounded-2xl p-5 flex flex-col justify-between">
+          <div class="flex flex-col gap-3.5">
             <div class="flex items-start justify-between">
               <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-lg bg-surface-container-high border border-secondary/30 flex items-center justify-center text-secondary">
-                  <span class="material-symbols-outlined text-[20px]">code</span>
+                <div class="w-10 h-10 rounded-xl bg-secondary/10 border border-secondary/25 flex items-center justify-center text-secondary shadow-[0_0_12px_rgba(129,140,248,0.15)]">
+                  <span class="material-symbols-outlined text-[22px]">code</span>
                 </div>
                 <div>
-                  <h3 class="text-sm font-semibold text-on-surface">Antigravity IDE</h3>
+                  <h3 class="text-sm font-bold text-white tracking-tight">Antigravity IDE</h3>
                   <span id="ide-version-label" class="text-[11px] text-on-surface-variant font-mono">VS Code Studio v2.5.5</span>
                 </div>
               </div>
-              <span id="ide-dot" class="w-2.5 h-2.5 rounded-full bg-tertiary shadow-[0_0_8px_#34d399]"></span>
+              <span id="ide-dot" class="w-2.5 h-2.5 rounded-full bg-tertiary glowing-dot text-tertiary"></span>
             </div>
 
-            <div class="flex flex-wrap gap-1.5">
-              <span id="tag-ide-unlocked" class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container border border-outline-variant text-[11px] font-mono text-on-surface-variant">
+            <div class="flex flex-wrap gap-2">
+              <span id="tag-ide-unlocked" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-surface-container border border-outline-variant text-[11px] font-mono text-on-surface-variant">
                 Проверка статуса...
               </span>
             </div>
 
-            <div class="p-2 rounded bg-surface-container-lowest border border-outline-variant font-mono text-[11px] text-on-surface-variant truncate">
+            <div class="p-2.5 rounded-xl bg-surface-container-lowest/90 border border-outline-variant font-mono text-[11px] text-on-surface-variant truncate">
               <span class="text-outline">PATH:</span>
-              <span id="ide-path-label" class="text-on-surface ml-1">/Applications/Antigravity IDE.app</span>
+              <span id="ide-path-label" class="text-on-surface ml-1 font-medium">/Applications/Antigravity IDE.app</span>
             </div>
           </div>
 
-          <div class="mt-4 pt-3 border-t border-outline-variant">
-            <button id="btn-ide-patch" class="w-full bg-surface-container hover:bg-surface-container-high border border-outline-variant hover:border-primary/40 py-1.5 px-3 rounded-lg text-xs font-medium text-center flex items-center justify-center gap-1.5 transition-colors active:scale-95">
-              <span class="material-symbols-outlined text-[15px] text-primary">lock_open</span>
+          <div class="mt-5 pt-3.5 border-t border-outline-variant">
+            <button id="btn-ide-patch" class="w-full glass-card hover:text-primary py-2 px-3 rounded-xl text-xs font-semibold text-center flex items-center justify-center gap-2 active:scale-95">
+              <span class="material-symbols-outlined text-[16px] text-primary">lock_open</span>
               <span>Разблокировать Antigravity IDE (Google Internal)</span>
             </button>
           </div>
         </div>
 
         <!-- CARD 4: CLI (agy) & VS Code Extension -->
-        <div class="rounded-xl bg-surface-container-low border border-outline-variant p-4 flex flex-col justify-between">
-          <div class="flex flex-col gap-3">
+        <div class="glass-card rounded-2xl p-5 flex flex-col justify-between">
+          <div class="flex flex-col gap-3.5">
             <div class="flex items-start justify-between">
               <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-lg bg-surface-container-high border border-tertiary/30 flex items-center justify-center text-tertiary">
-                  <span class="material-symbols-outlined text-[20px]">terminal</span>
+                <div class="w-10 h-10 rounded-xl bg-tertiary/10 border border-tertiary/25 flex items-center justify-center text-tertiary shadow-[0_0_12px_rgba(52,211,153,0.15)]">
+                  <span class="material-symbols-outlined text-[22px]">terminal</span>
                 </div>
                 <div>
-                  <h3 class="text-sm font-semibold text-on-surface">CLI agy и VS Code</h3>
+                  <h3 class="text-sm font-bold text-white tracking-tight">CLI agy и VS Code</h3>
                   <span class="text-[11px] text-on-surface-variant font-mono">Расширение и консольная утилита</span>
                 </div>
               </div>
-              <span id="vscode-dot" class="w-2.5 h-2.5 rounded-full bg-tertiary shadow-[0_0_8px_#34d399]"></span>
+              <span id="vscode-dot" class="w-2.5 h-2.5 rounded-full bg-tertiary glowing-dot text-tertiary"></span>
             </div>
 
-            <div class="flex flex-wrap gap-1.5">
-              <span id="tag-agy-status" class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container border border-outline-variant text-[11px] font-mono text-on-surface-variant">
+            <div class="flex flex-wrap gap-2">
+              <span id="tag-agy-status" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-surface-container border border-outline-variant text-[11px] font-mono text-on-surface-variant">
                 CLI agy
               </span>
-              <span id="tag-vscode-status" class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container border border-outline-variant text-[11px] font-mono text-on-surface-variant">
+              <span id="tag-vscode-status" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-surface-container border border-outline-variant text-[11px] font-mono text-on-surface-variant">
                 VS Code extension
               </span>
             </div>
 
-            <div class="p-2 rounded bg-surface-container-lowest border border-outline-variant font-mono text-[11px] text-on-surface-variant truncate">
+            <div class="p-2.5 rounded-xl bg-surface-container-lowest/90 border border-outline-variant font-mono text-[11px] text-on-surface-variant truncate">
               <span class="text-outline">AGY:</span>
-              <span id="agy-path-label" class="text-on-surface ml-1">~/.gemini/bin/agy</span>
+              <span id="agy-path-label" class="text-on-surface ml-1 font-medium">~/.gemini/bin/agy</span>
             </div>
           </div>
 
-          <div class="mt-4 pt-3 border-t border-outline-variant">
-            <button id="btn-unlock-tools" class="w-full bg-surface-container hover:bg-surface-container-high border border-outline-variant hover:border-primary/40 py-1.5 px-3 rounded-lg text-xs font-medium text-center flex items-center justify-center gap-1.5 transition-colors active:scale-95">
-              <span class="material-symbols-outlined text-[15px] text-tertiary">tune</span>
+          <div class="mt-5 pt-3.5 border-t border-outline-variant">
+            <button id="btn-unlock-tools" class="w-full glass-card hover:text-tertiary py-2 px-3 rounded-xl text-xs font-semibold text-center flex items-center justify-center gap-2 active:scale-95">
+              <span class="material-symbols-outlined text-[16px] text-tertiary">tune</span>
               <span>Разблокировать CLI & VS Code</span>
             </button>
           </div>
@@ -562,38 +644,45 @@
       </section>
 
       <!-- ================= 4. TERMINAL CONSOLE PANEL ================= -->
-      <section class="rounded-xl border border-outline-variant bg-surface-container-lowest overflow-hidden shadow-2xl flex flex-col flex-shrink-0">
-        <!-- Terminal Header -->
-        <div class="flex items-center justify-between px-4 py-2 bg-surface-container-low border-b border-outline-variant">
-          <div class="flex items-center gap-3">
-            <div class="flex items-center gap-1.5">
-              <span class="material-symbols-outlined text-primary text-[17px]">terminal</span>
-              <span class="text-xs font-semibold text-on-surface">Консоль операций и логов</span>
+      <section class="glass-panel rounded-2xl overflow-hidden shadow-2xl flex flex-col flex-shrink-0 border border-white/[0.08]">
+        <!-- Terminal Header (macOS Console Styling) -->
+        <div class="flex items-center justify-between px-4 py-2.5 bg-surface-container-low/90 border-b border-outline-variant">
+          <div class="flex items-center gap-3.5">
+            <!-- macOS Window Dots -->
+            <div class="flex items-center gap-1.5 pl-1">
+              <span class="w-2.5 h-2.5 rounded-full bg-[#ff5f56]/80"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]/80"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-[#27c93f]/80"></span>
             </div>
-            <div id="term-status-badge" class="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-surface-container border border-tertiary/40 text-[10px] font-mono text-tertiary">
-              <span class="w-1.5 h-1.5 rounded-full bg-tertiary animate-pulse"></span>
+            <div class="h-3.5 w-[1px] bg-outline-variant"></div>
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary text-[17px]">terminal</span>
+              <span class="text-xs font-semibold text-white">Консоль операций и логов</span>
+            </div>
+            <div id="term-status-badge" class="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-surface-container border border-tertiary/30 text-[10px] font-mono text-tertiary">
+              <span class="w-1.5 h-1.5 rounded-full bg-tertiary animate-pulse glowing-dot"></span>
               <span id="term-status-text">Готов к работе</span>
             </div>
           </div>
 
           <div class="flex items-center gap-2">
-            <button id="copyLogsBtn" class="flex items-center gap-1 px-2 py-1 rounded bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface text-[11px] border border-outline-variant transition-colors active:scale-95">
+            <button id="copyLogsBtn" class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-white text-[11px] border border-outline-variant transition-all active:scale-95">
               <span class="material-symbols-outlined text-[13px]">content_copy</span>
               <span>Копировать</span>
             </button>
-            <button id="clearLogsBtn" class="flex items-center gap-1 px-2 py-1 rounded bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface text-[11px] border border-outline-variant transition-colors active:scale-95">
+            <button id="clearLogsBtn" class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-white text-[11px] border border-outline-variant transition-all active:scale-95">
               <span class="material-symbols-outlined text-[13px]">delete_sweep</span>
               <span>Очистить</span>
             </button>
           </div>
         </div>
 
-        <!-- Terminal Output -->
-        <div id="terminalScreen" class="p-4 bg-[#050608] font-mono text-[11px] leading-relaxed text-on-surface-variant h-44 overflow-y-auto custom-scroll space-y-1 select-text">
+        <!-- Terminal Monospace Output -->
+        <div id="terminalScreen" class="p-4 bg-[#04060a] font-mono text-[11px] leading-relaxed text-slate-300 h-48 overflow-y-auto custom-scroll space-y-1 select-text">
           <div class="flex items-start gap-2">
             <span class="text-outline">[00:00:00]</span>
             <span class="text-primary font-medium">[SYSTEM]</span>
-            <span class="text-on-surface">Инициализация графического интерфейса Antigravity Toolkit 2.0 RU...</span>
+            <span class="text-slate-200">Инициализация графического интерфейса Antigravity Toolkit 2.0 RU...</span>
           </div>
           <div class="flex items-start gap-2">
             <span class="text-outline">[00:00:01]</span>
@@ -612,40 +701,40 @@
   </div>
 
   <!-- ==================== WARNING & CONFIRMATION MODAL ==================== -->
-  <div id="confirmModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-    <div class="relative w-full max-w-lg rounded-2xl bg-surface-container-low border border-outline-variant shadow-2xl p-6 flex flex-col gap-4 border-glow-cyan animate-in fade-in zoom-in duration-150">
-      <div class="flex items-start gap-3.5">
-        <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
-          <span class="material-symbols-outlined text-[24px]">warning</span>
+  <div id="confirmModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/85 backdrop-blur-md p-4">
+    <div class="relative w-full max-w-lg rounded-3xl glass-panel border border-white/10 shadow-2xl p-6 flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-150">
+      <div class="flex items-start gap-4">
+        <div class="w-11 h-11 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0 shadow-[0_0_16px_rgba(245,158,11,0.2)]">
+          <span class="material-symbols-outlined text-[26px]">warning</span>
         </div>
         <div class="flex flex-col">
-          <h3 class="text-base font-bold text-on-surface" id="confirmModalTitle">Подтверждение операции</h3>
+          <h3 class="text-base font-bold text-white tracking-tight" id="confirmModalTitle">Подтверждение операции</h3>
           <span class="text-[11px] text-amber-400 font-mono" id="confirmModalSubtitle">Antigravity Security Guard</span>
         </div>
       </div>
 
-      <div class="p-3.5 rounded-xl bg-surface-container-lowest border border-outline-variant/60 text-xs text-on-surface-variant leading-relaxed space-y-2">
+      <div class="p-4 rounded-2xl bg-surface-container-lowest/90 border border-outline-variant text-xs text-on-surface-variant leading-relaxed space-y-2.5">
         <p id="confirmModalMessage" class="text-on-surface font-medium">
           Будет выполнено действие над компонентами Antigravity.
         </p>
-        <p class="text-[11px] text-amber-300/90 flex items-center gap-1.5">
-          <span class="material-symbols-outlined text-[15px]">info</span>
+        <p class="text-[11px] text-amber-300/90 flex items-center gap-2">
+          <span class="material-symbols-outlined text-[16px]">info</span>
           <span>Рекомендуется закрыть приложение Antigravity перед началом операции.</span>
         </p>
       </div>
 
       <!-- Auto-backup checkbox before action -->
-      <label class="flex items-center gap-2.5 text-xs text-on-surface cursor-pointer select-none bg-surface-container-lowest p-2.5 rounded-lg border border-outline-variant/40">
-        <input type="checkbox" id="confirmModalBackupCheck" checked class="w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary bg-surface-container" />
-        <span class="text-xs">Автоматически создать резервную копию чатов перед запуском</span>
+      <label class="flex items-center gap-3 text-xs text-on-surface cursor-pointer select-none bg-surface-container-lowest/80 p-3 rounded-xl border border-outline-variant hover:border-primary/40 transition-colors">
+        <input type="checkbox" id="confirmModalBackupCheck" checked class="w-4 h-4 rounded border-outline text-primary focus:ring-primary bg-surface-container" />
+        <span class="text-xs font-medium">Автоматически создать резервную копию чатов перед запуском</span>
       </label>
 
       <div class="flex items-center justify-end gap-3 pt-2">
         <button id="confirmModalCancelBtn" class="px-4 py-2 rounded-xl bg-surface-container hover:bg-surface-container-high border border-outline-variant text-xs font-medium text-on-surface transition-colors active:scale-95">
           Отмена
         </button>
-        <button id="confirmModalProceedBtn" class="btn-gradient px-5 py-2 rounded-xl text-xs font-semibold text-on-surface shadow-md active:scale-95 flex items-center gap-1.5">
-          <span class="material-symbols-outlined text-[16px]">check_circle</span>
+        <button id="confirmModalProceedBtn" class="btn-gradient px-5 py-2.5 rounded-xl text-xs font-semibold text-white shadow-md active:scale-95 flex items-center gap-2">
+          <span class="material-symbols-outlined text-[17px]">check_circle</span>
           <span id="confirmModalBtnText">Подтвердить и продолжить</span>
         </button>
       </div>
@@ -653,33 +742,33 @@
   </div>
 
   <!-- ==================== BACKUPS LIST & RESTORE MODAL ==================== -->
-  <div id="backupsListModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-    <div class="relative w-full max-w-2xl rounded-2xl bg-surface-container-low border border-outline-variant shadow-2xl p-6 flex flex-col gap-4 border-glow-cyan max-h-[85vh]">
-      <div class="flex items-center justify-between border-b border-outline-variant pb-3">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
-            <span class="material-symbols-outlined text-[24px]">history</span>
+  <div id="backupsListModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/85 backdrop-blur-md p-4">
+    <div class="relative w-full max-w-2xl rounded-3xl glass-panel border border-white/10 shadow-2xl p-6 flex flex-col gap-4 max-h-[85vh] animate-in fade-in zoom-in-95 duration-150">
+      <div class="flex items-center justify-between border-b border-outline-variant pb-3.5">
+        <div class="flex items-center gap-3.5">
+          <div class="w-11 h-11 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.2)]">
+            <span class="material-symbols-outlined text-[26px]">history</span>
           </div>
           <div>
-            <h3 class="text-base font-bold text-on-surface">Резервные копии чатов и данных</h3>
+            <h3 class="text-base font-bold text-white tracking-tight">Резервные копии чатов и данных</h3>
             <span class="text-xs text-on-surface-variant font-mono">Каталог: ~/.gemini/backups</span>
           </div>
         </div>
 
-        <button id="closeBackupsModalBtn" class="p-1.5 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-on-surface">
+        <button id="closeBackupsModalBtn" class="p-2 rounded-xl hover:bg-surface-container text-on-surface-variant hover:text-white transition-colors">
           <span class="material-symbols-outlined text-[20px]">close</span>
         </button>
       </div>
 
       <!-- Backups List Container -->
-      <div id="modalBackupsContainer" class="flex-1 overflow-y-auto custom-scroll space-y-2 pr-1 min-h-[220px] max-h-[380px]">
-        <div class="text-xs text-on-surface-variant text-center py-8">Загрузка списка копий...</div>
+      <div id="modalBackupsContainer" class="flex-1 overflow-y-auto custom-scroll space-y-2.5 pr-1.5 min-h-[220px] max-h-[380px]">
+        <div class="text-xs text-on-surface-variant text-center py-8 font-mono">Загрузка списка копий...</div>
       </div>
 
-      <div class="flex items-center justify-between border-t border-outline-variant pt-3 text-xs">
+      <div class="flex items-center justify-between border-t border-outline-variant pt-3.5 text-xs">
         <span class="text-outline">Восстановление заменяет текущие чаты файлами из архива.</span>
-        <button id="modalCreateNewBackupBtn" class="btn-gradient px-4 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 shadow-sm active:scale-95">
-          <span class="material-symbols-outlined text-[15px]">add</span>
+        <button id="modalCreateNewBackupBtn" class="btn-gradient px-4 py-2 rounded-xl text-xs font-semibold text-white flex items-center gap-1.5 shadow-sm active:scale-95">
+          <span class="material-symbols-outlined text-[16px]">add</span>
           <span>Создать свежую копию</span>
         </button>
       </div>

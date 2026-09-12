@@ -1,11 +1,19 @@
 {
-  "name": "antigravity-toolkit-gui",
+  "name": "@salambeq/antigravity-toolkit-gui",
   "version": "2.0.4",
-  "description": "Центр управления, снятия ограничений и локализации Antigravity 2.0",
+  "description": "Центр управления, снятия региональных ограничений и русской локализации Antigravity 2.0 (GUI & CLI)",
   "main": "gui/main.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/salambeq/antigravity-ru.git"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "scripts": {
     "start": "electron .",
-    "build:macos": "./build_gui_macos.sh"
+    "build:macos": "./build_gui_macos.sh",
+    "package:macos": "./scripts/package_macos.sh"
   },
   "author": "Antigravity Localization Team",
   "license": "MIT",
