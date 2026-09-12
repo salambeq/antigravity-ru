@@ -141,8 +141,9 @@ def get_system_status_json():
             pass
     vs_agy_patched = is_agy_patched(vs_agy) if (vs_agy and os.path.isfile(vs_agy)) else False
 
-    cur_acc = {"authenticated": False, "email": None, "name": None, "slot": None}
+    cur_acc = {"authenticated": False, "email": None, "name": None, "slot": None, "picture": None}
     slots_dict = {}
+    quota_dict = {}
     try:
         ac_mgr = AccountManager()
         raw_slots = ac_mgr.list_slots()
@@ -152,10 +153,12 @@ def get_system_status_json():
             "authenticated": cur.get("authenticated", False),
             "email": cur.get("email"),
             "name": cur.get("name"),
+            "picture": cur.get("picture"),
             "slot": meta.get("active_slot"),
         }
         for k, v in raw_slots.items():
             slots_dict[str(k)] = v
+        quota_dict = ac_mgr.get_slot_quota_summary()
     except Exception:
         pass
 
@@ -199,6 +202,7 @@ def get_system_status_json():
         "accounts": {
             "current": cur_acc,
             "slots": slots_dict,
+            "quota": quota_dict,
         },
         "backups": backups_data,
     }
@@ -970,6 +974,10 @@ def main():
             bm = BackupManager()
             success, msg = bm.delete_backup(target_f)
             sys.exit(0 if success else 1)
+        elif arg in ("--quota-json", "-qj"):
+            am = AccountManager()
+            print(json.dumps(am.get_slot_quota_summary(), ensure_ascii=False, indent=2))
+            sys.exit(0)
         elif arg in ("--json-status", "--status-json"):
             print(json.dumps(get_system_status_json(), ensure_ascii=False, indent=2))
             sys.exit(0)

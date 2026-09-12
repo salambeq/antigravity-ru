@@ -64,7 +64,8 @@ conversations/
 brain/
 
 # 5. Токены, слоты аккаунтов, секреты и переменные окружения
-accounts/
+.gemini/accounts/
+!patcher/accounts/
 slots/
 *slot_*.json
 metadata.json

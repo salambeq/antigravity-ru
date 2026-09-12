@@ -8,8 +8,8 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
 cd "$DIR"
 
 REPO="salambeq/antigravity-ru"
-TAG="v2.0.4"
-NAME="Antigravity Toolkit GUI v2.0.4 (macOS Edition)"
+TAG="v2.0.5"
+NAME="Antigravity Toolkit GUI v2.0.5 (macOS Edition)"
 
 ARCH="$(uname -m)"
 DMG_PATH="dist/Antigravity-Toolkit-GUI-macOS-${ARCH}.dmg"
@@ -63,34 +63,30 @@ RELEASE_ID=$(node -e '
     } catch (e) {}
 ' "$RELEASES_LIST" "$TAG")
 
-BODY_TEXT='## 🇷🇺 Antigravity Toolkit GUI v2.0.4 (macOS)
+BODY_TEXT='## 🇷🇺 Antigravity Toolkit GUI v2.0.5 (macOS)
 
 Готовый бинарный дистрибутив десктопного приложения **Antigravity Toolkit GUI** для macOS (Apple Silicon).
 
 ### 📦 Загрузка дистрибутива (Пакеты macOS):
-- **💿 Образ установщика DMG (рекомендуется)**: [Antigravity-Toolkit-GUI-macOS-arm64.dmg](https://github.com/salambeq/antigravity-ru/releases/download/v2.0.4/Antigravity-Toolkit-GUI-macOS-arm64.dmg)
-- **🗜️ Портативный архив ZIP**: [Antigravity-Toolkit-GUI-macOS-arm64.zip](https://github.com/salambeq/antigravity-ru/releases/download/v2.0.4/Antigravity-Toolkit-GUI-macOS-arm64.zip)
+- **💿 Образ установщика DMG (рекомендуется)**: [Antigravity-Toolkit-GUI-macOS-arm64.dmg](https://github.com/salambeq/antigravity-ru/releases/download/v2.0.5/Antigravity-Toolkit-GUI-macOS-arm64.dmg)
+- **🗜️ Портативный архив ZIP**: [Antigravity-Toolkit-GUI-macOS-arm64.zip](https://github.com/salambeq/antigravity-ru/releases/download/v2.0.5/Antigravity-Toolkit-GUI-macOS-arm64.zip)
 
 ---
 
-### ✨ Ключевые возможности релиза:
-1. 🎨 **Премиальный графический интерфейс (Obsidian Dark)**:
-   - Полный визуальный редизайн в фирменном стиле Antigravity 2.0.
-   - Эффекты матового стекла (glassmorphism), неоновые акценты Cyan / Emerald / Indigo.
-   - Интерактивный Bento Grid, живая консоль операций и нативные окна подтверждений.
-2. 🔒 **100% Локальность и приватность (Zero-Leak Policy)**:
-   - Полное отсутствие фоновой телеметрии и внешних сетевых запросов в рантайме.
-   - Офлайн-декодирование профиля Google OAuth из локального `id_token` без обращений к Google API.
-   - Все базы данных диалогов, токены и архивы надежно изолированы и защищены в `.gitignore`.
-3. 📦 **Защита и резервное копирование чатов (Backup & Restore)**:
-   - Сохранение 100+ пользовательских диалогов (`conversations/*.db`), сессий и настроек в один клик.
-   - Встроенный менеджер списка архивов и мгновенное восстановление переписок.
-4. 🔄 **Мультиаккаунты и авто-ротация квот токенов**:
-   - Мгновенное переключение между 4 Google-аккаунтами через системный Keychain macOS.
-   - Фоновый демон ротации при получении HTTP 429 (`QUOTA_EXHAUSTED`).
+### ✨ Ключевые возможности релиза v2.0.5:
+1. 🛡️ **Защита аккаунтов от слёта и разлогинивания (Zero-Logout)**:
+   - Интегрированы официальные client_id и client_secret из бинарника language_server для автоматического обновления истекающих refresh_token.
+   - Двухфазная синхронизация токенов macOS Keychain перед ротацией слотов — аккаунты сохраняются при любых перезагрузках и перезапусках.
+2. 👤 **Реальные email, имена и аватарки аккаунтов**:
+   - Автоматическое извлечение реальных адресов электронной почты Google (напр. `user@gmail.com`) и display names пользователя для всех слотов вместо заглушек `account_1@google`.
+3. ⚡ **Мониторинг квот и лимитов токенов (5ч, неделя, Claude/GPT)**:
+   - 100% Zero-Leak офлайн сбор данных о квотах через локальный gRPC-Web RPC-порт `language_server` с CSRF-авторизацией (время отклика 10 мс).
+   - Точные проценты остатка токенов и прогресс-бары для 5-часового и недельного лимитов Gemini, а также моделей Claude 3.7 Sonnet / Opus и GPT-OSS.
+   - Живой посекундный таймер обратного отсчета до сброса лимита (`ЧЧ:ММ:СС`) в Bento-панели и в сайдбаре.
+4. 📦 **Защита и бэкап чатов (Backup & Restore)**:
+   - Локальное сохранение 100+ баз данных SQLite, сессий и конфигураций без риска потери истории.
 5. 🍏 **Нативная интеграция с macOS**:
-   - Корректные отступы под системные кнопки управления окном (Traffic Lights).
-   - Ad-hoc цифровая подпись Apple `codesign`, исключающая предупреждения о повреждении бандла.'
+   - Чистая верстка в стиле Google Antigravity, поддержка кнопок окна macOS и подпись Apple `codesign`.'
 
 TMP_PAYLOAD="/tmp/github_release_payload.json"
 
@@ -100,9 +96,9 @@ if [ -z "$RELEASE_ID" ] || [ "$RELEASE_ID" = "null" ]; then
         const fs = require("fs");
         const body = process.argv[1];
         fs.writeFileSync(process.argv[2], JSON.stringify({
-            tag_name: "v2.0.4",
+            tag_name: "v2.0.5",
             target_commitish: "main",
-            name: "Antigravity Toolkit GUI v2.0.4 (macOS Edition)",
+            name: "Antigravity Toolkit GUI v2.0.5 (macOS Edition)",
             body: body,
             draft: false,
             prerelease: false

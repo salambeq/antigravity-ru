@@ -137,6 +137,24 @@ ipcMain.handle('get-status', async () => {
   });
 });
 
+// IPC: Quota
+ipcMain.handle('get-quota', async () => {
+  return new Promise((resolve) => {
+    execFile(PYTHON_BIN, [MAIN_PY, '--quota-json'], { cwd: ROOT_DIR, timeout: 15000 }, (err, stdout) => {
+      if (err) {
+        resolve({ error: err.message, raw: stdout });
+        return;
+      }
+      try {
+        const data = JSON.parse(stdout);
+        resolve(data);
+      } catch (parseErr) {
+        resolve({ error: `Ошибка парсинга JSON: ${parseErr.message}`, raw: stdout });
+      }
+    });
+  });
+});
+
 // IPC: Run actions
 ipcMain.handle('run-action', async (event, action) => {
   const map = {
