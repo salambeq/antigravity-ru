@@ -1,7 +1,5 @@
 import json
 import sys
-import urllib.request
-import urllib.error
 import webbrowser
 
 from patcher.constants import VERSION, COLOR_CYAN, COLOR_GREEN, COLOR_YELLOW, COLOR_RED, COLOR_BOLD, COLOR_UNDERLINE
@@ -73,49 +71,24 @@ def _parse_version(v):
 
 
 def _fetch_latest_release(timeout=5):
-    """Fetch latest release info from GitHub API. Returns (tag, html_url) or (None, None)."""
-    req = urllib.request.Request(API_URL, headers={
-        "Accept": "application/vnd.github.v3+json",
-        "User-Agent": f"OpenAGPatcher/{VERSION}",
-    })
-    try:
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
-            tag = data.get("tag_name", "")
-            html_url = data.get("html_url", "")
-            return tag, html_url
-    except Exception:
-        return None, None
+    """
+    Автоматические сетевые запросы отключены для обеспечения 100% локальной работы.
+    Обновления и синхронизация с upstream-репозиторием осуществляются исключительно
+    вручную по запросу пользователя через .agent (workflow sync_unlocker).
+    """
+    return None, None
 
 
 def check_for_updates(silent=True, timeout=5):
-    """Check for updates. Returns True if an update is available.
-
-    If silent=True, only prints a message if an update is found.
-    If silent=False, always prints the result.
+    """
+    Офлайн-проверка обновлений. В соответствии с политикой нулевых сетевых утечек
+    программа не выполняет сетевых запросов в фоновом режиме.
     """
     global LAST_UPDATE_RESULT
-    tag, url = _fetch_latest_release(timeout=timeout)
-
-    if tag is None:
-        LAST_UPDATE_RESULT = "network_error"
-        if not silent:
-            print_network_error_warning()
-        return False
-
-    current = _parse_version(VERSION)
-    latest = _parse_version(tag)
-
-    if latest > current:
-        LAST_UPDATE_RESULT = ("update_available", tag, url)
-        if not silent:
-            info(f"New version available: {color(tag, COLOR_GREEN, COLOR_BOLD)} (current: {color(VERSION, COLOR_YELLOW)})")
-            hint(f"Download: {color(url, COLOR_CYAN)}")
-        return True
-
     LAST_UPDATE_RESULT = "up_to_date"
     if not silent:
-        ok(f"Already up to date (v{VERSION})")
+        ok(f"Приложение работает в 100% локальном режиме (v{VERSION})")
+        hint("Для ручной сверки обновлений анлокера используйте workflow .agent или scripts/check_upstream.py")
     return False
 
 

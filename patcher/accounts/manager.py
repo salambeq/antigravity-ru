@@ -73,9 +73,10 @@ class AccountManager:
             return {"authenticated": False, "email": None, "error": "Токен не найден в связке ключей"}
 
         payload = decode_token_payload(raw)
-        tok = payload.get("token", {})
+        tok = payload.get("token", {}) if isinstance(payload, dict) else {}
         access_token = tok.get("access_token", "")
         refresh_token = tok.get("refresh_token", "")
+        id_token = tok.get("id_token", "") or (payload.get("id_token", "") if isinstance(payload, dict) else "")
 
         account_info = {
             "authenticated": bool(access_token or refresh_token),
@@ -86,11 +87,11 @@ class AccountManager:
             "raw": raw,
         }
 
-        if access_token:
-            google_info = fetch_google_account_info(access_token)
-            if google_info.get("email"):
-                account_info["email"] = google_info.get("email")
-                account_info["name"] = google_info.get("name")
+        # 100% локальное извлечение email/имени без внешних сетевых утечек
+        google_info = fetch_google_account_info(access_token, id_token=id_token, allow_network=False)
+        if google_info.get("email"):
+            account_info["email"] = google_info.get("email")
+            account_info["name"] = google_info.get("name")
 
         return account_info
 

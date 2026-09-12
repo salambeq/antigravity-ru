@@ -1,27 +1,109 @@
-# OS files
+# ==============================================================================
+#                      ANTIGRAVITY TOOLKIT — GITIGNORE
+#       Полная защита от утечек данных, токенов, сессий и резервных копий
+# ==============================================================================
+
+# 1. Системные файлы ОС
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
+desktop.ini
 
-# Python cache
+# 2. Python кэши и окружения
 __pycache__/
-*.pyc
-
-# Local build artifacts (PyInstaller)
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
 build/
+develop-eggs/
 dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 *.spec
 
-# Heavy binaries and backups (148MB+)
-*.orig
+# 3. Приватные данные пользователей и резервные копии (Zero-Leak Policy)
+backups/
+*.tar.gz
+*.tgz
+*.tar
+*.zip
+*.7z
 *.agybak
 *.bak
+*.orig
 *.tmp
+
+# 4. Базы данных диалогов, журналы WAL и Protobuf состояния
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+*.pbtxt
+*.pb
+conversations/
+brain/
+
+# 5. Токены, слоты аккаунтов, секреты и переменные окружения
+accounts/
+slots/
+*slot_*.json
+metadata.json
+app_storage.json
+storage.json
+credentials.json
+tokens.json
+token*.json
+*.pem
+*.key
+*.cert
+.env
+.env.*
+!.env.example
+
+# 6. Логи, дампы и отладочная информация
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+crash.dump
+
+# 7. Тяжелые бинарники и временные файлы распаковки
 *.asar
 *.asar.ru
 *.ru
 language_server*
 !patch_binary.py
-
-# Extracted temporary caches
 extracted_asar/
+app.asar.unpacked/
 node_modules/
+temp_patch/
+
+# 8. Настройки IDE и локальные воркспейсы (кроме рекомендаций)
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+*.sublime-project
+*.sublime-workspace

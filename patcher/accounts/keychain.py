@@ -154,11 +154,47 @@ def write_token_raw(raw_value: str) -> bool:
     return False
 
 
-def fetch_google_account_info(access_token: str, timeout: int = 3) -> dict:
+def decode_jwt_payload_offline(jwt_token: str) -> dict:
     """
-    Запрашивает базовую информацию об аккаунте (email, name) через Google OAuth userinfo API.
+    Безопасно декодирует полезную нагрузку JWT без внешних сетевых запросов.
+    Используется для локального чтения email и имени из id_token Google OAuth.
     """
-    if not access_token:
+    if not jwt_token or "." not in jwt_token:
+        return {}
+    try:
+        parts = jwt_token.strip().split(".")
+        if len(parts) < 2:
+            return {}
+        payload_b64 = parts[1]
+        rem = len(payload_b64) % 4
+        if rem > 0:
+            payload_b64 += "=" * (4 - rem)
+        decoded = base64.urlsafe_b64decode(payload_b64.encode("utf-8"))
+        data = json.loads(decoded.decode("utf-8"))
+        return {
+            "email": data.get("email", ""),
+            "name": data.get("name", ""),
+            "picture": data.get("picture", ""),
+            "sub": data.get("sub", ""),
+        }
+    except Exception:
+        return {}
+
+
+def fetch_google_account_info(access_token: str, id_token: str = "", allow_network: bool = False, timeout: int = 2) -> dict:
+    """
+    Возвращает информацию об аккаунте. В первую очередь используется строго офлайн-декодирование
+    из id_token (100% локально, без утечек и сетевых запросов).
+    Сетевой запрос к userinfo выполняется только при явном флаге allow_network=True.
+    """
+    # 1. Приоритет: локальное декодирование id_token без сети
+    if id_token:
+        offline_info = decode_jwt_payload_offline(id_token)
+        if offline_info.get("email"):
+            return offline_info
+
+    # 2. Сетевой запрос только если явно разрешен
+    if not allow_network or not access_token:
         return {}
 
     url = "https://www.googleapis.com/oauth2/v3/userinfo"
@@ -177,3 +213,4 @@ def fetch_google_account_info(access_token: str, timeout: int = 3) -> dict:
         pass
 
     return {}
+
