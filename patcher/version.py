@@ -13,7 +13,7 @@ import json
 import hashlib
 import subprocess
 
-BASE_VERSION = "2.0.7"
+BASE_VERSION = "2.0.8"
 GITHUB_REPO = "salambeq/antigravity-ru"
 GITHUB_REPO_URL = f"https://github.com/{GITHUB_REPO}"
 

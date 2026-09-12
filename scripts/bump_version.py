@@ -100,6 +100,18 @@ def sync_all(new_base_version=None):
             f.write(readme)
         print(f"✓ README.md -> заголовок обновлен до v{base_ver}")
 
+    # 6. Обновляем статические метки версий в gui/index.html
+    gui_html_path = os.path.join(ROOT_DIR, "gui", "index.html")
+    if os.path.isfile(gui_html_path):
+        with open(gui_html_path, "r", encoding="utf-8") as f:
+            html = f.read()
+        html = re.sub(r'id="toolkit-version-badge"[^>]*>v[0-9\.]+ RU<', f'id="toolkit-version-badge" class="px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 font-sans font-medium text-[10px] border border-blue-500/25" title="Antigravity Toolkit RU">v{base_ver} RU<', html)
+        html = re.sub(r'id="sb-toolkit-ver"[^>]*>v[0-9\.]+<', f'id="sb-toolkit-ver" class="font-mono text-slate-400">v{base_ver}<', html)
+        html = re.sub(r'id="updateCurrentVer"[^>]*>v[0-9\.]+<', f'id="updateCurrentVer" class="text-sm font-mono font-bold text-slate-300">v{base_ver}<', html)
+        with open(gui_html_path, "w", encoding="utf-8") as f:
+            f.write(html)
+        print(f"✓ gui/index.html -> версии обновлены до v{base_ver}")
+
 
 def bump(part="patch"):
     version_json_path = os.path.join(ROOT_DIR, "version.json")

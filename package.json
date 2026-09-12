@@ -1,6 +1,6 @@
 {
   "name": "@salambeq/antigravity-toolkit-gui",
-  "version": "2.0.7",
+  "version": "2.0.8",
   "description": "Центр управления, снятия региональных ограничений и русской локализации Antigravity 2.0 (GUI & CLI)",
   "main": "gui/main.js",
   "repository": {
