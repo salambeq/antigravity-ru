@@ -112,7 +112,12 @@ if [ -z "$RELEASE_ID" ] || [ "$RELEASE_ID" = "null" ]; then
         --data-binary @"$TMP_PAYLOAD" \
         "https://api.github.com/repos/$REPO/releases")
 
-    RELEASE_ID=$(echo "$CREATE_RESP" | grep -o '"id": [0-9]*' | head -1 | awk '{print $2}')
+    RELEASE_ID=$(echo "$CREATE_RESP" | node -e '
+        try {
+            const d = JSON.parse(require("fs").readFileSync(0, "utf-8"));
+            if (d && d.id) console.log(d.id);
+        } catch(e) {}
+    ')
     if [ -z "$RELEASE_ID" ] || [ "$RELEASE_ID" = "null" ]; then
         echo "❌ Ошибка создания релиза: $CREATE_RESP"
         exit 1
@@ -124,7 +129,7 @@ else
         const fs = require("fs");
         const body = process.argv[1];
         fs.writeFileSync(process.argv[2], JSON.stringify({
-            name: "Antigravity Toolkit GUI v2.0.4 (macOS Edition)",
+            name: "Antigravity Toolkit GUI v2.0.5 (macOS Edition)",
             body: body
         }));
     ' "$BODY_TEXT" "$TMP_PAYLOAD"
