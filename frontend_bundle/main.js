@@ -9362,7 +9362,14 @@ var AccountSlotsSwitcher=()=>{
 
   (0,z.useEffect)(()=>{
     loadSlots();
-  },[loadSlots]);
+    var timer=null;
+    if(slotsData?.pending_wizard){
+      timer=setInterval(()=>{
+        loadSlots();
+      },2000);
+    }
+    return ()=>{if(timer)clearInterval(timer)};
+  },[loadSlots,slotsData?.pending_wizard]);
 
   var handleSwitch=async slotNum=>{
     try{
@@ -9393,10 +9400,17 @@ var AccountSlotsSwitcher=()=>{
       if(typeof window!=="undefined"&&window.antigravityAccounts?.prepareAdd){
         var res=await window.antigravityAccounts.prepareAdd(slotNum);
         if(res&&res.success){
-          setStatusMsg("Готово! Войдите в Google в окне аккаунта...");
+          setStatusMsg("Готово! Открываем окно входа в Google...");
+          await loadSlots();
           setTimeout(()=>{
-            try{window.location.reload()}catch(e){}
-          },3500);
+            try{
+              var auth=Ld?.()?.core?.authService;
+              if(auth?.showLoginFlow){
+                auth.showLoginFlow();
+              }
+            }catch(e){}
+            setSwitchingSlot(null);
+          },1200);
         }else{
           setStatusMsg(res?.error||"Ошибка подготовки слота");
           setSwitchingSlot(null);
@@ -9417,10 +9431,17 @@ var AccountSlotsSwitcher=()=>{
       if(typeof window!=="undefined"&&window.antigravityAccounts?.prepareAdd){
         var res=await window.antigravityAccounts.prepareAdd(nextSlot);
         if(res&&res.success){
-          setStatusMsg("Готово! Войдите в Google в окне аккаунта...");
+          setStatusMsg("Готово! Открываем окно входа в Google...");
+          await loadSlots();
           setTimeout(()=>{
-            try{window.location.reload()}catch(e){}
-          },3500);
+            try{
+              var auth=Ld?.()?.core?.authService;
+              if(auth?.showLoginFlow){
+                auth.showLoginFlow();
+              }
+            }catch(e){}
+            setSwitchingSlot(null);
+          },1200);
         }else{
           setStatusMsg(res?.error||"Ошибка создания слота");
           setSwitchingSlot(null);
@@ -9462,13 +9483,28 @@ var AccountSlotsSwitcher=()=>{
   return z.createElement(O0,null,
     hasPending&&z.createElement(CR,{
       label:z.createElement("span",{className:"text-amber-500 font-medium text-xs"},"⚠️ Режим добавления нового аккаунта"),
-      description:"Предыдущая сессия в безопасности (Zero-Revocation). Войдите в Google выше или отмените добавление.",
-      rightElement:z.createElement(Yz,{
-        variant:"secondary",
-        size:"sm",
-        disabled:switchingSlot!==null,
-        onClick:handleCancelAdd
-      },switchingSlot===998?"Восстановление...":"Отменить")
+      description:"Предыдущая сессия в безопасности (Zero-Revocation). Нажмите «Войти в Google» или отмените добавление.",
+      rightElement:z.createElement("div",{className:"flex items-center gap-2"},
+        z.createElement(Yz,{
+          variant:"primary",
+          size:"sm",
+          disabled:switchingSlot!==null,
+          onClick:()=>{
+            try{
+              var auth=Ld?.()?.core?.authService;
+              if(auth?.showLoginFlow){
+                auth.showLoginFlow();
+              }
+            }catch(e){console.error(e)}
+          }
+        },"Войти в Google"),
+        z.createElement(Yz,{
+          variant:"secondary",
+          size:"sm",
+          disabled:switchingSlot!==null,
+          onClick:handleCancelAdd
+        },switchingSlot===998?"Восстановление...":"Отменить")
+      )
     }),
     slots.map(s=>{
       var isActive=Boolean(s.is_active);

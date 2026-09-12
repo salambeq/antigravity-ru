@@ -16,6 +16,7 @@ import urllib.error
 SERVICE_NAME = "gemini"
 ACCOUNT_NAME = "antigravity"
 KEYRING_PREFIX = "go-keyring-base64:"
+JETSKI_TOKEN_PATH = os.path.expanduser("~/.gemini/jetski-standalone-oauth-token")
 
 
 def decode_token_payload(raw_value: str) -> dict:
@@ -44,10 +45,22 @@ def encode_token_payload(data: dict) -> str:
 
 def read_current_token_raw() -> str:
     """
-    Считывает текущую сырую строку токена из системного хранилища ключей.
-    Поддерживает сервисы "gemini" (родной для language_server) и "Antigravity".
+    Считывает текущую сырую строку токена из jetski-файла или системного хранилища ключей.
+    Поддерживает jetski-standalone-oauth-token, а также сервисы "gemini" и "Antigravity".
     Возвращает пустую строку, если ключ не найден.
     """
+    # 0. Проверяем standalone-токен language_server в ~/.gemini/jetski-standalone-oauth-token
+    if os.path.isfile(JETSKI_TOKEN_PATH):
+        try:
+            with open(JETSKI_TOKEN_PATH, "r", encoding="utf-8") as f:
+                content = f.read().strip()
+            if content and content.startswith("{"):
+                parsed = json.loads(content)
+                if isinstance(parsed, dict) and "token" in parsed:
+                    return encode_token_payload(parsed)
+        except Exception:
+            pass
+
     if sys.platform == "darwin":
         # 1. Проверяем основной сервис language_server ("gemini", "antigravity")
         try:
@@ -114,13 +127,24 @@ def read_current_token_raw() -> str:
 
 def write_token_raw(raw_value: str) -> bool:
     """
-    Записывает сырую строку токена в системное хранилище ключей.
+    Записывает сырую строку токена в системное хранилище ключей и файл jetski-standalone-oauth-token.
     Поддерживает сервисы "gemini" и "Antigravity".
     """
     if not raw_value:
         return False
 
     raw_value = raw_value.strip()
+
+    # 0. Записываем standalone-токен language_server в ~/.gemini/jetski-standalone-oauth-token
+    try:
+        payload = decode_token_payload(raw_value)
+        if isinstance(payload, dict) and "token" in payload:
+            os.makedirs(os.path.dirname(JETSKI_TOKEN_PATH), mode=0o700, exist_ok=True)
+            with open(JETSKI_TOKEN_PATH, "w", encoding="utf-8") as f:
+                json.dump(payload, f, separators=(",", ":"))
+            os.chmod(JETSKI_TOKEN_PATH, 0o600)
+    except Exception:
+        pass
 
     if sys.platform == "darwin":
         success = False
@@ -186,9 +210,17 @@ def write_token_raw(raw_value: str) -> bool:
 
 def delete_current_token_raw() -> bool:
     """
-    Безопасно удаляет текущий токен из связки ключей БЕЗ отправки сетевого запроса на отзыв (Zero-Revocation).
-    Удаляет записи 'Antigravity' и 'gemini'. Сессия на серверах Google остается на 100% валидной.
+    Безопасно удаляет текущий токен из связки ключей и jetski-файла БЕЗ отправки сетевого запроса на отзыв (Zero-Revocation).
+    Удаляет записи 'Antigravity' и 'gemini', а также ~/.gemini/jetski-standalone-oauth-token.
+    Сессия на серверах Google остается на 100% валидной.
     """
+    # 0. Локальное удаление файла standalone-токена
+    if os.path.isfile(JETSKI_TOKEN_PATH):
+        try:
+            os.remove(JETSKI_TOKEN_PATH)
+        except Exception:
+            pass
+
     if sys.platform == "darwin":
         # 1. Локальное удаление записи сервиса "Antigravity"
         for cmd in [

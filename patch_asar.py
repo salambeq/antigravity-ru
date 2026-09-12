@@ -109,6 +109,30 @@ def patch_asar_dir(dist_dir):
     const metaPath = path_accounts.join(accountsDir, 'metadata.json');
     const altMetaPath = path_accounts.join(accountsDir, 'accounts_meta.json');
     const pendingPath = path_accounts.join(accountsDir, 'pending_wizard.json');
+    const jetskiTokenPath = path_accounts.join(os_accounts.homedir(), '.gemini', 'jetski-standalone-oauth-token');
+
+    function payloadToJetskiJson(rawPayload) {
+        if (!rawPayload) return '';
+        try {
+            if (rawPayload.startsWith('go-keyring-base64:')) {
+                const b64 = rawPayload.slice(18);
+                return Buffer.from(b64, 'base64').toString('utf8');
+            } else if (rawPayload.trim().startsWith('{')) {
+                return rawPayload.trim();
+            }
+        } catch {}
+        return '';
+    }
+
+    function jetskiJsonToPayload(jsonStr) {
+        if (!jsonStr) return '';
+        try {
+            const b64 = Buffer.from(jsonStr.trim(), 'utf8').toString('base64');
+            return `go-keyring-base64:${b64}`;
+        } catch {
+            return '';
+        }
+    }
 
     function getMacKeychainToken(service = 'gemini', account = 'antigravity') {
         try {
@@ -149,6 +173,60 @@ def patch_asar_dir(dist_dir):
         }
     }
 
+    function readCurrentRawToken() {
+        // 1. Проверяем файл токена ~/.gemini/jetski-standalone-oauth-token
+        if (fs_accounts.existsSync(jetskiTokenPath)) {
+            try {
+                const content = fs_accounts.readFileSync(jetskiTokenPath, 'utf8').trim();
+                if (content && content.startsWith('{')) {
+                    const parsed = JSON.parse(content);
+                    if (parsed.token) {
+                        return jetskiJsonToPayload(content);
+                    }
+                }
+            } catch {}
+        }
+        // 2. Проверяем системную связку ключей macOS Keychain
+        return getMacKeychainToken('gemini', 'antigravity') || getMacKeychainToken('Antigravity', 'antigravity');
+    }
+
+    function writeRawToken(rawPayload) {
+        if (!rawPayload) return false;
+        // 1. Записываем в ~/.gemini/jetski-standalone-oauth-token
+        const jsonStr = payloadToJetskiJson(rawPayload);
+        if (jsonStr) {
+            try {
+                const geminiDir = path_accounts.dirname(jetskiTokenPath);
+                if (!fs_accounts.existsSync(geminiDir)) {
+                    fs_accounts.mkdirSync(geminiDir, { recursive: true });
+                }
+                fs_accounts.writeFileSync(jetskiTokenPath, jsonStr, { encoding: 'utf8', mode: 0o600 });
+            } catch (e) {
+                console.error('[Accounts] Failed to write jetski token:', e);
+            }
+        }
+        // 2. Записываем в связку ключей macOS Keychain
+        const keyringRaw = rawPayload.startsWith('go-keyring-base64:') ? rawPayload : jetskiJsonToPayload(rawPayload);
+        setMacKeychainToken(keyringRaw, 'gemini', 'antigravity');
+        setMacKeychainToken(keyringRaw, 'Antigravity', 'antigravity');
+        return true;
+    }
+
+    function deleteCurrentRawToken() {
+        // 1. Удаляем ~/.gemini/jetski-standalone-oauth-token
+        if (fs_accounts.existsSync(jetskiTokenPath)) {
+            try {
+                fs_accounts.unlinkSync(jetskiTokenPath);
+            } catch (e) {
+                console.error('[Accounts] Failed to delete jetski token:', e);
+            }
+        }
+        // 2. Удаляем из связки ключей
+        deleteMacKeychainToken('gemini', 'antigravity');
+        deleteMacKeychainToken('Antigravity', 'antigravity');
+        return true;
+    }
+
     function restartLanguageServer() {
         try {
             if (process.platform === 'darwin' || process.platform.startsWith('linux')) {
@@ -166,10 +244,11 @@ def patch_asar_dir(dist_dir):
                 } catch {}
             }
 
+            // Если запущен мастер привязки, проверяем, появился ли новый токен
             if (fs_accounts.existsSync(pendingPath)) {
                 try {
                     const pendingData = JSON.parse(fs_accounts.readFileSync(pendingPath, 'utf8'));
-                    const curRaw = getMacKeychainToken('gemini', 'antigravity') || getMacKeychainToken('Antigravity', 'antigravity');
+                    const curRaw = readCurrentRawToken();
                     if (curRaw && curRaw !== pendingData.prev_raw_payload) {
                         const targetSlot = pendingData.target_slot || ((Object.keys(meta.slots || {}).length) + 1);
                         let email = `Слот #${targetSlot}`;
@@ -266,12 +345,13 @@ def patch_asar_dir(dist_dir):
                 return { success: false, error: `Слот #${slotNum} не существует` };
             }
 
+            // 1. Бэкап текущего токена в активный слот
             let curMeta = { active_slot: 1, slots: {} };
             if (fs_accounts.existsSync(metaPath)) {
                 try { curMeta = JSON.parse(fs_accounts.readFileSync(metaPath, 'utf8')); } catch {}
             }
             const currentActive = curMeta.active_slot || 1;
-            const curRaw = getMacKeychainToken('gemini', 'antigravity') || getMacKeychainToken('Antigravity', 'antigravity');
+            const curRaw = readCurrentRawToken();
             if (curRaw) {
                 const curSlotFile = path_accounts.join(slotsDir, `slot_${currentActive}.json`);
                 if (fs_accounts.existsSync(curSlotFile)) {
@@ -284,15 +364,17 @@ def patch_asar_dir(dist_dir):
                 }
             }
 
+            // 2. Читаем токен целевого слота
             const targetData = JSON.parse(fs_accounts.readFileSync(slotFile, 'utf8'));
             const targetRaw = targetData.raw_payload;
             if (!targetRaw) {
                 return { success: false, error: `В слоте #${slotNum} отсутствуют данные токена` };
             }
 
-            setMacKeychainToken(targetRaw, 'gemini', 'antigravity');
-            setMacKeychainToken(targetRaw, 'Antigravity', 'antigravity');
+            // 3. Записываем в jetski-токен и Keychain
+            writeRawToken(targetRaw);
 
+            // 4. Обновляем метаданные
             curMeta.active_slot = slotNum;
             if (!curMeta.slots) curMeta.slots = {};
             curMeta.slots[String(slotNum)] = {
@@ -304,6 +386,7 @@ def patch_asar_dir(dist_dir):
             fs_accounts.writeFileSync(metaPath, JSON.stringify(curMeta, null, 2), 'utf8');
             fs_accounts.writeFileSync(altMetaPath, JSON.stringify(curMeta, null, 2), 'utf8');
 
+            // 5. Перезапускаем языковой сервер
             restartLanguageServer();
 
             return { success: true, email: targetData.email, slot: slotNum };
@@ -320,8 +403,9 @@ def patch_asar_dir(dist_dir):
                 try { curMeta = JSON.parse(fs_accounts.readFileSync(metaPath, 'utf8')); } catch {}
             }
             const currentActive = curMeta.active_slot || 1;
-            const curRaw = getMacKeychainToken('gemini', 'antigravity') || getMacKeychainToken('Antigravity', 'antigravity');
+            const curRaw = readCurrentRawToken();
 
+            // Сохраняем снимок перед входом в pending_wizard.json
             const pendingData = {
                 target_slot: slotNum,
                 prev_active_slot: currentActive,
@@ -330,6 +414,7 @@ def patch_asar_dir(dist_dir):
             };
             fs_accounts.writeFileSync(pendingPath, JSON.stringify(pendingData, null, 2), 'utf8');
 
+            // Сохраняем сессию текущего слота
             if (curRaw) {
                 const curSlotFile = path_accounts.join(slotsDir, `slot_${currentActive}.json`);
                 if (fs_accounts.existsSync(curSlotFile)) {
@@ -342,9 +427,10 @@ def patch_asar_dir(dist_dir):
                 }
             }
 
-            deleteMacKeychainToken('gemini', 'antigravity');
-            deleteMacKeychainToken('Antigravity', 'antigravity');
+            // Очищаем токен из jetski-файла и Keychain для чистого входа
+            deleteCurrentRawToken();
 
+            // Перезапускаем языковой сервер
             restartLanguageServer();
 
             return { success: true, target_slot: slotNum };
@@ -361,8 +447,7 @@ def patch_asar_dir(dist_dir):
             const pendingData = JSON.parse(fs_accounts.readFileSync(pendingPath, 'utf8'));
             const prevRaw = pendingData.prev_raw_payload;
             if (prevRaw) {
-                setMacKeychainToken(prevRaw, 'gemini', 'antigravity');
-                setMacKeychainToken(prevRaw, 'Antigravity', 'antigravity');
+                writeRawToken(prevRaw);
             }
             try { fs_accounts.unlinkSync(pendingPath); } catch {}
             restartLanguageServer();
